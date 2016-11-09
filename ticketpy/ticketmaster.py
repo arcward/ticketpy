@@ -1,22 +1,18 @@
 import requests
-import os
-from configparser import ConfigParser
-
-# smithe's old bar: KovZpZAJledA
-# tabernacle: KovZpaFEZe
 
 
 class Ticketmaster:
-    def __init__(self):
-        config = ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
-        self.api_key = config.get('ticketmaster', 'api_key')
-        self.events_url = config.get('ticketmaster', 'events_url')
+    """Client for the Ticketmaster discovery API"""
+    def __init__(self, api_key, version='v2', response_type='json'):
+        self.api_key = api_key
+        self.response_type = response_type
+        self.base_url = "http://app.ticketmaster.com/discovery/{version}/".format(version=version)
         
-    def events(self, venue_id, size):
-        """Returns a list of events for the specified venue ID"""
-        request_url = self.events_url.format(sort='date,asc', size=size, api_key=self.api_key, venue_id=venue_id)
+    def events(self, venue_id, size='20', sort='date,asc'):
+        """Retrieves a list of events for the specified venue ID"""
+        events_url = "events.{response_type}?size={size}&sort={sort}&venueId={venue_id}&apikey={api_key}" \
+            .format(api_key=self.api_key, response_type=self.response_type,
+                    size=str(size), sort=sort, venue_id=venue_id)
+        request_url = ''.join([self.base_url, events_url])
         resp = requests.get(request_url).json()
-        event_list = [event['name'] for event in resp['_embedded']['events']]
-        print(event_list)
-        return event_list
+        return [event['name'] for event in resp['_embedded']['events']]
