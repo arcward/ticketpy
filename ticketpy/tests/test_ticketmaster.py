@@ -3,6 +3,7 @@ from ticketpy.ticketmaster import Ticketmaster
 from configparser import ConfigParser
 import os
 
+
 class TestTicketmaster(TestCase):
     def setUp(self):
         config = ConfigParser()
