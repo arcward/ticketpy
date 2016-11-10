@@ -50,7 +50,6 @@ class Ticketmaster:
                     size=str(size), sort=sort, venue_id=venue_id)
         request_url = ''.join([self.base_url, events_url])
         resp = requests.get(request_url).json()
-        print(resp)
         return [
             {
                 'name': event['name'],

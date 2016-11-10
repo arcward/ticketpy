@@ -1,2 +1,5 @@
 config.ini
 .idea
+build/
+dist/
+ticketpy.egg-info
