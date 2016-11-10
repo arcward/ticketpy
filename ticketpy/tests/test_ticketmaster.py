@@ -12,5 +12,5 @@ class TestTicketmaster(TestCase):
         self.tm = Ticketmaster(api_key)
     
     def test_events(self):
-        elist = self.tm.events('KovZpaFEZe', size=7)
+        elist = self.tm.events('KovZpZAJledA', size=7)
         print(elist)

@@ -50,14 +50,17 @@ class Ticketmaster:
                     size=str(size), sort=sort, venue_id=venue_id)
         request_url = ''.join([self.base_url, events_url])
         resp = requests.get(request_url).json()
+        print(resp)
         return [
             {
                 'name': event['name'],
                 'start_date': event['dates']['start']['localDate'],
                 'start_time': event['dates']['start']['localTime'],
+                'genres': [classification['genre']['name'] for classification in event['classifications']],
                 'status': event['dates']['status']['code'],  # watch for 'cancelled'
-                'price_range': "{} - {}".format(event['priceRanges'][0]['min'],
+                'price_range': ("{} - {}".format(event['priceRanges'][0]['min'],
                                                 event['priceRanges'][0]['max'])
+                                if 'priceRanges' in event else 'N/A')
             }
             for event in resp['_embedded']['events']
         ]
