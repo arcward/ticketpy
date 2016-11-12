@@ -1,7 +1,7 @@
 from unittest import TestCase
-from ticketpy.ticketmaster import Ticketmaster
 from configparser import ConfigParser
 import os
+import ticketmaster
 
 
 class TestTicketmaster(TestCase):
@@ -9,8 +9,22 @@ class TestTicketmaster(TestCase):
         config = ConfigParser()
         config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
         api_key = config.get('ticketmaster', 'api_key')
-        self.tm = Ticketmaster(api_key)
+        self.tm = ticketmaster.Ticketmaster(api_key)
+        
+    def test_search_events(self):
+        search_params = {
+            'size': '10',
+            'sort': 'date,asc',
+            'venueId': 'KovZpaFEZe',
+        }
+        self.tm.search_events(**search_params)
     
     def test_events(self):
-        elist = self.tm.events('KovZpZAJledA', size=7)
+        elist = self.tm.events_by_venue_id('KovZpZAJledA', size=7)
+        print(elist)
+        
+    def test_search_events_by_location(self):
+        atl_centerish = "33.7838737,-84.366088"
+        radius = '1'
+        elist = self.tm.events_by_location(atl_centerish, radius=radius)
         print(elist)
