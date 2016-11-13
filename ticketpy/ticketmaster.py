@@ -26,6 +26,7 @@ import requests
 
 class Ticketmaster:
     """Client for the Ticketmaster discovery API"""
+    
     def __init__(self, api_key, version='v2', response_type='json'):
         """Initialize the API client.
         
@@ -36,37 +37,36 @@ class Ticketmaster:
         self.api_key = api_key
         self.response_type = response_type  # JSON, XML...
         self.base_url = "http://app.ticketmaster.com/discovery/{version}/".format(version=version)
-        
+    
     def search_events(self, **search_parameters):
         """Search events with provided search parameters. Generic class for ones like search_by_venue_id()"""
         events_url = "{base_url}events.{response_type}".format(base_url=self.base_url,
                                                                response_type=self.response_type)
         search_parameters.update({'apikey': self.api_key})  # Inject API key into URL
         response = requests.get(events_url, params=search_parameters).json()  # TODO update to consider xml?
-        # Severely hacky way of ignoring missing stuff from the API response. Create dicts with blank values
-        # for things we expect to be there, but sometimes aren't for some events, so we can set them as
-        # the default for {}.get(key, default)
-        # TODO do something smarter
-        missing_date = {'dates': {'start': {'localDate': '', 'localTime': ''},'status': {'code': ''}}}
-        missing_genre = {'classifications': [{'genre': {'name': ''}}]}
-        missing_venue = [{'name': ''}]
-        missing = {'date': missing_date, 'genre': missing_genre, 'venue': missing_venue}
-        return [
-            {
-                'name': event['name'],
-                'start_date': event.get('dates', missing['date']['dates']).get('start').get('localDate'),
-                'start_time': event.get('dates', missing['date']['dates']).get('start').get('localTime'),
-                'genres': ([classification.get('genre')['name']
-                            for classification in event.get('classifications',
-                                                            missing['genre']['classifications'])]),
-                'status': event.get('dates', missing['date']['dates'])['status']['code'],  # watch for 'cancelled'
-                'price_range': ("{} - {}".format(event['priceRanges'][0]['min'],
-                                                 event['priceRanges'][0]['max'])
-                                if 'priceRanges' in event else 'N/A'),
-                'venue': event['_embedded'].get('venues', missing['venue']).pop()['name'] # TODO cases w/ >1 venue?
+        
+        event_list = []
+        for event in response.get('_embedded').get('events'):
+            event_dict = {
+                'name': event.get('name'),
+                'start_date': event.get('dates').get('start').get('localDate'),
+                'start_time': event.get('dates').get('start').get('localTime'),
+                'status': event.get('dates').get('status').get('code'),
+                'genres': [classification.get('genre').get('name')
+                           for classification in event.get('classifications')]
             }
-            for event in response['_embedded']['events']
-            ]
+            # Add venue - some events have >1 venue (or possibly none??), join them into one string
+            venues = event.get('_embedded').get('venues')
+            if venues is not None:
+                event_dict['venue'] = ','.join([venue.get('name') for venue in venues])
+            # Not all events have a price range attached, or have multiple pricing tiers
+            # TODO account for >1 pricing tier
+            price_ranges = event.get('priceRanges')
+            if price_ranges is not None:
+                event_dict['price_range'] = "{}-{}".format(price_ranges[0].get('min', ''),
+                                                           price_ranges[0].get('max', ''))
+            event_list.append(event_dict)
+        return event_list
     
     def events_by_location(self, latlong, radius='10'):
         """ Searches events within a radius of a latitude/longitude coordinate.
