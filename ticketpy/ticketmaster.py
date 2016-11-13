@@ -34,17 +34,40 @@ class Ticketmaster:
         :param version: API version (default: v2)
         :param response_type: Data format (JSON, XML...)
         """
+        # URL ends up looking something lke:
+        # http://app.ticketmaster.com/discovery/v2/events.json?apikey=[api key]
         self.api_key = api_key
         self.response_type = response_type  # JSON, XML...
         self.base_url = "http://app.ticketmaster.com/discovery/{version}/".format(version=version)
+        self.method_url = "{base_url}{method}.{response_type}"
+        
+    def _build_uri(self, method):
+        """Build a request URL.
+        :param method: Search type (events, venues..)
+        :return: Appropriate request URL
+        """
+        return self.method_url.format(base_url=self.base_url,
+                                      method=method,
+                                      response_type=self.response_type)
     
+    def _search(self, method, **search_parameters):
+        """Generic method for API requests.
+        :param method: Search type (events, venues...)
+        :param search_parameters: Search parameters, ex. venueId, eventId, latlong, radius..
+        :return: List of results
+        """
+        search_url = self._build_uri(method)
+        search_parameters.update({'apikey': self.api_key})
+        return requests.get(search_url, params=search_parameters).json()
+        
+    def search_venues(self, **search_parameters):
+        response = self._search('venues', **search_parameters)
+        
+        
     def search_events(self, **search_parameters):
         """Search events with provided search parameters. Generic class for ones like search_by_venue_id()"""
-        events_url = "{base_url}events.{response_type}".format(base_url=self.base_url,
-                                                               response_type=self.response_type)
-        search_parameters.update({'apikey': self.api_key})  # Inject API key into URL
-        response = requests.get(events_url, params=search_parameters).json()  # TODO update to consider xml?
-        
+        response = self._search('events', **search_parameters)
+        # Pick apart the serialized JSON response and just return the good stuff
         event_list = []
         for event in response.get('_embedded').get('events'):
             event_dict = {
@@ -55,10 +78,12 @@ class Ticketmaster:
                 'genres': [classification.get('genre').get('name')
                            for classification in event.get('classifications')]
             }
+            
             # Add venue - some events have >1 venue (or possibly none??), join them into one string
             venues = event.get('_embedded').get('venues')
             if venues is not None:
                 event_dict['venue'] = ','.join([venue.get('name') for venue in venues])
+                
             # Not all events have a price range attached, or have multiple pricing tiers
             # TODO account for >1 pricing tier
             price_ranges = event.get('priceRanges')
