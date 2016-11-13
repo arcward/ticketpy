@@ -62,7 +62,30 @@ class Ticketmaster:
         
     def search_venues(self, **search_parameters):
         response = self._search('venues', **search_parameters)
+        # pull out the important stuff for readability
+        venue_list = []
+        for venue in response['_embedded']['venues']:
+            venue_dict = {
+                'name': venue.get('name'),
+                'city': venue.get('city').get('name'),
+                'markets': [market.get('id') for market in venue.get('markets', [])],  # account for missing markets
+                'address': venue.get('address').get('line1')
+            }
+            venue_list.append(venue_dict)
+        return venue_list
+    
+    def venues_by_name(self, venue_name, state_code=None, size='10'):
+        """Search for a venue by name.
         
+        :param venue_name: Venue name to search
+        :param state_code: Two-letter state code to narrow results (ex 'GA')
+        :param size: Size of returned list
+        :return: List of venues found matching search criteria
+        """
+        search_params = {'keyword': venue_name, 'size': size}
+        if state_code is not None:
+            search_params.update({'stateCode': state_code})
+        return self.search_venues(**search_params)
         
     def search_events(self, **search_parameters):
         """Search events with provided search parameters. Generic class for ones like search_by_venue_id()"""

@@ -28,3 +28,20 @@ class TestTicketmaster(TestCase):
         radius = '1'
         elist = self.tm.events_by_location(atl_centerish, radius=radius)
         print(elist)
+        
+    def test_search_venues(self):
+        search_params = {
+            'keyword': 'tabernacle',
+            'stateCode': 'GA',
+            'size': '10',
+        }
+        vlist = self.tm.search_venues(**search_params)
+        print(vlist)
+    
+    def test_venues_by_name(self):
+        params = {
+            'venue_name': 'tabernacle',
+            'state_code': 'GA'
+        }
+        vlist = self.tm.venues_by_name(**params)
+        print(vlist)
