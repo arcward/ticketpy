@@ -97,10 +97,14 @@ class Ticketmaster:
                 'name': event.get('name'),
                 'start_date': event.get('dates').get('start').get('localDate'),
                 'start_time': event.get('dates').get('start').get('localTime'),
-                'status': event.get('dates').get('status').get('code'),
-                'genres': [classification.get('genre').get('name')
-                           for classification in event.get('classifications')]
+                'status': event.get('dates').get('status').get('code')
             }
+            
+            if event.get('classifications') is not None:
+                event_dict['genres'] = [classification.get('genre').get('name')
+                           for classification in event.get('classifications')]
+                event_dict['segments'] = [classification.get('segment').get('name')
+                            for classification in event.get('classifications')]
             
             # Add venue - some events have >1 venue (or possibly none??), join them into one string
             venues = event.get('_embedded').get('venues')
