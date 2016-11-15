@@ -95,11 +95,11 @@ class Ticketmaster:
         for event in response.get('_embedded').get('events'):
             event_dict = {
                 'name': event.get('name'),
-                'start_date': event.get('dates').get('start').get('localDate'),
+                'start_date': event.get('dates').get('start').get('localDate'),  # YYYY-MM-DDTHH:MM:SSZ"
                 'start_time': event.get('dates').get('start').get('localTime'),
-                'status': event.get('dates').get('status').get('code')
+                'status': event.get('dates').get('status').get('code')  # Cancelled, offsale..
             }
-            
+            # 'Classifications' contains genres, subgenres, and sometimes names the type of event (like 'Music')
             if event.get('classifications') is not None:
                 event_dict['genres'] = [classification.get('genre').get('name')
                            for classification in event.get('classifications')]
