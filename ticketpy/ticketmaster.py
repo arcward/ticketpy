@@ -89,22 +89,22 @@ class Events:
         self.method = "events"
     
     def by_location(self, latlong, radius='10'):
-        """ Searches events within a radius of a latitude/longitude coordinate.
-                :param latlong: Latitude/longitude of the radius center
-                :param radius: Radius to search around provided latitude/longitude
-                :return: List of events
-                """
+        """
+        Searches events within a radius of a latitude/longitude coordinate.
+        
+        :param latlong: Latitude/longitude of the radius center
+        :param radius: Radius to search around provided latitude/longitude
+        :return: List of events
+        """
         event_list = self.api_client.search(
-            self.method, **{'latlong': latlong, 'radius': radius}
+            self.method,
+            **{'latlong': latlong, 'radius': radius}
         ).get('_embedded', {}).get('events')
-        event_objects = []
-        for event in event_list:
-            event_objects.append(
-                Event(**_event_params_from_json_obj(event))
-            )
-        return event_objects
+        return [
+            Event(**_event_params_from_json_obj(event))
+            for event in event_list
+        ]
             
-    
     def by_venue_id(self, venue_id, size='20', sort='date,asc'):
         return self.api_client.search(
             self.method,
@@ -172,72 +172,3 @@ class ApiClient:
             }
             venue_list.append(venue_dict)
         return venue_list
-    
-    def search_events(self, **search_parameters):
-        """Search events with provided search parameters.
-        Generic class for ones like search_by_venue_id()
-        """
-        response = self.search('events', **search_parameters)
-        # Pick apart the serialized JSON response and just return the good stuff
-        event_list = []
-        for event in response.get('_embedded').get('events'):
-            event_dict = {
-                'name': event.get('name'),
-                'start_date': event.get('dates').get('start').get('localDate'),
-                # YYYY-MM-DDTHH:MM:SSZ"
-                'start_time': event.get('dates').get('start').get('localTime'),
-                'status': event.get('dates').get('status').get('code')
-                # Cancelled, offsale..
-            }
-            # 'Classifications' contains genres, subgenres, and sometimes names
-            # the type of event (like 'Music')
-            if event.get('classifications') is not None:
-                event_dict['genres'] = [
-                    classification.get('genre').get('name')
-                    for classification in event.get('classifications')]
-                event_dict['segments'] = [
-                    classification.get('segment').get('name')
-                    for classification in event.get('classifications')]
-            
-            # Add venue - some events have >1 venue (or possibly none??), join them into one string
-            venues = event.get('_embedded').get('venues')
-            if venues is not None:
-                event_dict['venue'] = ','.join(
-                    [venue.get('name') for venue in venues]
-                )
-            
-            # Not all events have a price range attached, or have multiple pricing tiers
-            # TODO account for >1 pricing tier
-            price_ranges = event.get('priceRanges')
-            if price_ranges is not None:
-                event_dict['price_range'] = "{}-{}".format(
-                    price_ranges[0].get('min', ''),
-                    price_ranges[0].get('max', ''))
-            event_list.append(event_dict)
-        return event_list
-    
-    def events_by_location(self, latlong, radius='10'):
-        return self.search_events(
-            **{
-                'latlong': latlong,
-                'radius': radius
-            }
-        )
-    
-    def events_by_venue_id(self, venue_id, size='20', sort='date,asc'):
-        """Retrieve a list of events for the provided venue ID.
-        
-        :param venue_id: Venue ID
-        :param size: Number of results (default: 20)
-        :param sort: Sort method (default: date,asc)
-        :return: List of events
-        """
-        return self.search_events(
-            **{
-                'size': size,
-                'sort': sort,
-                'venueId': venue_id
-            }
-        )
-
-    
