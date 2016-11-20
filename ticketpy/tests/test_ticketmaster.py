@@ -37,7 +37,7 @@ class TestTicketmaster(TestCase):
             'stateCode': 'GA',
             'size': '10',
         }
-        vlist = self.tm.search_venues(**search_params)
+        vlist = self.tm.venues.find(**search_params)
         print(vlist)
     
     def test_venues_by_name(self):

@@ -25,6 +25,12 @@ import requests
 
 
 def _event_params_from_json_obj(json_object):
+    """
+    'Cleans up' the JSON object received from the API, returns a dictionary
+    to pass to Event class to initialize
+    :param json_object: object deserialized from JSON, from API
+    :return:
+    """
     j_obj = json_object
     print(j_obj)
     # localTime in format: YYYY-MM-DDTHH:MM:SSZ
@@ -52,6 +58,24 @@ def _event_params_from_json_obj(json_object):
     }
 
 
+def _venue_params_from_json_obj(json_object):
+    j_obj = json_object
+    return {
+        'name': j_obj.get('name'),
+        'city': j_obj.get('city', {}).get('name'),
+        'markets': [market.get('id') for market in j_obj.get('markets', {})],
+        'address': j_obj.get('address', {}).get('line1')
+    }
+
+
+class Venue:
+    def __init__(self, name=None, city=None, markets=None, address=None):
+        self.name = name
+        self.city = city
+        self.markets = markets
+        self.address = address
+        
+
 class Event:
     def __init__(self, name=None, start_date=None, start_time=None,
                  status=None, genres=None, price_ranges=None, venues=None):
@@ -68,6 +92,14 @@ class Venues:
     def __init__(self, api_client):
         self.api_client = api_client
         self.method = "venues"
+        
+    def find(self, **search_parameters):
+        response = self.api_client.search('venues', **search_parameters)
+        # pull out the important stuff for readability
+        venue_list = response.get('_embedded', {}).get('venues')
+        return [
+            Venue(**_venue_params_from_json_obj(venue)) for venue in venue_list
+        ]
     
     def by_name(self, name, state_code=None, size='10'):
         """Search for a venue by name.
@@ -84,9 +116,18 @@ class Venues:
 
 
 class Events:
+    """Abstraction to search API for events"""
     def __init__(self, api_client):
         self.api_client = api_client
         self.method = "events"
+        
+    def find(self, **search_parameters):
+        event_list = self.api_client.search(**search_parameters)\
+            .get('_embedded', {}).get('events')
+        return [
+            Event(**_event_params_from_json_obj(event))
+            for event in event_list
+            ]
     
     def by_location(self, latlong, radius='10'):
         """
@@ -96,24 +137,12 @@ class Events:
         :param radius: Radius to search around provided latitude/longitude
         :return: List of events
         """
-        event_list = self.api_client.search(
-            self.method,
-            **{'latlong': latlong, 'radius': radius}
-        ).get('_embedded', {}).get('events')
-        return [
-            Event(**_event_params_from_json_obj(event))
-            for event in event_list
-        ]
-            
+        return self.find(**{'latlong': latlong, 'radius': radius})
+    
     def by_venue_id(self, venue_id, size='20', sort='date,asc'):
-        return self.api_client.search(
-            self.method,
-            **{
-                'venueId': venue_id,
-                'size': size,
-                'sort': sort
-            }
-        )
+        return self.find(**{'venueId': venue_id,
+                            'size': size,
+                            'sort': sort})
 
 
 class ApiClient:
@@ -156,19 +185,3 @@ class ApiClient:
         search_url = self._build_uri(method)
         search_parameters.update({'apikey': self.api_key})
         return requests.get(search_url, params=search_parameters).json()
-    
-    def search_venues(self, **search_parameters):
-        response = self.search('venues', **search_parameters)
-        # pull out the important stuff for readability
-        venue_list = []
-        for venue in response['_embedded']['venues']:
-            venue_dict = {
-                'name': venue.get('name'),
-                'city': venue.get('city').get('name'),
-                'markets': [market.get('id') for market in
-                            venue.get('markets', [])],
-            # account for missing markets
-                'address': venue.get('address').get('line1')
-            }
-            venue_list.append(venue_dict)
-        return venue_list
