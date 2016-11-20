@@ -24,22 +24,46 @@ SOFTWARE.
 import requests
 
 
+def _event_params_from_json_obj(json_object):
+    j_obj = json_object
+    print(j_obj)
+    # localTime in format: YYYY-MM-DDTHH:MM:SSZ
+    # status usually something like.. Cancelled, Offsale..
+    return {
+        'name': j_obj.get('name'),
+        'start_date': j_obj.get('dates', {}).get('start', {})
+            .get('localDate'),
+        'start_time': j_obj.get('dates', {}).get('start', {})
+            .get('localTime'),
+        'status': j_obj.get('dates', {}).get('status', {})
+            .get('code'),
+        'genres': [
+            classification.get('genre', {}).get('name')
+            for classification in j_obj.get('classifications', [{}])
+            ],
+        'price_ranges': [
+            {'min': p_range.get('min'), 'max': p_range.get('max')}
+            for p_range in j_obj.get('priceRanges', [{}])
+            ],
+        'venues': [
+            venue.get('name')
+            for venue in j_obj.get('_embedded', {}).get('venues', [{}])
+            ]
+    }
+
+
 class Event:
-    def __init__(self, **kwargs):
-        self.name = None
-        self.dates = None
-        self.price = None
-        self.venues = None
-        self.classifications = None
+    def __init__(self, name=None, start_date=None, start_time=None,
+                 status=None, genres=None, price_ranges=None, venues=None):
+        self.name = name
+        self.start_date = start_date
+        self.start_time = start_time
+        self.status = status
+        self.price_ranges = price_ranges
+        self.venues = venues
+        self.genres = genres
         
-        self.name = kwargs.get('name')
-        self.dates = kwargs.get('dates', {})
-        self.classifications = kwargs.get('classifications')
-        self.price = kwargs.get('priceRanges', [{}])
-        embedded = kwargs.get('_embedded', {})
-        self.venues = embedded.get('venues', [{}])
-
-
+        
 class Venues:
     def __init__(self, api_client):
         self.api_client = api_client
@@ -70,10 +94,16 @@ class Events:
                 :param radius: Radius to search around provided latitude/longitude
                 :return: List of events
                 """
-        return self.api_client.search(
-            self.method,
-            **{'latlong': latlong, 'radius': radius}
-        )
+        event_list = self.api_client.search(
+            self.method, **{'latlong': latlong, 'radius': radius}
+        ).get('_embedded', {}).get('events')
+        event_objects = []
+        for event in event_list:
+            event_objects.append(
+                Event(**_event_params_from_json_obj(event))
+            )
+        return event_objects
+            
     
     def by_venue_id(self, venue_id, size='20', sort='date,asc'):
         return self.api_client.search(

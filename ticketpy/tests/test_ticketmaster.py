@@ -28,8 +28,8 @@ class TestTicketmaster(TestCase):
         radius = '1'
         event_list = self.tm.events.by_location(
             atl_centerish,
-            radius=radius)
-        print(event_list)
+            radius=radius
+        )
         
     def test_search_venues(self):
         search_params = {
