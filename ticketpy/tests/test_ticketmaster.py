@@ -9,7 +9,7 @@ class TestTicketmaster(TestCase):
         config = ConfigParser()
         config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
         api_key = config.get('ticketmaster', 'api_key')
-        self.tm = ticketmaster.Ticketmaster(api_key)
+        self.tm = ticketmaster.ApiClient(api_key)
         
     def test_search_events(self):
         search_params = {
@@ -26,8 +26,10 @@ class TestTicketmaster(TestCase):
     def test_search_events_by_location(self):
         atl_centerish = "33.7838737,-84.366088"
         radius = '1'
-        elist = self.tm.events_by_location(atl_centerish, radius=radius)
-        print(elist)
+        event_list = self.tm.events.by_location(
+            atl_centerish,
+            radius=radius)
+        print(event_list)
         
     def test_search_venues(self):
         search_params = {
