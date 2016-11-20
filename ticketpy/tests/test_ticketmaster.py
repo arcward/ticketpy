@@ -17,10 +17,11 @@ class TestTicketmaster(TestCase):
             'sort': 'date,asc',
             'venueId': 'KovZpaFEZe',
         }
-        self.tm.search_events(**search_params)
+        events = self.tm.events.find(**search_params)
+        print(events)
     
     def test_events(self):
-        elist = self.tm.events_by_venue_id('KovZpZAJledA', size=7)
+        elist = self.tm.events.by_venue_id('KovZpZAJledA', size=7)
         print(elist)
         
     def test_search_events_by_location(self):
@@ -30,6 +31,7 @@ class TestTicketmaster(TestCase):
             atl_centerish,
             radius=radius
         )
+        print(event_list)
         
     def test_search_venues(self):
         search_params = {
@@ -42,8 +44,8 @@ class TestTicketmaster(TestCase):
     
     def test_venues_by_name(self):
         params = {
-            'venue_name': 'tabernacle',
+            'name': 'tabernacle',
             'state_code': 'GA'
         }
-        vlist = self.tm.venues_by_name(**params)
+        vlist = self.tm.venues.by_name(**params)
         print(vlist)

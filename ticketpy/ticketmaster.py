@@ -59,6 +59,7 @@ def _event_params_from_json_obj(json_object):
 
 
 def _venue_params_from_json_obj(json_object):
+    """Creates a Venue object from the provided JSON object"""
     j_obj = json_object
     return {
         'name': j_obj.get('name'),
@@ -69,6 +70,7 @@ def _venue_params_from_json_obj(json_object):
 
 
 class Venue:
+    """A venue"""
     def __init__(self, name=None, city=None, markets=None, address=None):
         self.name = name
         self.city = city
@@ -77,6 +79,7 @@ class Venue:
         
 
 class Event:
+    """An event"""
     def __init__(self, name=None, start_date=None, start_time=None,
                  status=None, genres=None, price_ranges=None, venues=None):
         self.name = name
@@ -89,6 +92,7 @@ class Event:
         
         
 class Venues:
+    """Abstraction for venue searches. Returns lists of venues."""
     def __init__(self, api_client):
         self.api_client = api_client
         self.method = "venues"
@@ -112,7 +116,7 @@ class Venues:
         search_params = {'keyword': name, 'size': size}
         if state_code is not None:
             search_params.update({'stateCode': state_code})
-        self.api_client.search(self.method, **search_params)
+        return self.find(**search_params)
 
 
 class Events:
@@ -122,12 +126,11 @@ class Events:
         self.method = "events"
         
     def find(self, **search_parameters):
-        event_list = self.api_client.search(**search_parameters)\
-            .get('_embedded', {}).get('events')
-        return [
-            Event(**_event_params_from_json_obj(event))
-            for event in event_list
-            ]
+        event_list = self.api_client.search(
+            self.method,
+            **search_parameters).get('_embedded', {}).get('events')
+        return [Event(**_event_params_from_json_obj(event))
+                for event in event_list]
     
     def by_location(self, latlong, radius='10'):
         """
