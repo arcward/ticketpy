@@ -1,8 +1,22 @@
 import requests
 
 
-class Venue:
-    """A venue"""
+class _Venue:
+    """A venue
+    
+    JSON response from the Ticketmaster API looks similar to below 
+    (at least as far as what's being used here):
+    
+    ```json
+    {
+        "name": "Venue name",
+        "city": {"name": "Atlanta"},
+        "markets": [{"id": "12345"}, {"id": "67890"}],
+        "address": {"line1": "123 Fake St"}
+    }
+    ```
+    
+    """
     def __init__(self, name=None, city=None, markets=None, address=None):
         self.name = name  #: Venue's name
         self.city = city  #: City name
@@ -11,7 +25,7 @@ class Venue:
 
     @staticmethod
     def from_json(json_venue):
-        v = Venue()
+        v = _Venue()
         v.name = json_venue['name']
         if 'city' in json_venue:
             v.city = json_venue['city']['name']
@@ -22,7 +36,34 @@ class Venue:
         return v
 
 
-class Event:
+class _Event:
+    """An event
+    
+    JSON from API response, as far as what's being used here, looks like: 
+    
+    ```json
+    {
+        "name": "Event name",
+        "dates": {
+            "start": {
+                "localDate": "2019-04-01", 
+                "localTime": "2019-04-01T23:00:00Z"
+            },
+            "status": {"code": "onsale"}
+        },
+        "classifications": [
+            {"genre": {"name": "Rock"}},
+            {"genre": {"name": "Funk"}
+        ],
+        "priceRanges": [{"min": 10, "max": 25}],
+        "_embedded": {
+            "venues": [{"name": "The Tabernacle"}]
+        }
+    }
+    
+    ```
+    
+    """
     def __init__(self, name=None, start_date=None, start_time=None,
                  status=None, genres=None, price_ranges=None, venues=None):
         self.name = name  #: Event name/title
@@ -56,12 +97,12 @@ class Event:
 
     @staticmethod
     def from_json(json_event):
-        """Creates an ``Event`` from API's JSON response
+        """Creates an ``_Event`` from API's JSON response
         
         :param json_event: Deserialized JSON dict
         :return: 
         """
-        e = Event()
+        e = _Event()
         e.name = json_event.get('name')
 
         # Dates/times
@@ -101,7 +142,7 @@ class Event:
         return e
 
         
-class Venues:
+class _Venues:
     """Abstraction for venue searches. Returns lists of venues."""
     def __init__(self, api_client):
         self.api_client = api_client
@@ -117,7 +158,7 @@ class Venues:
         if 'venues' not in response['_embedded']:
             raise KeyError("Expected 'venues' key in this response...")
 
-        return [Venue.from_json(e) for e in
+        return [_Venue.from_json(e) for e in
                 response['_embedded']['venues']]
     
     def by_name(self, name, state_code=None, size='10'):
@@ -135,7 +176,7 @@ class Venues:
         return self.find(**search_params)
 
 
-class Events:
+class _Events:
     """Abstraction to search API for events"""
     def __init__(self, api_client):
         self.api_client = api_client
@@ -154,7 +195,7 @@ class Events:
         if 'events' not in response['_embedded']:
             raise KeyError("Expected 'events' key in this response...")
 
-        return [Event.from_json(e) for e in response['_embedded']['events']]
+        return [_Event.from_json(e) for e in response['_embedded']['events']]
 
     def by_location(self, latlong, radius='10'):
         """
@@ -174,7 +215,7 @@ class Events:
         })
 
 
-class ApiClient:
+class Client:
     """Client for the Ticketmaster Discovery API
     
     Request URLs end up looking like:
@@ -187,14 +228,14 @@ class ApiClient:
         """Initialize the API client.
         
         :param api_key: Ticketmaster discovery API key
-        :param version: API version (default: *v2*)
-        :param response_type: Data format (JSON, XML...) (default: *json*)
+        :param version: API version (default: v2)
+        :param response_type: Data format (JSON, XML...) (default: json)
         """
         self.api_key = api_key  #: Ticketmaster API key
         self.response_type = response_type  #: Response type (json, xml...)
         self.version = version
-        self.events = Events(api_client=self)
-        self.venues = Venues(api_client=self)
+        self.events = _Events(api_client=self)
+        self.venues = _Venues(api_client=self)
 
     @property
     def url(self):

@@ -9,7 +9,7 @@ class TestTicketmaster(TestCase):
         config = ConfigParser()
         config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
         api_key = config.get('ticketmaster', 'api_key')
-        self.tm = ticketmaster.ApiClient(api_key)
+        self.tm = ticketmaster.Client(api_key)
         
     def test_search_events(self):
         search_params = {
