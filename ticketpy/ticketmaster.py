@@ -1,72 +1,105 @@
 import requests
 
 
-def _event_params_from_json_obj(json_object):
-    """
-    'Cleans up' the JSON object received from the API, returns a dictionary
-    to pass to Event class to initialize
-    :param json_object: object deserialized from JSON, from API
-    :return:
-    """
-    j_obj = json_object
-    print(j_obj)
-    # localTime in format: YYYY-MM-DDTHH:MM:SSZ
-    # status usually something like.. Cancelled, Offsale..
-    return {
-        'name': j_obj.get('name'),
-        'start_date': j_obj.get('dates', {}).get('start', {})
-            .get('localDate'),
-        'start_time': j_obj.get('dates', {}).get('start', {})
-            .get('localTime'),
-        'status': j_obj.get('dates', {}).get('status', {})
-            .get('code'),
-        'genres': [
-            classification.get('genre', {}).get('name')
-            for classification in j_obj.get('classifications', [{}])
-            ],
-        'price_ranges': [
-            {'min': p_range.get('min'), 'max': p_range.get('max')}
-            for p_range in j_obj.get('priceRanges', [{}])
-            ],
-        'venues': [
-            venue.get('name')
-            for venue in j_obj.get('_embedded', {}).get('venues', [{}])
-            ]
-    }
-
-
-def _venue_params_from_json_obj(json_object):
-    """Creates a Venue object from the provided JSON object"""
-    j_obj = json_object
-    return {
-        'name': j_obj.get('name'),
-        'city': j_obj.get('city', {}).get('name'),
-        'markets': [market.get('id') for market in j_obj.get('markets', {})],
-        'address': j_obj.get('address', {}).get('line1')
-    }
-
-
 class Venue:
     """A venue"""
     def __init__(self, name=None, city=None, markets=None, address=None):
-        self.name = name
-        self.city = city
-        self.markets = markets
-        self.address = address
-        
+        self.name = name  #: Venue's name
+        self.city = city  #: City name
+        self.markets = markets  #: Market IDs
+        self.address = address  #: Street address (first line)
+
+    @staticmethod
+    def from_json(json_venue):
+        v = Venue()
+        v.name = json_venue['name']
+        if 'city' in json_venue:
+            v.city = json_venue['city']['name']
+        if 'markets' in json_venue:
+            v.markets = [m['id'] for m in json_venue['markets']]
+        if 'address' in json_venue:
+            v.address = json_venue['address']['line1']
+        return v
+
 
 class Event:
-    """An event"""
     def __init__(self, name=None, start_date=None, start_time=None,
                  status=None, genres=None, price_ranges=None, venues=None):
-        self.name = name
-        self.start_date = start_date
-        self.start_time = start_time
-        self.status = status
-        self.price_ranges = price_ranges
-        self.venues = venues
-        self.genres = genres
+        self.name = name  #: Event name/title
+        self.start_date = start_date  #: Local start date
+        self.start_time = start_time  #: Start time (YYYY-MM-DDTHH:MM:SSZ)
+        self.status = status  #: Sale status (such as *Cancelled, Offsale...*)
+        self.genres = genres  #: List of genre classifications
+        self.price_ranges = price_ranges  #: Price ranges found for tickets
+        self.venues = venues  #: List of venue names
+
+    def __str__(self):
+        tmpl = ("Event:        {event_name}\n"
+                "Venue(s):     {venues}\n"
+                "Start date:   {start_date}\n"
+                "Start time:   {start_time}\n"
+                "Price ranges: {ranges}\n"
+                "Status:       {status}\n"
+                "Genres:       {genres}\n")
+
+        ranges = ['-'.join([str(pr['min']), str(pr['max'])])
+                  for pr in self.price_ranges]
+        return tmpl.format(
+            event_name=self.name,
+            venues=', '.join(self.venues),
+            start_date=self.start_date,
+            start_time=self.start_time,
+            ranges=', '.join(ranges),
+            status=self.status,
+            genres=', '.join(self.genres)
+        )
+
+    @staticmethod
+    def from_json(json_event):
+        """Creates an ``Event`` from API's JSON response
         
+        :param json_event: Deserialized JSON dict
+        :return: 
+        """
+        e = Event()
+        e.name = json_event.get('name')
+
+        # Dates/times
+        dates = json_event.get('dates')
+        start_dates = dates.get('start', {})
+        e.start_date = start_dates.get('localDate')
+        e.start_time = start_dates.get('localTime')
+
+        # Event status (ex: 'onsale')
+        status = dates.get('status', {})
+        e.status = status.get('code')
+
+        # Pull genre names from classifications
+        genres = []
+        if 'classifications' in json_event:
+            for cl in json_event['classifications']:
+                if 'genre' in cl:
+                    genres.append(cl['genre']['name'])
+        e.genres = genres
+
+        # min/max price ranges
+        price_ranges = []
+        if 'priceRanges' in json_event:
+            for pr in json_event['priceRanges']:
+                price_ranges.append({
+                    'min': pr['min'],
+                    'max': pr['max']
+                })
+        e.price_ranges = price_ranges
+
+        # venue list (occasionally >1 venue)
+        venues = []
+        if 'venues' in json_event.get('_embedded', {}):
+            for v in json_event['_embedded']['venues']:
+                venues.append(v['name'])
+        e.venues = venues
+        return e
+
         
 class Venues:
     """Abstraction for venue searches. Returns lists of venues."""
@@ -76,18 +109,24 @@ class Venues:
         
     def find(self, **search_parameters):
         response = self.api_client.search('venues', **search_parameters)
+
         # pull out the important stuff for readability
-        venue_list = response.get('_embedded', {}).get('venues')
-        return [
-            Venue(**_venue_params_from_json_obj(venue)) for venue in venue_list
-        ]
+        if '_embedded' not in response:
+            raise KeyError("Expected '_embedded' key in venues response")
+
+        if 'venues' not in response['_embedded']:
+            raise KeyError("Expected 'venues' key in this response...")
+
+        return [Venue.from_json(e) for e in
+                response['_embedded']['venues']]
     
     def by_name(self, name, state_code=None, size='10'):
         """Search for a venue by name.
 
         :param name: Venue name to search
         :param state_code: Two-letter state code to narrow results (ex 'GA')
-        :param size: Size of returned list
+            (default: None)
+        :param size: Size of returned list (default: 10)
         :return: List of venues found matching search criteria
         """
         search_params = {'keyword': name, 'size': size}
@@ -102,13 +141,21 @@ class Events:
         self.api_client = api_client
         self.method = "events"
         
-    def find(self, **search_parameters):
-        event_list = self.api_client.search(
-            self.method,
-            **search_parameters).get('_embedded', {}).get('events')
-        return [Event(**_event_params_from_json_obj(event))
-                for event in event_list]
-    
+    def find(self, **kwargs):
+        """Find events matching parameters
+        
+        :param search_parameters: 
+        :return: 
+        """
+        response = self.api_client.search(self.method, **kwargs)
+
+        if '_embedded' not in response:
+            raise KeyError("Expected '_embedded' key in events response")
+        if 'events' not in response['_embedded']:
+            raise KeyError("Expected 'events' key in this response...")
+
+        return [Event.from_json(e) for e in response['_embedded']['events']]
+
     def by_location(self, latlong, radius='10'):
         """
         Searches events within a radius of a latitude/longitude coordinate.
@@ -120,48 +167,67 @@ class Events:
         return self.find(**{'latlong': latlong, 'radius': radius})
     
     def by_venue_id(self, venue_id, size='20', sort='date,asc'):
-        return self.find(**{'venueId': venue_id,
-                            'size': size,
-                            'sort': sort})
+        return self.find(**{
+            'venueId': venue_id,
+            'size': size,
+            'sort': sort
+        })
 
 
 class ApiClient:
-    """Client for the Ticketmaster discovery API"""
+    """Client for the Ticketmaster Discovery API
+    
+    Request URLs end up looking like:
+    http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}
+    """
+    _base_url = "http://app.ticketmaster.com/discovery"  #: Base URL
+    _method_tmpl = "{url}/{method}.{response_type}"  #: URL method template
+
     def __init__(self, api_key, version='v2', response_type='json'):
         """Initialize the API client.
         
         :param api_key: Ticketmaster discovery API key
-        :param version: API version (default: v2)
-        :param response_type: Data format (JSON, XML...)
+        :param version: API version (default: *v2*)
+        :param response_type: Data format (JSON, XML...) (default: *json*)
         """
-        # URL ends up looking something lke:
-        # http://app.ticketmaster.com/discovery/v2/events.json?apikey=[api key]
-        self.api_key = api_key
-        self.response_type = response_type  # JSON, XML...
-        self.base_url = "http://app.ticketmaster.com/discovery/{version}/" \
-            .format(version=version)
-        self.method_url = "{base_url}{method}.{response_type}"
-        
+        self.api_key = api_key  #: Ticketmaster API key
+        self.response_type = response_type  #: Response type (json, xml...)
+        self.version = version
         self.events = Events(api_client=self)
         self.venues = Venues(api_client=self)
+
+    @property
+    def url(self):
+        return "{}/{}".format(self._base_url, self.version)
+
+    @property
+    def events_url(self):
+        return self._method_tmpl.format(url=self.url,
+                                        method='events',
+                                        response_type=self.response_type)
+
+    @property
+    def venues_url(self):
+        return self._method_tmpl.format(url=self.url,
+                                        method='venues',
+                                        response_type=self.response_type)
     
-    def _build_uri(self, method):
-        """Build a request URL.
-        :param method: Search type (events, venues..)
-        :return: Appropriate request URL
-        """
-        return self.method_url.format(
-            base_url=self.base_url,
-            method=method,
-            response_type=self.response_type
-        )
-    
-    def search(self, method, **search_parameters):
+    def search(self, method, **kwargs):
         """Generic method for API requests.
         :param method: Search type (events, venues...)
-        :param search_parameters: Search parameters, ex. venueId, eventId, latlong, radius..
+        :param kwargs: Search parameters, ex. venueId, eventId, 
+            latlong, radius..
         :return: List of results
         """
-        search_url = self._build_uri(method)
-        search_parameters.update({'apikey': self.api_key})
-        return requests.get(search_url, params=search_parameters).json()
+        # Get basic request URL
+        if method == 'events':
+            search_url = self.events_url
+        elif method == 'venues':
+            search_url = self.venues_url
+        else:
+            raise ValueError("Received: '{}' but was expecting "
+                             "one of: {}".format(method, ['events', 'venues']))
+
+        # Add ?api_key={api_key} and then search parameters
+        kwargs.update({'apikey': self.api_key})
+        return requests.get(search_url, params=kwargs).json()
