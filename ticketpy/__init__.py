@@ -1,3 +1,3 @@
-from ticketpy.ticketmaster import Client
+from ticketpy.ticketpy import Client
 
-__all__ = ['ticketmaster', 'tests']
+__all__ = ['ticketpy.py', 'tests']

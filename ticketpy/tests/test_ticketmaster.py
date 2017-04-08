@@ -1,54 +1,47 @@
 from unittest import TestCase
 from configparser import ConfigParser
 import os
-from ticketpy import ticketmaster
+from ticketpy import ticketpy
+from ticketpy.ticketpy import ApiException
 
 
-class TestTicketmaster(TestCase):
+class TestTicketpy(TestCase):
     def setUp(self):
         config = ConfigParser()
         config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
         api_key = config.get('ticketmaster', 'api_key')
-        self.tm = ticketmaster.Client(api_key)
+
+        self.tm = ticketpy.Client(api_key)
+        self.venues = {
+            'smithes': 'KovZpZAJledA',
+            'tabernacle': 'KovZpaFEZe'
+        }
         
     def test_search_events(self):
-        search_params = {
-            'size': '10',
-            'sort': 'date,asc',
-            'venueId': 'KovZpaFEZe',
-        }
-        event_list = self.tm.events.find(**search_params)
+        event_list = self.tm.events.find(venue_id=self.venues['tabernacle'])
         for e in event_list:
             print(e)
-    
-    def test_events(self):
-        elist = self.tm.events.by_venue_id('KovZpZAJledA', size=7)
-        print(elist)
+
+    def test_events_get(self):
+        elist = self.tm.events.find(classification_name='Hip-Hop',
+                                    venue_id='KovZpZAJledA', size=7)
         for e in elist:
             print(e)
         
     def test_search_events_by_location(self):
-        atl_centerish = "33.7838737,-84.366088"
-        radius = '1'
         event_list = self.tm.events.by_location(
-            atl_centerish,
-            radius=radius
+            latitude='33.7838737',
+            longitude='-84.366088',
+            radius='1.5',
+            unit='miles'
         )
-        print(event_list)
-        
-    def test_search_venues(self):
-        search_params = {
-            'keyword': 'tabernacle',
-            'stateCode': 'GA',
-            'size': '10',
-        }
-        vlist = self.tm.venues.find(**search_params)
-        print(vlist)
-    
-    def test_venues_by_name(self):
-        params = {
-            'name': 'tabernacle',
-            'state_code': 'GA'
-        }
-        vlist = self.tm.venues.by_name(**params)
-        print(vlist)
+        for e in event_list:
+            print(e)
+
+    def test_venue_search(self):
+        venue_list = self.tm.venues.find(keyword="The Tabernacle",
+                                         state_code="GA",
+                                         size="1")
+        self.assertEqual(1, len(venue_list))
+        tabernacle = venue_list[0]
+        self.assertEqual("The Tabernacle", tabernacle.name)
