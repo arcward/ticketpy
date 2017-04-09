@@ -121,6 +121,17 @@ class _VenueSearch:
         self.api_client = api_client
         self.method = "venues"
 
+    def get(self, venue_id):
+        """Get details for a specific venue
+
+        :param venue_id: Venue ID
+        :return: Venue
+        """
+        get_url = "{}/venues/{}".format(self.api_client.url, venue_id)
+        r = requests.get(get_url,
+                         params={'apikey': self.api_client.api_key}).json()
+        return Venue.from_json(r)
+
     def find(self, keyword=None, venue_id=None, sort=None, state_code=None,
              country_code=None, source=None, include_test=None,
              page=None, size=None, locale=None):
@@ -150,7 +161,6 @@ class _VenueSearch:
         :param venue_name: Venue name to search
         :param state_code: Two-letter state code to narrow results (ex 'GA')
             (default: None)
-        :param size: Size of returned list (default: 10)
         :return: List of venues found matching search criteria
         """
         return self.find(keyword=venue_name, state_code=state_code, **kwargs)
@@ -183,6 +193,17 @@ class _EventSearch:
     def __init__(self, api_client):
         self.api_client = api_client
         self.method = "events"
+
+    def get(self, event_id):
+        """Get details for a specific event
+        
+        :param event_id: Event ID
+        :return: Event
+        """
+        get_url = "{}/events/{}".format(self.api_client.url, event_id)
+        r = requests.get(get_url,
+                         params={'apikey': self.api_client.api_key}).json()
+        return Event.from_json(r)
 
     def find(self, sort='date,asc', latlong=None, radius=None, unit=None,
              start_date_time=None, end_date_time=None,
@@ -435,8 +456,10 @@ class Event:
     ```
     
     """
-    def __init__(self, name=None, start_date=None, start_time=None,
-                 status=None, genres=None, price_ranges=None, venues=None):
+    def __init__(self, event_id=None, name=None, start_date=None,
+                 start_time=None, status=None, genres=None, price_ranges=None,
+                 venues=None):
+        self.event_id = event_id  #: Event ID
         self.name = name  #: Event name/title
         self.start_date = start_date  #: Local start date
         self.start_time = start_time  #: Start time (YYYY-MM-DDTHH:MM:SSZ)
@@ -474,6 +497,7 @@ class Event:
         :return: 
         """
         e = Event()
+        e.event_id = json_event['id']
         e.name = json_event.get('name')
 
         # Dates/times
@@ -568,7 +592,8 @@ class PageIterator:
         """Return a flat list of results. Automatically paginates."""
         return [i for item_list in self for i in item_list]
 
-    def __page(self, **kwargs):
+    @staticmethod
+    def __page(**kwargs):
         """Instantiate and return a Page(list)"""
         page = kwargs['page']
         links = kwargs['_links']
@@ -620,6 +645,7 @@ class Page(list):
     """API response page"""
     def __init__(self, number, size, total_elements, total_pages,
                  link_self, link_next, embedded):
+        super().__init__([])
         self.number = number  #: Page number
         self.size = size  #: Page size
         self.total_elements = total_elements  #: Total elements (all pages)
