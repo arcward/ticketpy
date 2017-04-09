@@ -16,9 +16,16 @@ class TestTicketpy(TestCase):
             'smithes': 'KovZpZAJledA',
             'tabernacle': 'KovZpaFEZe'
         }
+
+    def test_iterator(self):
+        event_list = self.tm.events.find(venue_id=self.venues['tabernacle'],
+                                         size='7').limit(8, True)
+        for e in event_list:
+            print(e)
         
     def test_search_events(self):
-        event_list = self.tm.events.find(venue_id=self.venues['tabernacle'])
+        event_list = self.tm.events.find(venue_id=self.venues['tabernacle'],
+                                         size='1')
         for e in event_list:
             print(e)
 
