@@ -56,7 +56,6 @@ class Client:
             raise ValueError("Received: '{}' but was expecting "
                              "one of: {}".format(method, ['events', 'venues']))
 
-
         # Make updates to parameters. Add apikey, make sure params that
         # may be passed as integers are cast, and cast bools to 'yes' 'no'
         kwargs = {k: v for (k, v) in kwargs.items() if v is not None}
@@ -213,7 +212,7 @@ class _EventSearch:
              classification_name=None, classification_id=None,
              market_id=None, promoter_id=None, dma_id=None,
              include_tba=None, include_tbd=None, client_visibility=None,
-             keyword=None, id=None, source=None, include_test=None,
+             keyword=None, event_id=None, source=None, include_test=None,
              page=None, size=None, locale=None, **kwargs):
         """
 
@@ -281,7 +280,7 @@ class _EventSearch:
             'includeTBD': include_tbd,
             'clientVisibility': client_visibility,
             'keyword': keyword,
-            'id': id,
+            'id': event_id,
             'source': source,
             'includeTest': include_test,
             'page': page,
@@ -332,7 +331,7 @@ class _EventSearch:
         longitude = str(longitude)
         radius = str(radius)
         latlong = "{lat},{long}".format(lat=latitude, long=longitude)
-        return self.find(latlong=latlong, radius=radius, unit=unit)
+        return self.find(latlong=latlong, radius=radius, unit=unit, **kwargs)
 
 
 class Venue:
@@ -655,6 +654,7 @@ class Page(list):
         self._link_next = link_next  #: Link to the next page
 
         # Parse embedded objects and add them to ourself
+        items = []
         if 'events' in embedded:
             items = [Event.from_json(e) for e in embedded['events']]
         elif 'venues' in embedded:
