@@ -56,12 +56,34 @@ class Client:
             raise ValueError("Received: '{}' but was expecting "
                              "one of: {}".format(method, ['events', 'venues']))
 
-        # Add ?api_key={api_key} and then search parameters
-        kwargs.update({'apikey': self.api_key})
+
+        # Make updates to parameters. Add apikey, make sure params that
+        # may be passed as integers are cast, and cast bools to 'yes' 'no'
+        kwargs = {k: v for (k, v) in kwargs.items() if v is not None}
+        updates = {'apikey': self.api_key}
+        for k, v in kwargs.items():
+            if k in ['includeTBA', 'includeTBD', 'includeTest']:
+                updates[k] = self.__yes_no_only(v)
+            elif k in ['size', 'radius', 'marketId']:
+                updates[k] = str(v)
+
+        kwargs.update(updates)
         response = requests.get(search_url, params=kwargs).json()
         if 'errors' in response:
             raise ApiException(search_url, kwargs, response)
         return PageIterator(self, **response)
+
+    @staticmethod
+    def __yes_no_only(s):
+        if s in ['yes', 'no', 'only']:
+            pass
+        elif s == True:
+            s = 'yes'
+        elif s == False:
+            s = 'no'
+        else:
+            s = s.lower()
+        return s
 
 
 class ApiException(Exception):
@@ -120,33 +142,18 @@ class _VenueSearch:
 
     def __get(self, **kwargs):
         response = self.api_client._search('venues', **kwargs)
+        return response
 
-        # No matches
-        if response['page']['totalPages'] == 0:
-            return []
-
-        if '_embedded' not in response:
-            raise KeyError("Expected '_embedded' key in venues response")
-
-        if 'venues' not in response['_embedded']:
-            raise KeyError("Expected 'venues' key in this response...")
-
-        return [Venue.from_json(e) for e in
-                response['_embedded']['venues']]
-
-    def by_name(self, name, state_code=None, size='10'):
+    def by_name(self, venue_name, state_code=None, **kwargs):
         """Search for a venue by name.
 
-        :param name: Venue name to search
+        :param venue_name: Venue name to search
         :param state_code: Two-letter state code to narrow results (ex 'GA')
             (default: None)
         :param size: Size of returned list (default: 10)
         :return: List of venues found matching search criteria
         """
-        search_params = {'keyword': name, 'size': size}
-        if state_code is not None:
-            search_params.update({'stateCode': state_code})
-        return self.__get(**search_params)
+        return self.find(keyword=venue_name, state_code=state_code, **kwargs)
 
 
 class _EventSearch:
@@ -186,7 +193,7 @@ class _EventSearch:
              market_id=None, promoter_id=None, dma_id=None,
              include_tba=None, include_tbd=None, client_visibility=None,
              keyword=None, id=None, source=None, include_test=None,
-             page=None, size='20', locale=None, **kwargs):
+             page=None, size=None, locale=None, **kwargs):
         """
 
         :param sort: Sorting order of search result 
@@ -227,12 +234,6 @@ class _EventSearch:
         :param locale: 
         :return: 
         """
-
-        try:
-            int(size)
-        except ValueError:
-            raise ValueError("'size' parameter requires an "
-                             "integer. Received: {}".format(size))
 
         # Translate parameters to API-friendly parameters
         kw_map = {
@@ -293,20 +294,6 @@ class _EventSearch:
         :return: 
         """
         response = self.api_client._search(self.method, **kwargs)
-
-        # No matches
-        # if response['page']['totalPages'] == 0:
-        #     return []
-
-        # if '_embedded' not in response:
-        #     raise KeyError("Expected '_embedded' key in events response")
-        #
-        # if 'events' not in response['_embedded']:
-        #     raise KeyError("Expected 'events' key in this response...")
-
-        # return [Event.from_json(e) for e in response['_embedded']['events']]
-
-        #return [Event.from_json(e) for e in response['_embedded']['events']]
         return response
 
     def by_location(self, latitude, longitude, radius='10', unit='miles',
@@ -323,7 +310,6 @@ class _EventSearch:
         latitude = str(latitude)
         longitude = str(longitude)
         radius = str(radius)
-
         latlong = "{lat},{long}".format(lat=latitude, long=longitude)
         return self.find(latlong=latlong, radius=radius, unit=unit)
 
@@ -391,7 +377,7 @@ class Venue:
         v = Venue()
         v.venue_id = json_venue['id']
         v.name = json_venue['name']
-        v.url = json_venue['url']
+        v.url = json_venue.get('url')
 
         if 'markets' in json_venue:
             v.markets = [m['id'] for m in json_venue['markets']]
@@ -530,20 +516,21 @@ class Event:
 class PageIterator:
     """Iterates through API response pages"""
     def __init__(self, api_client, **kwargs):
-        self.api_client = api_client
-        self.page = None
+        self.api_client = api_client  #: Parent API client
+        self.page = None  #: Current page
         self.page = self.__page(**kwargs)
 
-        self.start_page = self.page.number
-        self.current_page = self.start_page
-        self.end_page = self.page.total_pages
+        self.start_page = self.page.number  #: Initial page number
+        self.current_page = self.start_page  #: Current page number
+        self.end_page = self.page.total_pages  #: Final page number
 
     def __iter__(self):
         return self
 
     def limit(self, limit=50, strict=False):
         """Limit the number of items returned. NOTE: Will go over or under 
-        the actual limit depending on *strict*. 
+        the actual limit depending on *strict*. Automatically paginates 
+        through response.
         
         If *strict* is False, all items in results pages are added until 
         *limit* is either met or exceeded.
@@ -578,7 +565,7 @@ class PageIterator:
         return all_items
 
     def all(self):
-        """Return a flat list of all results"""
+        """Return a flat list of results. Automatically paginates."""
         return [i for item_list in self for i in item_list]
 
     def __page(self, **kwargs):
@@ -618,6 +605,9 @@ class PageIterator:
 
         self.page = self.__page(**r)
 
+        # If 'next' link goes missing, there were fewer pages than
+        # expected for some reason, so bump current_page to end_page to
+        # throw StopIteration next time next() is called
         if self.page.link_next is None:
             self.current_page = self.end_page
 
@@ -627,32 +617,32 @@ class PageIterator:
 
 
 class Page(list):
+    """API response page"""
     def __init__(self, number, size, total_elements, total_pages,
                  link_self, link_next, embedded):
-        self.number = number
-        self.size = size
-        self.total_elements = total_elements
-        self.total_pages = total_pages
+        self.number = number  #: Page number
+        self.size = size  #: Page size
+        self.total_elements = total_elements  #: Total elements (all pages)
+        self.total_pages = total_pages  #: Total pages
 
-        self._link_self = link_self
-        self._link_next = link_next
+        self._link_self = link_self  #: Link to this page
+        self._link_next = link_next  #: Link to the next page
 
+        # Parse embedded objects and add them to ourself
         if 'events' in embedded:
             items = [Event.from_json(e) for e in embedded['events']]
         elif 'venues' in embedded:
             items = [Venue.from_json(v) for v in embedded['venues']]
+
         for i in items:
             self.append(i)
 
     @property
     def link_next(self):
+        """Link to the next page"""
         return "{}{}".format(Client.base_url, self._link_next)
 
     @property
     def link_self(self):
+        """Link to this page"""
         return "{}{}".format(Client.base_url, self._link_self)
-
-
-
-
-

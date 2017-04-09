@@ -25,9 +25,9 @@ class TestTicketpy(TestCase):
         
     def test_search_events(self):
         event_list = self.tm.events.find(venue_id=self.venues['tabernacle'],
-                                         size='1')
+                                         size=1, include_tba=True).all()
         for e in event_list:
-            print(e)
+            print(str(e))
 
     def test_events_get(self):
         elist = self.tm.events.find(classification_name='Hip-Hop',
@@ -39,16 +39,16 @@ class TestTicketpy(TestCase):
         event_list = self.tm.events.by_location(
             latitude='33.7838737',
             longitude='-84.366088',
-            radius='1.5',
+            radius=1,
             unit='miles'
-        )
+        ).all()
         for e in event_list:
             print(e)
 
     def test_venue_search(self):
         venue_list = self.tm.venues.find(keyword="The Tabernacle",
                                          state_code="GA",
-                                         size="1")
+                                         size=1).all()
         self.assertEqual(1, len(venue_list))
         tabernacle = venue_list[0]
         self.assertEqual("The Tabernacle", tabernacle.name)
