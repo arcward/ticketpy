@@ -1,8 +1,9 @@
+"""Client/library for Ticketmaster's Discovery API"""
 import requests
 
 
-class Client:
-    """Client for the Ticketmaster Discovery API
+class ApiClient:
+    """ApiClient for the Ticketmaster Discovery API
 
     Request URLs end up looking like:
     http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}
@@ -86,6 +87,7 @@ class Client:
 
 
 class ApiException(Exception):
+    """Exception thrown for API-related error messages"""
     def __init__(self, url, params, response):
         self.url = url
         del params['apikey']
@@ -114,9 +116,13 @@ class ApiException(Exception):
 
 
 class _VenueSearch:
-    """Abstraction for venue searches. Returns lists of venues."""
+    """Queries for venues"""
 
     def __init__(self, api_client):
+        """Init VenueSearch
+        
+        :param api_client: Instance of `ticketpy.ApiClient`
+        """
         self.api_client = api_client
         self.method = "venues"
 
@@ -134,7 +140,23 @@ class _VenueSearch:
     def find(self, keyword=None, venue_id=None, sort=None, state_code=None,
              country_code=None, source=None, include_test=None,
              page=None, size=None, locale=None):
-
+        """Search for venues matching provided parameters
+        
+        :param keyword: Keyword to search on (such as part of the venue name)
+        :param venue_id: Venue ID 
+        :param sort: Sort method for response (API default: 'name,asc')
+        :param state_code: Filter by state code (ex: 'GA' not 'Georgia')
+        :param country_code: Filter by country code
+        :param source: Filter entities by source (['ticketmaster', 'universe', 
+            'frontgate', 'tmr'])
+        :param include_test: ['yes', 'no', 'only'], whether to include 
+            entities flagged as test in the response (default: 'no')
+        :param page: Page number (default: 0)
+        :param size: Page size of the response (default: 20)
+        :param locale: Locale (default: 'en')
+        :return: Venues found matching criteria 
+        :rtype: `ticketpy.PageIterator`fff
+        """
         kw_map = {
             'sort': sort,
             'stateCode': state_code,
@@ -151,6 +173,7 @@ class _VenueSearch:
         return self.__get(**kwargs)
 
     def __get(self, **kwargs):
+        """Calls `ApiClient.get()` with final parameters"""
         response = self.api_client._search('venues', **kwargs)
         return response
 
@@ -190,6 +213,10 @@ class _EventSearch:
     }
 
     def __init__(self, api_client):
+        """Init EventSearch
+        
+        :param api_client: Instance of `ticketpy.ApiClient`
+        """
         self.api_client = api_client
         self.method = "events"
 
@@ -214,7 +241,7 @@ class _EventSearch:
              include_tba=None, include_tbd=None, client_visibility=None,
              keyword=None, event_id=None, source=None, include_test=None,
              page=None, size=None, locale=None, **kwargs):
-        """
+        """Search for events matching given criteria.
 
         :param sort: Sorting order of search result 
             (default: *'relevance, desc'*)
@@ -226,8 +253,8 @@ class _EventSearch:
         :param onsale_start_date_time: 
         :param onsale_end_date_time: 
         :param country_code: 
-        :param state_code: 
-        :param venue_id: 
+        :param state_code: State code (ex: 'GA' not 'Georgia')
+        :param venue_id: Find events for provided venue ID
         :param attraction_id: 
         :param segment_id: 
         :param segment_name: 
@@ -243,15 +270,15 @@ class _EventSearch:
             defined (['yes', 'no', 'only'])
         :param client_visibility: 
         :param keyword: 
-        :param id: 
+        :param event_id: Event ID to search 
         :param source: Filter entities by source name: ['ticketmaster', 
             'universe', 'frontgate', 'tmr']
         :param include_test: 'yes' to include test entities in the 
             response. False or 'no' to exclude. 'only' to return ONLY test 
             entities. (['yes', 'no', 'only'])
-        :param page: Page number to get
+        :param page: Page number to get (default: 0)
         :param size: Size of page (default: 20)
-        :param locale: 
+        :param locale: Locale (default: 'en')
         :return: 
         """
 
@@ -394,6 +421,11 @@ class Venue:
 
     @staticmethod
     def from_json(json_venue):
+        """Create a `Venue` object from the API response's JSON data
+        
+        :param json_venue: Deserialized JSON from API response
+        :return: `ticketpy.Venue`
+        """
         v = Venue()
         v.venue_id = json_venue['id']
         v.name = json_venue['name']
@@ -453,7 +485,6 @@ class Event:
     }
     
     ```
-    
     """
     def __init__(self, event_id=None, name=None, start_date=None,
                  start_time=None, status=None, genres=None, price_ranges=None,
@@ -492,8 +523,8 @@ class Event:
     def from_json(json_event):
         """Creates an ``Event`` from API's JSON response
         
-        :param json_event: Deserialized JSON dict
-        :return: 
+        :param json_event: Deserialized JSON object from API response
+        :return: `ticketpy.Event`
         """
         e = Event()
         e.event_id = json_event['id']
@@ -666,9 +697,9 @@ class Page(list):
     @property
     def link_next(self):
         """Link to the next page"""
-        return "{}{}".format(Client.base_url, self._link_next)
+        return "{}{}".format(ApiClient.base_url, self._link_next)
 
     @property
     def link_self(self):
         """Link to this page"""
-        return "{}{}".format(Client.base_url, self._link_self)
+        return "{}{}".format(ApiClient.base_url, self._link_self)

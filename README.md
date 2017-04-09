@@ -9,13 +9,13 @@ http://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
 #### Installation
 Just run `python setup.py install`
 
-## Usage
+## Usage examples
 ### Events
 To pull ~20 events for marketId 10 (Atlanta):
 ```python
 import ticketpy
 
-tm_client = ticketpy.Client("your_api_key")
+tm_client = ticketpy.ApiClient("your_api_key")
 events = tm_client.events.find(market_id=10).limit(20)
 
     for e in events:
@@ -52,7 +52,7 @@ To search for all venues based on the string '*Tabernacle*':
 ```python
 import ticketpy
 
-tm_client = ticketpy.Client("your_api_key")
+tm_client = ticketpy.ApiClient("your_api_key")
 venues = tm_client.venues.find(keyword="Tabernacle").all()
 for v in venues:
     print("Name: {} / City: {}".format(v.name, v.city))

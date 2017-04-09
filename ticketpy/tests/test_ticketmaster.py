@@ -11,7 +11,7 @@ class TestTicketpy(TestCase):
         config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
         api_key = config.get('ticketmaster', 'api_key')
 
-        self.tm = ticketpy.Client(api_key)
+        self.tm = ticketpy.ApiClient(api_key)
         self.venues = {
             'smithes': 'KovZpZAJledA',
             'tabernacle': 'KovZpaFEZe'
