@@ -32,12 +32,14 @@ class ApiClient:
 
     @property
     def events_url(self):
+        """URL for */events/*"""
         return self._method_tmpl.format(url=self.url,
                                         method='events',
                                         response_type=self.response_type)
 
     @property
     def venues_url(self):
+        """URL for */venues/*"""
         return self._method_tmpl.format(url=self.url,
                                         method='venues',
                                         response_type=self.response_type)
@@ -56,7 +58,7 @@ class ApiClient:
         :param method: Search type (events, venues...)
         :param kwargs: Search parameters, ex. venueId, eventId, 
             latlong, radius..
-        :return: List of results
+        :return: ``PageIterator``
         """
         # Get basic request URL
         if method == 'events':
@@ -572,7 +574,11 @@ class Event:
 
     @property
     def utc_datetime(self):
-        """Start date/time in UTC (Format: *YYYY-MM-DDTHH:MM:SSZ*)"""
+        """Start date/time in UTC (Format: *YYYY-MM-DDTHH:MM:SSZ*)
+        
+        :return: Start date/time in UTC
+        :rtype: ``datetime``
+        """
         return self.__utc_datetime
 
     @utc_datetime.setter
@@ -667,45 +673,39 @@ class PageIterator:
     def __iter__(self):
         return self
 
-    def limit(self, limit=50, strict=False):
-        """Limit the number of items returned. NOTE: Will go over or under 
-        the actual limit depending on *strict*. Automatically paginates 
-        through response.
+    def limit(self, max_pages=10):
+        """Limit the number of page requests. Default: 5
         
-        If *strict* is False, all items in results pages are added until 
-        *limit* is either met or exceeded.
+        With a default page size of 20, ``limit(max_pages=5`` would 
+        return a maximum of 200 items (fewer, if there are fewer results).
         
-        If *strict* is True, items are added until the limit is either met, 
-        or until the next page size would exceed the limit.
+        Use this to contain the number of API calls being made, as the 
+        API restricts users to a maximum of 5,000 per day. Very 
+        broad searches can return a large number of pages.
         
-        Ex: 
-        5 pages of 20 results each (100 items)
+        To contrast, ``all()`` will automatically request every 
+        page available.
         
-        Limit=25, strict=False would return a list of size 40 (the initial 
-        page has len==20, so another page is returned)
-        
-        Limit=25, strict=True would return a list of size 20 (the initial 
-        page has len==20, though pulling another would exceed *limit*)
-        
-        :param limit: Return (roughly) this number of items
-        :param strict: *False* to come as close to *limit* as possible 
-            without falling below. *True* to come as close as possible 
-            to *limit* without exceeding it.
-        :return: List of items
+        :param max_pages: Maximum number of pages to request. 
+            Default: *10*. Set to *None* (or use ``all()``) to return 
+            all pages.
+        :return: Flat list of results from pages
         """
-        all_items = []
-        for idx, item_list in enumerate(self):
-            if idx > 0:
-                if strict and len(all_items)+self.page.size > limit:
-                    break
+        if max_pages is None:
+            return self.all()
 
-            all_items += item_list
-            if len(all_items) >= limit:
-                break
+        all_items = []
+        for i in range(0, max_pages):
+            all_items += self.next()
         return all_items
 
     def all(self):
-        """Return a flat list of results. Automatically paginates."""
+        """Returns a flat list of all results. Queries all possible pages.
+        
+        Use ``limit()`` to restrict the number of calls being made.
+        
+        :return: Flat list of results
+        """
         return [i for item_list in self for i in item_list]
 
     @staticmethod
@@ -734,7 +734,7 @@ class PageIterator:
         # Return initial Page result if we haven't yet
         if self.page.number == self.current_page:
             self.current_page += 1
-            return self.page
+            return [i for i in self.page]
 
         # StopIteration if we know we've run out of pages.
         # Check for current>end as empty results still return
@@ -755,7 +755,7 @@ class PageIterator:
         if self.page.link_next is None:
             self.current_page = self.end_page
 
-        return self.page
+        return [i for i in self.page]
 
     __next__ = next
 

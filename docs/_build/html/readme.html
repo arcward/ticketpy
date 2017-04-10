@@ -77,47 +77,92 @@
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="usage-examples">
-<h1>Usage examples<a class="headerlink" href="#usage-examples" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="quickstart-examples">
+<h2>Quickstart/examples<a class="headerlink" href="#quickstart-examples" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="events">
-<h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
-<p>To pull ~20 events for <em>marketId=10</em> (Atlanta):</p>
+<h3>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h3>
+<p>To pull all Hip-Hop events in Georgia between May 19th, 2017 and
+May 21st, 2017:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ticketpy</span>
 
-<span class="n">tm_client</span> <span class="o">=</span> <span class="n">ticketpy</span><span class="o">.</span><span class="n">ApiClient</span><span class="p">(</span><span class="s2">&quot;your_api_key&quot;</span><span class="p">)</span>
-<span class="n">events</span> <span class="o">=</span> <span class="n">tm_client</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">market_id</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">tm_client</span> <span class="o">=</span> <span class="n">ticketpy</span><span class="o">.</span><span class="n">ApiClient</span><span class="p">(</span><span class="s1">&#39;your_api_key&#39;</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[What/When] {} / {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">start_date</span><span class="p">))</span>
+<span class="n">pages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tm</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+    <span class="n">classification_name</span><span class="o">=</span><span class="s1">&#39;Hip-Hop&#39;</span><span class="p">,</span>
+    <span class="n">state_code</span><span class="o">=</span><span class="s1">&#39;GA&#39;</span><span class="p">,</span>
+    <span class="n">start_date_time</span><span class="o">=</span><span class="s1">&#39;2017-05-19T20:00:00Z&#39;</span><span class="p">,</span>
+    <span class="n">end_date_time</span><span class="o">=</span><span class="s1">&#39;2017-05-21T20:00:00Z&#39;</span>
+<span class="p">)</span>
+
+<span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">pages</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">page</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Output:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Viva</span> <span class="n">La</span> <span class="n">Hop</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">07</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Gwinnett</span> <span class="n">Braves</span> <span class="n">vs</span><span class="o">.</span> <span class="n">Durham</span> <span class="n">Bulls</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">07</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Old</span> <span class="n">Dominion</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">07</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Macon</span> <span class="n">Mayhem</span> <span class="n">vs</span><span class="o">.</span> <span class="n">Roanoke</span> <span class="n">Rail</span> <span class="n">Yard</span> <span class="n">Dawgs</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">07</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Rachmaninov</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">07</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">The</span> <span class="n">Young</span> <span class="n">Dubliners</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">07</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">The</span> <span class="n">Whiskey</span> <span class="n">Gentry</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">07</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Festival</span> <span class="n">Of</span> <span class="n">Laughs</span><span class="p">:</span> <span class="n">Mike</span> <span class="n">Epps</span><span class="p">,</span> <span class="n">Bruce</span> <span class="n">Bruce</span><span class="p">,</span> <span class="n">Sommore</span><span class="p">,</span> <span class="n">Arnez</span> <span class="n">J</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">07</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Three</span> <span class="n">Dog</span> <span class="n">Night</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">07</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Permagroove</span> <span class="ow">and</span> <span class="n">Friends</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">07</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Georgia</span> <span class="n">Bulldogs</span> <span class="n">v</span><span class="o">.</span> <span class="n">Missouri</span> <span class="n">Tigers</span> <span class="n">Men</span><span class="s1">&#39;s Baseball / 2017-04-08</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Gwinnett</span> <span class="n">Braves</span> <span class="n">vs</span><span class="o">.</span> <span class="n">Durham</span> <span class="n">Bulls</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">08</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Blurry</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">08</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Georgia</span> <span class="n">Firebirds</span> <span class="n">Vs</span> <span class="n">Corpus</span> <span class="n">Christi</span> <span class="n">Rage</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">08</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Ron</span> <span class="n">White</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">08</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Macon</span> <span class="n">Mayhem</span> <span class="n">vs</span><span class="o">.</span> <span class="n">Roanoke</span> <span class="n">Rail</span> <span class="n">Yard</span> <span class="n">Dawgs</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">08</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">MAJIC</span> <span class="mf">107.5</span><span class="o">/</span><span class="mf">97.5</span> <span class="n">Presents</span> <span class="n">Leela</span> <span class="n">James</span> <span class="o">&amp;</span> <span class="n">Daley</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">08</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">JoJo</span> <span class="o">-</span> <span class="n">Mad</span> <span class="n">Love</span> <span class="n">Tour</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">08</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Duran</span> <span class="n">Duran</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">08</span>
-<span class="p">[</span><span class="n">What</span><span class="o">/</span><span class="n">When</span><span class="p">]</span> <span class="n">Glass</span> <span class="n">Animals</span> <span class="o">/</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">08</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Event</span><span class="p">:</span>        <span class="n">Atlanta</span> <span class="n">Funk</span> <span class="n">Fest</span> <span class="mi">2017</span> <span class="mi">3</span> <span class="n">Day</span> <span class="n">Ticket</span>
+<span class="n">Venue</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>     <span class="s1">&#39;Wolf Creek Amphitheater&#39;</span> <span class="n">at</span> <span class="mi">3025</span> <span class="n">Merk</span> <span class="n">Road</span> <span class="ow">in</span> <span class="n">Atlanta</span> <span class="n">GA</span>
+<span class="n">Start</span> <span class="n">date</span><span class="p">:</span>   <span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">19</span>
+<span class="n">Start</span> <span class="n">time</span><span class="p">:</span>   <span class="mi">19</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+<span class="n">Price</span> <span class="n">ranges</span><span class="p">:</span> <span class="mf">128.01</span><span class="o">-</span><span class="mf">424.0</span>
+<span class="n">Status</span><span class="p">:</span>       <span class="n">onsale</span>
+<span class="n">Genres</span><span class="p">:</span>       <span class="n">R</span><span class="o">&amp;</span><span class="n">B</span>
+
+<span class="n">Event</span><span class="p">:</span>        <span class="n">Atlanta</span> <span class="n">Funk</span> <span class="n">Fest</span> <span class="mi">2017</span>
+<span class="n">Venue</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>     <span class="s1">&#39;Wolf Creek Amphitheater&#39;</span> <span class="n">at</span> <span class="mi">3025</span> <span class="n">Merk</span> <span class="n">Road</span> <span class="ow">in</span> <span class="n">Atlanta</span> <span class="n">GA</span>
+<span class="n">Start</span> <span class="n">date</span><span class="p">:</span>   <span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">19</span>
+<span class="n">Start</span> <span class="n">time</span><span class="p">:</span>   <span class="mi">19</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+<span class="n">Price</span> <span class="n">ranges</span><span class="p">:</span> <span class="mf">63.0</span><span class="o">-</span><span class="mf">158.0</span>
+<span class="n">Status</span><span class="p">:</span>       <span class="n">onsale</span>
+<span class="n">Genres</span><span class="p">:</span>       <span class="n">R</span><span class="o">&amp;</span><span class="n">B</span>
+
+<span class="n">Event</span><span class="p">:</span>        <span class="n">Atlanta</span> <span class="n">Funk</span> <span class="n">Fest</span> <span class="mi">2017</span>
+<span class="n">Venue</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>     <span class="s1">&#39;Wolf Creek Amphitheater&#39;</span> <span class="n">at</span> <span class="mi">3025</span> <span class="n">Merk</span> <span class="n">Road</span> <span class="ow">in</span> <span class="n">Atlanta</span> <span class="n">GA</span>
+<span class="n">Start</span> <span class="n">date</span><span class="p">:</span>   <span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">20</span>
+<span class="n">Start</span> <span class="n">time</span><span class="p">:</span>   <span class="mi">17</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+<span class="n">Price</span> <span class="n">ranges</span><span class="p">:</span> <span class="mf">63.0</span><span class="o">-</span><span class="mf">158.0</span>
+<span class="n">Status</span><span class="p">:</span>       <span class="n">onsale</span>
+<span class="n">Genres</span><span class="p">:</span>       <span class="n">Hip</span><span class="o">-</span><span class="n">Hop</span><span class="o">/</span><span class="n">Rap</span>
+
+<span class="n">Event</span><span class="p">:</span>        <span class="n">NF</span>
+<span class="n">Venue</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>     <span class="s1">&#39;Center Stage Theater&#39;</span> <span class="n">at</span> <span class="mi">1374</span> <span class="n">W</span> <span class="n">Peachtree</span> <span class="n">St</span><span class="o">.</span> <span class="n">NW</span> <span class="ow">in</span> <span class="n">Atlanta</span> <span class="n">GA</span>
+<span class="n">Start</span> <span class="n">date</span><span class="p">:</span>   <span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">20</span>
+<span class="n">Start</span> <span class="n">time</span><span class="p">:</span>   <span class="mi">20</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+<span class="n">Price</span> <span class="n">ranges</span><span class="p">:</span> <span class="mf">22.0</span><span class="o">-</span><span class="mf">83.0</span>
+<span class="n">Status</span><span class="p">:</span>       <span class="n">onsale</span>
+<span class="n">Genres</span><span class="p">:</span>       <span class="n">Hip</span><span class="o">-</span><span class="n">Hop</span><span class="o">/</span><span class="n">Rap</span>
 </pre></div>
 </div>
+<p>Calling <code class="docutils literal"><span class="pre">ApiClient.find()</span></code> returns a <code class="docutils literal"><span class="pre">ticketpy.PageIterator</span></code>
+object, which iterates through API response pages (as <code class="docutils literal"><span class="pre">ticketpy.Page</span></code>).</p>
+<p>By default, pages have 20 elements. If there are &gt;20 total elements,
+calling <code class="docutils literal"><span class="pre">PageIterator.next()</span></code> will request the next page from the API.</p>
+<p>You can simplify that/do away with the nested loop by using
+<code class="docutils literal"><span class="pre">PageIterator.limit()</span></code>. By default, this requests a maximum of 10 pages,
+and returns the elements of each in a flat list.</p>
+<p>For example, the previous example could also be written as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ticketpy</span>
+
+<span class="n">tm_client</span> <span class="o">=</span> <span class="n">ticketpy</span><span class="o">.</span><span class="n">ApiClient</span><span class="p">(</span><span class="s1">&#39;your_api_key&#39;</span><span class="p">)</span>
+
+<span class="n">pages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tm</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+    <span class="n">classification_name</span><span class="o">=</span><span class="s1">&#39;Hip-Hop&#39;</span><span class="p">,</span>
+    <span class="n">state_code</span><span class="o">=</span><span class="s1">&#39;GA&#39;</span><span class="p">,</span>
+    <span class="n">start_date_time</span><span class="o">=</span><span class="s1">&#39;2017-05-19T20:00:00Z&#39;</span><span class="p">,</span>
+    <span class="n">end_date_time</span><span class="o">=</span><span class="s1">&#39;2017-05-21T20:00:00Z&#39;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">pages</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output here would be the same as there was &lt;1 page available, however,
+this can save you some wasted API calls for large result sets. If you
+really want <em>every page</em>, though, use <code class="docutils literal"><span class="pre">all()</span></code> to request every available
+page.</p>
 </div>
 <div class="section" id="venues">
-<h2>Venues<a class="headerlink" href="#venues" title="Permalink to this headline">¶</a></h2>
+<h3>Venues<a class="headerlink" href="#venues" title="Permalink to this headline">¶</a></h3>
 <p>To search for all venues based on the string &#8220;<em>Tabernacle</em>&#8221;:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ticketpy</span>
 
@@ -146,6 +191,7 @@
 </div>
 </div>
 </div>
+</div>
 
 
           </div>
@@ -158,11 +204,11 @@
 <li><a class="reference internal" href="#">ticketpy</a><ul>
 <li><a class="reference internal" href="#requirements">Requirements</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#usage-examples">Usage examples</a><ul>
+<li><a class="reference internal" href="#quickstart-examples">Quickstart/examples</a><ul>
 <li><a class="reference internal" href="#events">Events</a></li>
 <li><a class="reference internal" href="#venues">Venues</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

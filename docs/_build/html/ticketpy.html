@@ -25,7 +25,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="ticketpy" href="readme.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,6 +38,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="readme.html" title="ticketpy"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.2 documentation</a> &#187;</li> 
       </ul>
     </div>  
@@ -60,8 +64,8 @@
 <a class="reference external" href="http://app.ticketmaster.com/discovery/v2/events.json">http://app.ticketmaster.com/discovery/v2/events.json</a>?apikey={api_key}</p>
 <dl class="attribute">
 <dt id="ticketpy.ticketpy.ApiClient.api_key">
-<code class="descname">api_key</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.api_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ticketmaster API key</p>
+<code class="descname">api_key</code><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.api_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>API key</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -72,7 +76,8 @@
 <dl class="attribute">
 <dt id="ticketpy.ticketpy.ApiClient.events_url">
 <code class="descname">events_url</code><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.events_url" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>URL for <em>/events/</em></p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ticketpy.ticketpy.ApiClient.response_type">
@@ -89,7 +94,8 @@
 <dl class="attribute">
 <dt id="ticketpy.ticketpy.ApiClient.venues_url">
 <code class="descname">venues_url</code><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.venues_url" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>URL for <em>/venues/</em></p>
+</dd></dl>
 
 </dd></dl>
 
@@ -102,7 +108,7 @@
 
 <dl class="class">
 <dt id="ticketpy.ticketpy.Event">
-<em class="property">class </em><code class="descclassname">ticketpy.ticketpy.</code><code class="descname">Event</code><span class="sig-paren">(</span><em>event_id=None</em>, <em>name=None</em>, <em>start_date=None</em>, <em>start_time=None</em>, <em>status=None</em>, <em>genres=None</em>, <em>price_ranges=None</em>, <em>venues=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.Event" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.ticketpy.</code><code class="descname">Event</code><span class="sig-paren">(</span><em>event_id=None</em>, <em>name=None</em>, <em>start_date=None</em>, <em>start_time=None</em>, <em>status=None</em>, <em>genres=None</em>, <em>price_ranges=None</em>, <em>venues=None</em>, <em>utc_datetime=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.Event" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Ticketmaster event.</p>
 <p>The JSON returned from the Discovery API (at least, as far as 
@@ -169,27 +175,43 @@ what&#8217;s being used here) looks like:</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ticketpy.ticketpy.Event.local_start_date">
+<code class="descname">local_start_date</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.local_start_date" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Local</strong> start date (<em>YYYY-MM-DD</em>)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Event.local_start_time">
+<code class="descname">local_start_time</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.local_start_time" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Local</strong> start time (<em>HH:MM:SS</em>)</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ticketpy.ticketpy.Event.price_ranges">
 <code class="descname">price_ranges</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.price_ranges" title="Permalink to this definition">¶</a></dt>
 <dd><p>Price ranges found for tickets</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ticketpy.ticketpy.Event.start_date">
-<code class="descname">start_date</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.start_date" title="Permalink to this definition">¶</a></dt>
-<dd><p>Local start date</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.ticketpy.Event.start_time">
-<code class="descname">start_time</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.start_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start time (YYYY-MM-DDTHH:MM:SSZ)</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ticketpy.ticketpy.Event.status">
 <code class="descname">status</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.status" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sale status (such as <em>Cancelled, Offsale...</em>)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Event.utc_datetime">
+<code class="descname">utc_datetime</code><a class="headerlink" href="#ticketpy.ticketpy.Event.utc_datetime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start date/time in UTC (Format: <em>YYYY-MM-DDTHH:MM:SSZ</em>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Start date/time in UTC</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">datetime</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -251,7 +273,16 @@ what&#8217;s being used here) looks like:</p>
 <dl class="method">
 <dt id="ticketpy.ticketpy.PageIterator.all">
 <code class="descname">all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.all" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a flat list of results. Automatically paginates.</p>
+<dd><p>Returns a flat list of all results. Queries all possible pages.</p>
+<p>Use <code class="docutils literal"><span class="pre">limit()</span></code> to restrict the number of calls being made.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Flat list of results</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -274,34 +305,24 @@ what&#8217;s being used here) looks like:</p>
 
 <dl class="method">
 <dt id="ticketpy.ticketpy.PageIterator.limit">
-<code class="descname">limit</code><span class="sig-paren">(</span><em>limit=50</em>, <em>strict=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.limit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Limit the number of items returned. NOTE: Will go over or under 
-the actual limit depending on <em>strict</em>. Automatically paginates 
-through response.</p>
-<p>If <em>strict</em> is False, all items in results pages are added until 
-<em>limit</em> is either met or exceeded.</p>
-<p>If <em>strict</em> is True, items are added until the limit is either met, 
-or until the next page size would exceed the limit.</p>
-<p>Ex: 
-5 pages of 20 results each (100 items)</p>
-<p>Limit=25, strict=False would return a list of size 40 (the initial 
-page has len==20, so another page is returned)</p>
-<p>Limit=25, strict=True would return a list of size 20 (the initial 
-page has len==20, though pulling another would exceed <em>limit</em>)</p>
+<code class="descname">limit</code><span class="sig-paren">(</span><em>max_pages=10</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limit the number of page requests. Default: 5</p>
+<p>With a default page size of 20, <code class="docutils literal"><span class="pre">limit(max_pages=5</span></code> would 
+return a maximum of 200 items (fewer, if there are fewer results).</p>
+<p>Use this to contain the number of API calls being made, as the 
+API restricts users to a maximum of 5,000 per day. Very 
+broad searches can return a large number of pages.</p>
+<p>To contrast, <code class="docutils literal"><span class="pre">all()</span></code> will automatically request every 
+page available.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>limit</strong> &#8211; Return (roughly) this number of items</li>
-<li><strong>strict</strong> &#8211; <em>False</em> to come as close to <em>limit</em> as possible 
-without falling below. <em>True</em> to come as close as possible 
-to <em>limit</em> without exceeding it.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>max_pages</strong> &#8211; Maximum number of pages to request. 
+Default: <em>10</em>. Set to <em>None</em> (or use <code class="docutils literal"><span class="pre">all()</span></code>) to return 
+all pages.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of items</p>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Flat list of results from pages</td>
 </tr>
 </tbody>
 </table>
@@ -505,6 +526,9 @@ to <em>limit</em> without exceeding it.</li>
 </li>
 </ul>
 
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="readme.html"
+                        title="previous chapter">ticketpy</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -535,6 +559,9 @@ to <em>limit</em> without exceeding it.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="readme.html" title="ticketpy"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.2 documentation</a> &#187;</li> 
       </ul>
     </div>
