@@ -40,7 +40,7 @@ May 21st, 2017:
 
     tm_client = ticketpy.ApiClient('your_api_key')
 
-    pages = self.tm.events.find(
+    pages = tm_client.events.find(
         classification_name='Hip-Hop',
         state_code='GA',
         start_date_time='2017-05-19T20:00:00Z',
@@ -103,7 +103,7 @@ For example, the previous example could also be written as:
 
     tm_client = ticketpy.ApiClient('your_api_key')
 
-    pages = self.tm.events.find(
+    pages = tm_client.events.find(
         classification_name='Hip-Hop',
         state_code='GA',
         start_date_time='2017-05-19T20:00:00Z',
