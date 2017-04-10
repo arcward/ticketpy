@@ -1,0 +1,546 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ticketpy package &#8212; ticketpy 1.0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.2 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ticketpy-package">
+<h1>ticketpy package<a class="headerlink" href="#ticketpy-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ticketpy.ticketpy">
+<span id="ticketpy-ticketpy-module"></span><h2>ticketpy.ticketpy module<a class="headerlink" href="#module-ticketpy.ticketpy" title="Permalink to this headline">¶</a></h2>
+<p>Client/library for Ticketmaster&#8217;s Discovery API</p>
+<dl class="class">
+<dt id="ticketpy.ticketpy.ApiClient">
+<em class="property">class </em><code class="descclassname">ticketpy.ticketpy.</code><code class="descname">ApiClient</code><span class="sig-paren">(</span><em>api_key</em>, <em>version='v2'</em>, <em>response_type='json'</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.ApiClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>ApiClient for the Ticketmaster Discovery API</p>
+<p>Request URLs end up looking like:
+<a class="reference external" href="http://app.ticketmaster.com/discovery/v2/events.json">http://app.ticketmaster.com/discovery/v2/events.json</a>?apikey={api_key}</p>
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.ApiClient.api_key">
+<code class="descname">api_key</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.api_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ticketmaster API key</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.ApiClient.base_url">
+<code class="descname">base_url</code><em class="property"> = 'https://app.ticketmaster.com'</em><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.base_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.ApiClient.events_url">
+<code class="descname">events_url</code><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.events_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.ApiClient.response_type">
+<code class="descname">response_type</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.response_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Response type (json, xml...)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.ApiClient.url">
+<code class="descname">url</code><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Root URL</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.ApiClient.venues_url">
+<code class="descname">venues_url</code><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.venues_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="ticketpy.ticketpy.ApiException">
+<em class="property">exception </em><code class="descclassname">ticketpy.ticketpy.</code><code class="descname">ApiException</code><span class="sig-paren">(</span><em>url</em>, <em>params</em>, <em>response</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.ApiException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Exception thrown for API-related error messages</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.ticketpy.Event">
+<em class="property">class </em><code class="descclassname">ticketpy.ticketpy.</code><code class="descname">Event</code><span class="sig-paren">(</span><em>event_id=None</em>, <em>name=None</em>, <em>start_date=None</em>, <em>start_time=None</em>, <em>status=None</em>, <em>genres=None</em>, <em>price_ranges=None</em>, <em>venues=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.Event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Ticketmaster event.</p>
+<p>The JSON returned from the Discovery API (at least, as far as 
+what&#8217;s being used here) looks like:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Event name&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;dates&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;start&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;localDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2019-04-01&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;localTime&quot;</span><span class="p">:</span> <span class="s2">&quot;2019-04-01T23:00:00Z&quot;</span>
+        <span class="p">},</span>
+        <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;onsale&quot;</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;classifications&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;genre&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Rock&quot;</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;genre&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Funk&quot;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;priceRanges&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;min&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="nt">&quot;max&quot;</span><span class="p">:</span> <span class="mi">25</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;_embedded&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;venues&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;The Tabernacle&quot;</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="staticmethod">
+<dt id="ticketpy.ticketpy.Event.from_json">
+<em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_event</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.Event.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an <code class="docutils literal"><span class="pre">Event</span></code> from API&#8217;s JSON response</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>json_event</strong> &#8211; Deserialized JSON object from API response</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><cite>ticketpy.Event</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Event.genres">
+<code class="descname">genres</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.genres" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of genre classifications</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Event.price_ranges">
+<code class="descname">price_ranges</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.price_ranges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Price ranges found for tickets</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Event.start_date">
+<code class="descname">start_date</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.start_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Local start date</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Event.start_time">
+<code class="descname">start_time</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.start_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start time (YYYY-MM-DDTHH:MM:SSZ)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Event.status">
+<code class="descname">status</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sale status (such as <em>Cancelled, Offsale...</em>)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Event.venues">
+<code class="descname">venues</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Event.venues" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of <code class="docutils literal"><span class="pre">ticketpy.Venue</span></code> objects associated with this event</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.ticketpy.Page">
+<em class="property">class </em><code class="descclassname">ticketpy.ticketpy.</code><code class="descname">Page</code><span class="sig-paren">(</span><em>number</em>, <em>size</em>, <em>total_elements</em>, <em>total_pages</em>, <em>link_self</em>, <em>link_next</em>, <em>embedded</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.Page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">list</span></code></p>
+<p>API response page</p>
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Page.link_next">
+<code class="descname">link_next</code><a class="headerlink" href="#ticketpy.ticketpy.Page.link_next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to the next page</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Page.link_self">
+<code class="descname">link_self</code><a class="headerlink" href="#ticketpy.ticketpy.Page.link_self" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to this page</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Page.number">
+<code class="descname">number</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Page.number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Page number</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Page.size">
+<code class="descname">size</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Page.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Page size</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Page.total_elements">
+<code class="descname">total_elements</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Page.total_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total elements (all pages)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Page.total_pages">
+<code class="descname">total_pages</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Page.total_pages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total pages</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.ticketpy.PageIterator">
+<em class="property">class </em><code class="descclassname">ticketpy.ticketpy.</code><code class="descname">PageIterator</code><span class="sig-paren">(</span><em>api_client</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.PageIterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Iterates through API response pages</p>
+<dl class="method">
+<dt id="ticketpy.ticketpy.PageIterator.all">
+<code class="descname">all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a flat list of results. Automatically paginates.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.PageIterator.api_client">
+<code class="descname">api_client</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.api_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parent API client</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.PageIterator.current_page">
+<code class="descname">current_page</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.current_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current page number</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.PageIterator.end_page">
+<code class="descname">end_page</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.end_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Final page number</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ticketpy.ticketpy.PageIterator.limit">
+<code class="descname">limit</code><span class="sig-paren">(</span><em>limit=50</em>, <em>strict=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limit the number of items returned. NOTE: Will go over or under 
+the actual limit depending on <em>strict</em>. Automatically paginates 
+through response.</p>
+<p>If <em>strict</em> is False, all items in results pages are added until 
+<em>limit</em> is either met or exceeded.</p>
+<p>If <em>strict</em> is True, items are added until the limit is either met, 
+or until the next page size would exceed the limit.</p>
+<p>Ex: 
+5 pages of 20 results each (100 items)</p>
+<p>Limit=25, strict=False would return a list of size 40 (the initial 
+page has len==20, so another page is returned)</p>
+<p>Limit=25, strict=True would return a list of size 20 (the initial 
+page has len==20, though pulling another would exceed <em>limit</em>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>limit</strong> &#8211; Return (roughly) this number of items</li>
+<li><strong>strict</strong> &#8211; <em>False</em> to come as close to <em>limit</em> as possible 
+without falling below. <em>True</em> to come as close as possible 
+to <em>limit</em> without exceeding it.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of items</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ticketpy.ticketpy.PageIterator.next">
+<code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.PageIterator.page">
+<code class="descname">page</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current page</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.PageIterator.start_page">
+<code class="descname">start_page</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.PageIterator.start_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initial page number</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.ticketpy.Venue">
+<em class="property">class </em><code class="descclassname">ticketpy.ticketpy.</code><code class="descname">Venue</code><span class="sig-paren">(</span><em>name=None</em>, <em>address=None</em>, <em>city=None</em>, <em>state_code=None</em>, <em>postal_code=None</em>, <em>latitude=None</em>, <em>longitude=None</em>, <em>markets=None</em>, <em>url=None</em>, <em>box_office_info=None</em>, <em>dmas=None</em>, <em>general_info=None</em>, <em>venue_id=None</em>, <em>social=None</em>, <em>timezone=None</em>, <em>images=None</em>, <em>parking_detail=None</em>, <em>accessible_seating_detail=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.Venue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A Ticketmaster venue</p>
+<p>The JSON returned from the Discovery API looks something like this 
+(<em>edited for brevity</em>):</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;KovZpaFEZe&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;The Tabernacle&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://www.ticketmaster.com/venue/115031&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;address&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;line1&quot;</span><span class="p">:</span> <span class="s2">&quot;152 Luckie Street&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;city&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Atlanta&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;postalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;30303&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;state&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;stateCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GA&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Georgia&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;country&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;United States Of America&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;countryCode&quot;</span><span class="p">:</span> <span class="s2">&quot;US&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;location&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;latitude&quot;</span><span class="p">:</span> <span class="s2">&quot;33.758688&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;longitude&quot;</span><span class="p">:</span> <span class="s2">&quot;-84.391449&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;social&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;twitter&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;handle&quot;</span><span class="p">:</span> <span class="s2">&quot;@TabernacleATL&quot;</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;markets&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;10&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.address">
+<code class="descname">address</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Street address (first line)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.city">
+<code class="descname">city</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.city" title="Permalink to this definition">¶</a></dt>
+<dd><p>City name</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ticketpy.ticketpy.Venue.from_json">
+<em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_venue</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.Venue.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <cite>Venue</cite> object from the API response&#8217;s JSON data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>json_venue</strong> &#8211; Deserialized JSON from API response</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><cite>ticketpy.Venue</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.general_info">
+<code class="descname">general_info</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.general_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>General info on the venue</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.images">
+<code class="descname">images</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ticketmaster venue image links</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.latitude">
+<code class="descname">latitude</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.latitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Latitude</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.location">
+<code class="descname">location</code><a class="headerlink" href="#ticketpy.ticketpy.Venue.location" title="Permalink to this definition">¶</a></dt>
+<dd><p>All location-based data (full address, lat/lon, timezone</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.longitude">
+<code class="descname">longitude</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.longitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Longitude</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.markets">
+<code class="descname">markets</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.markets" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of market IDs</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.name">
+<code class="descname">name</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Venue&#8217;s name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.parking_detail">
+<code class="descname">parking_detail</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.parking_detail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parking details</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.postal_code">
+<code class="descname">postal_code</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.postal_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zip/postal code</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.social">
+<code class="descname">social</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.social" title="Permalink to this definition">¶</a></dt>
+<dd><p>Social media links (Twitter, etc)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.state_code">
+<code class="descname">state_code</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.state_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>State code (ex: &#8216;GA&#8217; not &#8216;Georgia&#8217;)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.timezone">
+<code class="descname">timezone</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.timezone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timezone venue&#8217;s located in</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.url">
+<code class="descname">url</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ticketmaster internal venue URL</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.ticketpy.Venue.venue_id">
+<code class="descname">venue_id</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.ticketpy.Venue.venue_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Venue ID (use to look up events)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ticketpy">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ticketpy" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ticketpy package</a><ul>
+<li><a class="reference internal" href="#module-ticketpy.ticketpy">ticketpy.ticketpy module</a></li>
+<li><a class="reference internal" href="#module-ticketpy">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ticketpy.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.2 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Edward Wells.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

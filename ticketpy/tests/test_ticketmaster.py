@@ -22,7 +22,7 @@ class TestTicketpy(TestCase):
         print(e)
 
     def test_get_venue(self):
-        v = self.tm.venues.get('KovZpZAJledA')
+        v = self.tm.venues.get('KovZpaFEZe')
         print(v)
 
     def test_iterator(self):
@@ -33,13 +33,23 @@ class TestTicketpy(TestCase):
         
     def test_search_events(self):
         event_list = self.tm.events.find(venue_id=self.venues['tabernacle'],
-                                         size=1, include_tba=True).all()
+                                         size=5, include_tba=True).all()
         for e in event_list:
             print(str(e))
 
+    def test_event_search_genre(self):
+        start_dt = "2017-05-15T20:00:00Z"
+        end_dt = "2017-05-28T20:00:00Z"
+        elist = self.tm.events.find(classification_name='Hip-Hop',
+                                    state_code='GA',
+                                    start_date_time=start_dt,
+                                    end_date_time=end_dt).all()
+        for e in elist:
+            print(e.utc_datetime)
+
     def test_events_get(self):
         elist = self.tm.events.find(classification_name='Hip-Hop',
-                                    venue_id='KovZpZAJledA', size=7)
+                                    venue_id='KovZpZAJledA', size=7).all()
         for e in elist:
             print(e)
         

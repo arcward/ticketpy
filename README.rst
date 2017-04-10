@@ -26,8 +26,8 @@ Or, locally from the same directory as ``setup.py``:
 
     $ python setup.py install
 
-Usage examples
-==============
+Quickstart/examples
+===================
 
 Events
 ^^^^^^
