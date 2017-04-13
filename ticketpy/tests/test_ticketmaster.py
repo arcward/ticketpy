@@ -17,6 +17,11 @@ class TestTicketpy(TestCase):
             'tabernacle': 'KovZpaFEZe'
         }
 
+    def test_attractions(self):
+        a_list = self.tm.attractions.find(keyword="U2").limit(1)
+        for a in a_list:
+            print(a)
+
     def test_get_event_id(self):
         e = self.tm.events.get('vvG1zZfbJQpVWp')
         print(e)

@@ -24,6 +24,7 @@ class ApiClient:
         self.version = version
         self.events = _EventSearch(api_client=self)
         self.venues = _VenueSearch(api_client=self)
+        self.attractions = _AttractionSearch(api_client=self)
 
     @property
     def url(self):
@@ -42,6 +43,13 @@ class ApiClient:
         """URL for */venues/*"""
         return self._method_tmpl.format(url=self.url,
                                         method='venues',
+                                        response_type=self.response_type)
+
+    @property
+    def attractions_url(self):
+        """URL for */attractions/*"""
+        return self._method_tmpl.format(url=self.url,
+                                        method='attractions',
                                         response_type=self.response_type)
 
     @property
@@ -65,6 +73,8 @@ class ApiClient:
             search_url = self.events_url
         elif method == 'venues':
             search_url = self.venues_url
+        elif method == 'attractions':
+            search_url = self.attractions_url
         else:
             raise ValueError("Received: '{}' but was expecting "
                              "one of: {}".format(method, ['events', 'venues']))
@@ -374,6 +384,106 @@ class _EventSearch:
         radius = str(radius)
         latlong = "{lat},{long}".format(lat=latitude, long=longitude)
         return self.find(latlong=latlong, radius=radius, unit=unit, **kwargs)
+
+
+class _AttractionSearch:
+    """Query class for Attractions"""
+    attr_map = {
+        'include_test': 'includeTest',
+        'attraction_id': 'attractionId'
+    }
+
+    def __init__(self, api_client):
+        self.api_client = api_client
+        self.method = "attractions"
+
+    def __get(self, **kwargs):
+        """Find attractions matching parameters
+
+        :param kwargs: Search parameters
+        :return: 
+        """
+        response = self.api_client._search(self.method, **kwargs)
+        return response
+
+    def get(self, attraction_id):
+        get_url = "{}/attractions/{}".format(self.api_client.url,
+                                             attraction_id)
+        r = requests.get(get_url, params=self.api_client.api_key).json()
+        return Attraction.from_json(r)
+
+    def find(self, sort=None, keyword=None, attraction_id=None,
+             source=None, include_test=None, page=None, size=None,
+             locale=None, **kwargs):
+        """
+        
+        :param sort: Response sort type (API default: *name,asc*)
+        :param keyword: 
+        :param attraction_id: 
+        :param source: 
+        :param include_test: Include test attractions (['yes', 'no', 'only'])
+        :param page: 
+        :param size: 
+        :param locale: API default: *en*
+        :param kwargs: 
+        :return: 
+        """
+        kw_map = {
+            'sort': sort,
+            'keyword': keyword,
+            'attractionId': attraction_id,
+            'source': source,
+            'includeTest': include_test,
+            'page': page,
+            'size': size,
+            'locale': locale
+        }
+
+        # Update search parameters with kwargs
+        for k, v in kwargs.items():
+            # If arg is API-friendly (ex: stateCode='GA')
+            if k in kw_map:
+                kw_map[k] = v
+            # If arg matches a param name (ex: state_code='GA')
+            if k in self.attr_map:
+                kw_map[self.attr_map[k]] = v
+
+        # Only use ones that have been set
+        search_params = {k: v for (k, v) in kw_map.items() if v is not None}
+        return self.__get(**search_params)
+
+
+class Attraction:
+    """Attraction object"""
+    def __init__(self, attraction_id=None, attraction_name=None, url=None,
+                 classifications=None, images=None, test=None):
+        """
+        
+        :param attraction_id: Attraction ID
+        :param attraction_name: Name of the attraction (ex: '*U2*'
+        :param url: Ticketmaster URL
+        :param classifications: Genres, subgenres, etc
+        :param images: Images
+        :param test: Test (bool)
+        """
+        self.id = attraction_id
+        self.name = attraction_name
+        self.url = url
+        self.classifications = classifications
+        self.images = images
+        self.test = test
+
+    @staticmethod
+    def from_json(json_obj):
+        """Convert JSON object to ``Attraction`` object"""
+        att = Attraction()
+        att.id = json_obj.get('id')
+        att.name = json_obj.get('name')
+        att.url = json_obj.get('url')
+        att.test = json_obj.get('test')
+        att.images = json_obj.get('images')
+        att.classifications = json_obj.get('classifications')
+        return att
 
 
 class Venue:
@@ -779,6 +889,8 @@ class Page(list):
             items = [Event.from_json(e) for e in embedded['events']]
         elif 'venues' in embedded:
             items = [Venue.from_json(v) for v in embedded['venues']]
+        elif 'attractions' in embedded:
+            items = [Attraction.from_json(a) for a in embedded['attractions']]
 
         for i in items:
             self.append(i)
