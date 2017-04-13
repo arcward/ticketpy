@@ -89,8 +89,13 @@ class TestTicketpy(TestCase):
         for a in attrs:
             print(a)
 
+    def test_classification_search(self):
+        classif = self.tm.classifications.find(keyword="Drama").limit(1)
+        for cl in classif:
+            print(cl)
+
     def test_get_event_id(self):
-        e = self.tm.events.get('vvG1zZfbJQpVWp')
+        e = self.tm.events.by_id('vvG1zZfbJQpVWp')
         print(e)
 
     def test_get_venue(self):

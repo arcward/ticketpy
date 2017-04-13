@@ -25,6 +25,7 @@ class ApiClient:
         self.events = _EventSearch(api_client=self)
         self.venues = _VenueSearch(api_client=self)
         self.attractions = _AttractionSearch(api_client=self)
+        self.classifications = _ClassificationSearch(api_client=self)
 
     @property
     def url(self):
@@ -53,6 +54,13 @@ class ApiClient:
                                         response_type=self.response_type)
 
     @property
+    def classifications_url(self):
+        """URL for */attractions/*"""
+        return self._method_tmpl.format(url=self.url,
+                                        method='classifications',
+                                        response_type=self.response_type)
+
+    @property
     def api_key(self):
         """API key"""
         return {'apikey': self.__api_key}
@@ -75,6 +83,8 @@ class ApiClient:
             search_url = self.venues_url
         elif method == 'attractions':
             search_url = self.attractions_url
+        elif method == 'classifications':
+            search_url = self.classifications_url
         else:
             raise ValueError("Received: '{}' but was expecting "
                              "one of: {}".format(method, ['events', 'venues']))
@@ -267,6 +277,9 @@ class Page(list):
             items = [Venue.from_json(v) for v in embedded['venues']]
         elif 'attractions' in embedded:
             items = [Attraction.from_json(a) for a in embedded['attractions']]
+        elif 'classifications' in embedded:
+            items = [Classification.from_json(cl)
+                     for cl in embedded['classifications']]
 
         for i in items:
             self.append(i)
@@ -342,7 +355,7 @@ class BaseSearch:
         return self.__get(**params)
 
     def by_id(self, entity_id):
-        get_tmpl = "{url}/{method}/{entity_id}"
+        get_tmpl = "{}/{}/{}"
         get_url = get_tmpl.format(self.api_client.url, self.method, entity_id)
         r = requests.get(get_url, params=self.api_client.api_key).json()
         return self.model.from_json(r)
@@ -565,26 +578,9 @@ class _AttractionSearch(BaseSearch):
         return r
 
 
-
-
-class _ClassificationSearch:
-    attr_map = {
-        'include_test': 'includeTest'
-    }
-
+class _ClassificationSearch(BaseSearch):
     def __init__(self, api_client):
-        self.api_client = api_client
-        self.method = "classifications"
-
-    def __get(self, **kwargs):
-        response = self.api_client._search(self.method, **kwargs)
-        return response
-
-    def get(self, classification_id):
-        get_url = "{}/classifications/{}".format(self.api_client.url,
-                                                 classification_id)
-        r = requests.get(get_url, params=self.api_client.api_key).json()
-        return Classification.from_json(r)
+        super().__init__(api_client, 'classifications', Classification)
 
     def find(self, sort=None, keyword=None, classification_id=None,
              source=None, include_test=None, page=None, size=None,
@@ -603,29 +599,8 @@ class _ClassificationSearch:
         :param kwargs: 
         :return: 
         """
-        kw_map = {
-            'sort': sort,
-            'keyword': keyword,
-            'classificationId': classification_id,
-            'source': source,
-            'includeTest': include_test,
-            'page': page,
-            'size': size,
-            'locale': locale
-        }
-
-        # Update search parameters with kwargs
-        for k, v in kwargs.items():
-            # If arg is API-friendly (ex: stateCode='GA')
-            if k in kw_map:
-                kw_map[k] = v
-            # If arg matches a param name (ex: state_code='GA')
-            if k in self.attr_map:
-                kw_map[self.attr_map[k]] = v
-
-        # Only use ones that have been set
-        search_params = {k: v for (k, v) in kw_map.items() if v is not None}
-        return self.__get(**search_params)
+        return self._get(keyword, classification_id, sort, include_test,
+                         page, size, locale, source=source, **kwargs)
 
 
 # API object models
@@ -887,15 +862,8 @@ class Event:
         status = dates.get('status', {})
         e.status = status.get('code')
 
-        # Pull genre names from classifications
-        genres = []
-        # if 'classifications' in json_event:
-        #     for cl in json_event['classifications']:
-        #         if 'genre' in cl:
-        #             genres.append(cl['genre']['name'])
-        # e.genres = genres
         if 'classifications' in json_event:
-            e.classifications = [Classification.from_json(cl)
+            e.classifications = [EventClassification.from_json(cl)
                                  for cl in json_event['classifications']]
 
         # min/max price ranges
@@ -953,6 +921,35 @@ class Attraction:
         return att
 
 
+class EventClassification:
+    def __init__(self, genre=None, subgenre=None, segment=None,
+                 classification_type=None, classification_subtype=None,
+                 primary=None):
+        self.genre = genre
+        self.subgenre = subgenre
+        self.segment = segment
+        self.type = classification_type
+        self.subtype = classification_subtype
+        self.primary = primary
+
+    @staticmethod
+    def from_json(json_obj):
+        ec = EventClassification()
+        ec.primary = json_obj.get('primary')
+
+        ec.genre = Genre.from_json(json_obj['genre'])
+        ec.subgenre = SubGenre.from_json(json_obj['subGenre'])
+        ec.segment = Segment.from_json(json_obj['segment'])
+
+        cl_t = json_obj['type']
+        ec.type = ClassificationType(cl_t['id'], cl_t['name'])
+
+        cl_st = json_obj['subType']
+        ec.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
+
+        return ec
+
+
 class Classification:
     """Classification object (segment/genre/sub-genre)"""
     def __init__(self, classification_id=None, classification_name=None,
@@ -962,6 +959,7 @@ class Classification:
         self.name = classification_name
         self.segment = segment
         self.type = classification_type
+
         self.subtype = subtype
         self.primary = primary
         self.genre = genre
@@ -986,6 +984,27 @@ class Classification:
 
         return cl
 
+    def __str__(self):
+        return self.name if self.name is not None else 'Unknown'
+
+class ClassificationType:
+    def __init__(self, type_id=None, type_name=None, subtypes=None):
+        self.id = type_id
+        self.name = type_name
+        self.subtypes = subtypes
+
+    def __str__(self):
+        return self.name if self.name is not None else 'Unknown'
+
+
+class ClassificationSubType:
+    def __init__(self, type_id=None, type_name=None):
+        self.id = type_id
+        self.name = type_name
+
+    def __str__(self):
+        return self.name if self.name is not None else 'Unknown'
+
 
 class Segment:
     def __init__(self, segment_id=None, segment_name=None, genres=None):
@@ -1004,6 +1023,9 @@ class Segment:
             seg.genres = [Genre.from_json(g) for g in genres]
         return seg
 
+    def __str__(self):
+        return self.name if self.name is not None else 'Unknown'
+
 
 class Genre:
     def __init__(self, genre_id=None, genre_name=None, subgenres=None):
@@ -1017,10 +1039,13 @@ class Genre:
         g.id = json_obj.get('id')
         g.name = json_obj.get('name')
         if '_embedded' in json_obj:
-            embedded = json_obj.get['_embedded']
+            embedded = json_obj['_embedded']
             subgenres = embedded['subgenres']
             g.subgenres = [SubGenre.from_json(sg) for sg in subgenres]
         return g
+
+    def __str__(self):
+        return self.name if self.name is not None else 'Unknown'
 
 
 class SubGenre:
@@ -1035,6 +1060,8 @@ class SubGenre:
         sg.name = json_obj['name']
         return sg
 
+    def __str__(self):
+        return self.name if self.name is not None else 'Unknown'
 
 
 
