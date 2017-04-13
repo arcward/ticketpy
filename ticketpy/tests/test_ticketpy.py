@@ -61,7 +61,9 @@ class Test_VenueSearch(TestCase):
         pass
 
     def test_find(self):
-        pass
+        venue_list = self.api_client.venues.find(keyword="TABERNACLE").all()
+        for v in venue_list:
+            self.assertIn("TABERNACLE", v.name.upper())
 
     def test_by_name(self):
         # Make sure this returns only venues matching search terms...
@@ -82,12 +84,17 @@ class TestTicketpy(TestCase):
             'tabernacle': 'KovZpaFEZe'
         }
 
+    def test_attraction_search(self):
+        attrs = self.tm.attractions.find(keyword="U2").limit()
+        for a in attrs:
+            print(a)
+
     def test_get_event_id(self):
         e = self.tm.events.get('vvG1zZfbJQpVWp')
         print(e)
 
     def test_get_venue(self):
-        v = self.tm.venues.get('KovZpaFEZe')
+        v = self.tm.venues.by_id('KovZpaFEZe')
         print(v)
 
     def test_search_events(self):
@@ -117,3 +124,5 @@ class TestTicketpy(TestCase):
         ).all()
         for e in event_list:
             print(e)
+
+

@@ -178,7 +178,10 @@ class PageIterator:
 
         all_items = []
         for i in range(0, max_pages):
-            all_items += self.next()
+            try:
+                all_items += self.next()
+            except StopIteration:
+                break
         return all_items
 
     def all(self):
@@ -271,7 +274,8 @@ class Page(list):
     @property
     def link_next(self):
         """Link to the next page"""
-        return "{}{}".format(ApiClient.base_url, self._link_next)
+        link = "{}{}".format(ApiClient.base_url, self._link_next)
+        return link.replace('{&sort}', '')
 
     @property
     def link_self(self):
@@ -282,80 +286,7 @@ class Page(list):
 # Query/search classes
 
 
-class _VenueSearch:
-    """Queries for venues"""
-
-    def __init__(self, api_client):
-        """Init VenueSearch
-        
-        :param api_client: Instance of `ticketpy.ApiClient`
-        """
-        self.api_client = api_client
-        self.method = "venues"
-
-    def get(self, venue_id):
-        """Get details for a specific venue
-
-        :param venue_id: Venue ID
-        :return: Venue
-        """
-        get_url = "{}/venues/{}".format(self.api_client.url, venue_id)
-        r = requests.get(get_url, params=self.api_client.api_key).json()
-        return Venue.from_json(r)
-
-    def find(self, keyword=None, venue_id=None, sort=None, state_code=None,
-             country_code=None, source=None, include_test=None,
-             page=None, size=None, locale=None):
-        """Search for venues matching provided parameters
-        
-        :param keyword: Keyword to search on (such as part of the venue name)
-        :param venue_id: Venue ID 
-        :param sort: Sort method for response (API default: 'name,asc')
-        :param state_code: Filter by state code (ex: 'GA' not 'Georgia')
-        :param country_code: Filter by country code
-        :param source: Filter entities by source (['ticketmaster', 'universe', 
-            'frontgate', 'tmr'])
-        :param include_test: ['yes', 'no', 'only'], whether to include 
-            entities flagged as test in the response (default: 'no')
-        :param page: Page number (default: 0)
-        :param size: Page size of the response (default: 20)
-        :param locale: Locale (default: 'en')
-        :return: Venues found matching criteria 
-        :rtype: `ticketpy.PageIterator`fff
-        """
-        kw_map = {
-            'sort': sort,
-            'stateCode': state_code,
-            'countryCode': country_code,
-            'keyword': keyword,
-            'id': venue_id,
-            'source': source,
-            'includeTest': include_test,
-            'page': page,
-            'size': size,
-            'locale': locale
-        }
-        kwargs = {k: v for (k, v) in kw_map.items() if v is not None}
-        return self.__get(**kwargs)
-
-    def __get(self, **kwargs):
-        """Calls `ApiClient.get()` with final parameters"""
-        response = self.api_client._search('venues', **kwargs)
-        return response
-
-    def by_name(self, venue_name, state_code=None, **kwargs):
-        """Search for a venue by name.
-
-        :param venue_name: Venue name to search
-        :param state_code: Two-letter state code to narrow results (ex 'GA')
-            (default: None)
-        :return: List of venues found matching search criteria
-        """
-        return self.find(keyword=venue_name, state_code=state_code, **kwargs)
-
-
-class _EventSearch:
-    """Abstraction to search API for events"""
+class BaseSearch:
     attr_map = {
         'start_date_time': 'startDateTime',
         'end_date_time': 'endDateTime',
@@ -375,26 +306,114 @@ class _EventSearch:
         'include_tba': 'includeTBA',
         'include_tbd': 'includeTBD',
         'client_visibility': 'clientVisibility',
-        'include_test': 'includeTest'
+        'include_test': 'includeTest',
+        'attraction_id': 'attractionId',
+        'classification_id': 'classificationId',
+        'keyword': 'keyword',
+        'id': 'id',
+        'sort': 'sort',
+        'page': 'page',
+        'size': 'size',
+        'locale': 'locale'
     }
 
+    def __init__(self, api_client, method, model):
+        self.api_client = api_client
+        self.method = method
+        self.model = model
+
+    def __get(self, **kwargs):
+        response = self.api_client._search(self.method, **kwargs)
+        return response
+
+    def _get(self, keyword=None, id=None, sort=None, include_test=None,
+             page=None, size=None, locale=None, **kwargs):
+        search_args = dict(kwargs)
+        search_args.update({
+            'keyword': keyword,
+            'id': id,
+            'sort': sort,
+            'include_test': include_test,
+            'page': page,
+            'size': size,
+            'locale': locale
+        })
+        params = self._search_params(**search_args)
+        return self.__get(**params)
+
+    def by_id(self, entity_id):
+        get_tmpl = "{url}/{method}/{entity_id}"
+        get_url = get_tmpl.format(self.api_client.url, self.method, entity_id)
+        r = requests.get(get_url, params=self.api_client.api_key).json()
+        return self.model.from_json(r)
+
+    def _search_params(self, **kwargs):
+        # Update search parameters with kwargs
+        kw_map = {}
+        for k, v in kwargs.items():
+            # If arg is API-friendly (ex: stateCode='GA')
+            if k in self.attr_map.keys():
+                kw_map[self.attr_map[k]] = v
+            elif k in self.attr_map.values():
+                kw_map[k] = v
+
+        return {k: v for (k, v) in kw_map.items() if v is not None}
+
+
+class _VenueSearch(BaseSearch):
+    """Queries for venues"""
+
+    def __init__(self, api_client):
+        """Init VenueSearch
+        
+        :param api_client: Instance of `ticketpy.ApiClient`
+        """
+        super().__init__(api_client, 'venues', Venue)
+
+    def find(self, keyword=None, venue_id=None, sort=None, state_code=None,
+             country_code=None, source=None, include_test=None,
+             page=None, size=None, locale=None, **kwargs):
+        """Search for venues matching provided parameters
+        
+        :param keyword: Keyword to search on (such as part of the venue name)
+        :param venue_id: Venue ID 
+        :param sort: Sort method for response (API default: 'name,asc')
+        :param state_code: Filter by state code (ex: 'GA' not 'Georgia')
+        :param country_code: Filter by country code
+        :param source: Filter entities by source (['ticketmaster', 'universe', 
+            'frontgate', 'tmr'])
+        :param include_test: ['yes', 'no', 'only'], whether to include 
+            entities flagged as test in the response (default: 'no')
+        :param page: Page number (default: 0)
+        :param size: Page size of the response (default: 20)
+        :param locale: Locale (default: 'en')
+        :return: Venues found matching criteria 
+        :rtype: `ticketpy.PageIterator`fff
+        """
+        r = self._get(keyword, venue_id, sort, include_test, page,
+                      size, locale, state_code=state_code,
+                      country_code=country_code, source=source, **kwargs)
+        return r
+
+    def by_name(self, venue_name, state_code=None, **kwargs):
+        """Search for a venue by name.
+
+        :param venue_name: Venue name to search
+        :param state_code: Two-letter state code to narrow results (ex 'GA')
+            (default: None)
+        :return: List of venues found matching search criteria
+        """
+        return self.find(keyword=venue_name, state_code=state_code, **kwargs)
+
+
+class _EventSearch(BaseSearch):
+    """Abstraction to search API for events"""
     def __init__(self, api_client):
         """Init EventSearch
         
         :param api_client: Instance of `ticketpy.ApiClient`
         """
-        self.api_client = api_client
-        self.method = "events"
-
-    def get(self, event_id):
-        """Get details for a specific event
-        
-        :param event_id: Event ID
-        :return: Event
-        """
-        get_url = "{}/events/{}".format(self.api_client.url, event_id)
-        r = requests.get(get_url, params=self.api_client.api_key).json()
-        return Event.from_json(r)
+        super().__init__(api_client, 'events', Event)
 
     def find(self, sort='date,asc', latlong=None, radius=None, unit=None,
              start_date_time=None, end_date_time=None,
@@ -482,33 +501,23 @@ class _EventSearch:
             'locale': locale
         }
 
-        # Update search parameters with kwargs
-        for k, v in kwargs.items():
-            # If arg is API-friendly (ex: stateCode='GA')
-            if k in kw_map:
-                kw_map[k] = v
-            # If arg matches a param name (ex: state_code='GA')
-            if k in self.attr_map:
-                kw_map[self.attr_map[k]] = v
+        r = self._get(keyword, event_id, sort, include_test, page,
+                      size, locale, latlong=latlong, radius=radius,
+                      unit=unit, start_date_time=start_date_time,
+                      end_date_time=end_date_time,
+                      onsale_start_date_time=onsale_start_date_time,
+                      onsale_end_date_time= onsale_end_date_time,
+                      country_code=country_code, state_code=state_code,
+                      venue_id=venue_id, attraction_id=attraction_id,
+                      segment_id=segment_id, segment_name=segment_name,
+                      classification_name=classification_name,
+                      classification_id=classification_id,
+                      market_id=market_id, promoter_id=promoter_id,
+                      dma_id=dma_id, include_tba=include_tba,
+                      include_tbd=include_tbd,
+                      client_visibility=client_visibility, **kwargs)
 
-        # Only use ones that have been set
-        search_params = {k: v for (k, v) in kw_map.items() if v is not None}
-        return self.__get(**search_params)
-
-    def __get(self, **kwargs):
-        """Find events matching parameters
-
-        Common search parameters:
-        classificationName
-        venueId
-        latlong
-
-
-        :param kwargs: Search parameters
-        :return: 
-        """
-        response = self.api_client._search(self.method, **kwargs)
-        return response
+        return r
 
     def by_location(self, latitude, longitude, radius='10', unit='miles',
                     **kwargs):
@@ -528,31 +537,12 @@ class _EventSearch:
         return self.find(latlong=latlong, radius=radius, unit=unit, **kwargs)
 
 
-class _AttractionSearch:
+class _AttractionSearch(BaseSearch):
     """Query class for Attractions"""
-    attr_map = {
-        'include_test': 'includeTest',
-        'attraction_id': 'attractionId'
-    }
 
     def __init__(self, api_client):
         self.api_client = api_client
-        self.method = "attractions"
-
-    def __get(self, **kwargs):
-        """Find attractions matching parameters
-
-        :param kwargs: Search parameters
-        :return: 
-        """
-        response = self.api_client._search(self.method, **kwargs)
-        return response
-
-    def get(self, attraction_id):
-        get_url = "{}/attractions/{}".format(self.api_client.url,
-                                             attraction_id)
-        r = requests.get(get_url, params=self.api_client.api_key).json()
-        return Attraction.from_json(r)
+        super().__init__(api_client, 'attractions', Attraction)
 
     def find(self, sort=None, keyword=None, attraction_id=None,
              source=None, include_test=None, page=None, size=None,
@@ -570,10 +560,53 @@ class _AttractionSearch:
         :param kwargs: 
         :return: 
         """
+        r = self._get(keyword, attraction_id, sort, include_test,
+                      page, size, locale, source=source, **kwargs)
+        return r
+
+
+
+
+class _ClassificationSearch:
+    attr_map = {
+        'include_test': 'includeTest'
+    }
+
+    def __init__(self, api_client):
+        self.api_client = api_client
+        self.method = "classifications"
+
+    def __get(self, **kwargs):
+        response = self.api_client._search(self.method, **kwargs)
+        return response
+
+    def get(self, classification_id):
+        get_url = "{}/classifications/{}".format(self.api_client.url,
+                                                 classification_id)
+        r = requests.get(get_url, params=self.api_client.api_key).json()
+        return Classification.from_json(r)
+
+    def find(self, sort=None, keyword=None, classification_id=None,
+             source=None, include_test=None, page=None, size=None,
+             locale=None, **kwargs):
+        """
+
+        :param sort: Response sort type (API default: *name,asc*)
+        :param keyword: 
+        :param classification_id: 
+        :param source: 
+        :param include_test: Include test classifications 
+            (['yes', 'no', 'only'])
+        :param page: 
+        :param size: 
+        :param locale: API default: *en*
+        :param kwargs: 
+        :return: 
+        """
         kw_map = {
             'sort': sort,
             'keyword': keyword,
-            'attractionId': attraction_id,
+            'classificationId': classification_id,
             'source': source,
             'includeTest': include_test,
             'page': page,
@@ -596,8 +629,6 @@ class _AttractionSearch:
 
 
 # API object models
-# TODO Add models for: Classification, Segment, Genre, Sub-Genre
-
 
 class Venue:
     """A Ticketmaster venue
@@ -774,7 +805,7 @@ class Event:
         }
     """
     def __init__(self, event_id=None, name=None, start_date=None,
-                 start_time=None, status=None, genres=None, price_ranges=None,
+                 start_time=None, status=None, price_ranges=None,
                  venues=None, utc_datetime=None, classifications=None):
         self.event_id = event_id
         self.name = name
@@ -784,15 +815,13 @@ class Event:
         self.local_start_time = start_time
         #: Sale status (such as *Cancelled, Offsale...*)
         self.status = status
-        #: List of genre classifications
-        self.genres = genres
+        #: List of classifications
+        self.classifications = classifications
 
         #: Price ranges found for tickets
         self.price_ranges = price_ranges
         #: List of ``ticketpy.Venue`` objects associated with this event
         self.venues = venues
-
-        self.classifications = classifications
 
         self.__utc_datetime = None
         if utc_datetime is not None:
@@ -868,10 +897,6 @@ class Event:
         if 'classifications' in json_event:
             e.classifications = [Classification.from_json(cl)
                                  for cl in json_event['classifications']]
-
-
-
-        e.genres = genres
 
         # min/max price ranges
         price_ranges = []
