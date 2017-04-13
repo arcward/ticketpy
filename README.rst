@@ -147,3 +147,16 @@ Output::
     Name: The Tabernacle / City: London
     Name: Tabernacle Junction / City: Yeovil
     Name: New Tabernacle 4th Baptist Church / City: Charleston
+
+Attractions
+^^^^^^^^^^^
+Searching for attractions works similarly to events/venue searches:
+
+.. code-block:: python
+
+    import ticketpy
+
+    tm_client = ticketpy.ApiClient("your_api_key")
+    attractions = tm_client.attractions.find(keyword="U2").limit()
+    for attr in attractions:
+        print("Name: {} ".format(attr.name))
