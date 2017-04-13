@@ -206,7 +206,7 @@ Output::
     --Genre: Theatre
 
 Querying details for classifications by ID will return either a ``Segment``,
-``Genre``, or``SubGenre``, whichever matches the given ID.
+``Genre``, or ``SubGenre``, whichever matches the given ID.
 
 For example,
 
