@@ -69,6 +69,12 @@
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ticketpy.ticketpy.ApiClient.attractions_url">
+<code class="descname">attractions_url</code><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.attractions_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>URL for <em>/attractions/</em></p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ticketpy.ticketpy.ApiClient.base_url">
 <code class="descname">base_url</code><em class="property"> = 'https://app.ticketmaster.com'</em><a class="headerlink" href="#ticketpy.ticketpy.ApiClient.base_url" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -104,6 +110,19 @@
 <em class="property">exception </em><code class="descclassname">ticketpy.ticketpy.</code><code class="descname">ApiException</code><span class="sig-paren">(</span><em>url</em>, <em>params</em>, <em>response</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.ApiException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
 <p>Exception thrown for API-related error messages</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.ticketpy.Attraction">
+<em class="property">class </em><code class="descclassname">ticketpy.ticketpy.</code><code class="descname">Attraction</code><span class="sig-paren">(</span><em>attraction_id=None</em>, <em>attraction_name=None</em>, <em>url=None</em>, <em>classifications=None</em>, <em>images=None</em>, <em>test=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.Attraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Attraction object</p>
+<dl class="staticmethod">
+<dt id="ticketpy.ticketpy.Attraction.from_json">
+<em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.ticketpy.Attraction.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert JSON object to <code class="docutils literal"><span class="pre">Attraction</span></code> object</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
