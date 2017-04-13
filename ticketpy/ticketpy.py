@@ -775,7 +775,7 @@ class Event:
     """
     def __init__(self, event_id=None, name=None, start_date=None,
                  start_time=None, status=None, genres=None, price_ranges=None,
-                 venues=None, utc_datetime=None):
+                 venues=None, utc_datetime=None, classifications=None):
         self.event_id = event_id
         self.name = name
         #: **Local** start date (*YYYY-MM-DD*)
@@ -786,10 +786,13 @@ class Event:
         self.status = status
         #: List of genre classifications
         self.genres = genres
+
         #: Price ranges found for tickets
         self.price_ranges = price_ranges
         #: List of ``ticketpy.Venue`` objects associated with this event
         self.venues = venues
+
+        self.classifications = classifications
 
         self.__utc_datetime = None
         if utc_datetime is not None:
@@ -857,10 +860,17 @@ class Event:
 
         # Pull genre names from classifications
         genres = []
+        # if 'classifications' in json_event:
+        #     for cl in json_event['classifications']:
+        #         if 'genre' in cl:
+        #             genres.append(cl['genre']['name'])
+        # e.genres = genres
         if 'classifications' in json_event:
-            for cl in json_event['classifications']:
-                if 'genre' in cl:
-                    genres.append(cl['genre']['name'])
+            e.classifications = [Classification.from_json(cl)
+                                 for cl in json_event['classifications']]
+
+
+
         e.genres = genres
 
         # min/max price ranges
@@ -912,5 +922,99 @@ class Attraction:
         att.url = json_obj.get('url')
         att.test = json_obj.get('test')
         att.images = json_obj.get('images')
-        att.classifications = json_obj.get('classifications')
+        classifications = json_obj.get('classifications')
+        att.classifications = [Classification.from_json(cl)
+                               for cl in classifications]
         return att
+
+
+class Classification:
+    """Classification object (segment/genre/sub-genre)"""
+    def __init__(self, classification_id=None, classification_name=None,
+                 segment=None, classification_type=None, subtype=None,
+                 primary=None, genre=None, subgenre=None):
+        self.id = classification_id
+        self.name = classification_name
+        self.segment = segment
+        self.type = classification_type
+        self.subtype = subtype
+        self.primary = primary
+        self.genre = genre
+        self.subgenre = subgenre
+
+    @staticmethod
+    def from_json(json_obj):
+        cl = Classification()
+        cl.id = json_obj.get('id')
+        cl.name = json_obj.get('name')
+        cl.type = json_obj.get('type')
+        cl.subtype = json_obj.get('subtype')
+        cl.primary = json_obj.get('primary')
+        segment = json_obj.get('segment')
+        cl.segment = Segment.from_json(segment)
+
+        if 'genre' in json_obj:
+            cl.genre = Genre.from_json(json_obj['genre'])
+
+        if 'subGenre' in json_obj:
+            cl.subgenre = SubGenre.from_json(json_obj['subGenre'])
+
+        return cl
+
+
+class Segment:
+    def __init__(self, segment_id=None, segment_name=None, genres=None):
+        self.id = segment_id
+        self.name = segment_name
+        self.genres = genres
+
+    @staticmethod
+    def from_json(json_obj):
+        seg = Segment()
+        seg.id = json_obj['id']
+        seg.name = json_obj['name']
+
+        if '_embedded' in json_obj:
+            genres = json_obj['_embedded']['genres']
+            seg.genres = [Genre.from_json(g) for g in genres]
+        return seg
+
+
+class Genre:
+    def __init__(self, genre_id=None, genre_name=None, subgenres=None):
+        self.id = genre_id
+        self.name = genre_name
+        self.subgenres = subgenres
+
+    @staticmethod
+    def from_json(json_obj):
+        g = Genre()
+        g.id = json_obj.get('id')
+        g.name = json_obj.get('name')
+        if '_embedded' in json_obj:
+            embedded = json_obj.get['_embedded']
+            subgenres = embedded['subgenres']
+            g.subgenres = [SubGenre.from_json(sg) for sg in subgenres]
+        return g
+
+
+class SubGenre:
+    def __init__(self, subgenre_id=None, subgenre_name=None):
+        self.id = subgenre_id
+        self.name = subgenre_name
+
+    @staticmethod
+    def from_json(json_obj):
+        sg = SubGenre()
+        sg.id = json_obj['id']
+        sg.name = json_obj['name']
+        return sg
+
+
+
+
+
+
+
+
+
