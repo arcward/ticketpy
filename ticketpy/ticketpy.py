@@ -279,6 +279,9 @@ class Page(list):
         return "{}{}".format(ApiClient.base_url, self._link_self)
 
 
+# Query/search classes
+
+
 class _VenueSearch:
     """Queries for venues"""
 
@@ -590,6 +593,10 @@ class _AttractionSearch:
         # Only use ones that have been set
         search_params = {k: v for (k, v) in kw_map.items() if v is not None}
         return self.__get(**search_params)
+
+
+# API object models
+# TODO Add models for: Classification, Segment, Genre, Sub-Genre
 
 
 class Venue:
