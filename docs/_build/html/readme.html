@@ -77,8 +77,8 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="quickstart-examples">
-<h2>Quickstart/examples<a class="headerlink" href="#quickstart-examples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="example-searches">
+<h2>Example searches<a class="headerlink" href="#example-searches" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="events">
 <h3>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h3>
 <p>To pull all Hip-Hop events in Georgia between May 19th, 2017 and
@@ -190,6 +190,61 @@ page.</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="attractions">
+<h3>Attractions<a class="headerlink" href="#attractions" title="Permalink to this headline">¶</a></h3>
+<p>Searching for attractions works similarly to the above:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ticketpy</span>
+
+<span class="n">tm_client</span> <span class="o">=</span> <span class="n">ticketpy</span><span class="o">.</span><span class="n">ApiClient</span><span class="p">(</span><span class="s2">&quot;your_api_key&quot;</span><span class="p">)</span>
+<span class="n">attractions</span> <span class="o">=</span> <span class="n">tm_client</span><span class="o">.</span><span class="n">attractions</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">keyword</span><span class="o">=</span><span class="s2">&quot;Yankees&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attractions</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">New</span> <span class="n">York</span> <span class="n">Yankees</span>
+<span class="n">Scranton</span> <span class="n">Wilkes</span><span class="o">-</span><span class="n">Barre</span> <span class="n">RailRiders</span>
+<span class="n">Staten</span> <span class="n">Island</span> <span class="n">Yankees</span>
+<span class="n">Yankee</span> <span class="n">Stadium</span> <span class="n">Tours</span>
+<span class="n">Tampa</span> <span class="n">Yankees</span>
+<span class="n">New</span> <span class="n">York</span> <span class="n">Yankees</span>  <span class="n">Bomber</span> <span class="n">Bucks</span>
+<span class="n">Hands</span> <span class="n">On</span> <span class="n">History</span> <span class="n">At</span> <span class="n">Yankee</span> <span class="n">Stadium</span>
+<span class="n">Damn</span> <span class="n">Yankees</span>
+<span class="n">Damn</span> <span class="n">Yankees</span>
+<span class="n">Battle</span> <span class="n">Creek</span> <span class="n">Yankees</span>
+<span class="n">New</span> <span class="n">York</span> <span class="n">Yankees</span> <span class="n">Parking</span>
+<span class="n">Offsite</span> <span class="n">Parking</span> <span class="n">at</span> <span class="n">Yankee</span> <span class="n">Stadium</span>
+<span class="n">Quikpark</span> <span class="n">at</span> <span class="n">Yankee</span> <span class="n">Stadium</span><span class="o">-</span> <span class="n">NYCFC</span>
+<span class="n">New</span> <span class="n">York</span> <span class="n">Yankees</span> <span class="n">Fan</span> <span class="n">Fest</span>
+<span class="n">New</span> <span class="n">York</span> <span class="n">Yankees</span> <span class="mi">3</span> <span class="p">(</span><span class="n">Do</span> <span class="n">Not</span> <span class="n">Use</span><span class="p">)</span>
+<span class="n">New</span> <span class="n">York</span> <span class="n">Yankees</span> <span class="mi">1</span> <span class="p">(</span><span class="n">Do</span> <span class="n">Not</span> <span class="n">Use</span><span class="p">)</span>
+<span class="n">New</span> <span class="n">York</span> <span class="n">Yankees</span> <span class="mi">2</span> <span class="p">(</span><span class="n">Do</span> <span class="n">Not</span> <span class="n">Use</span><span class="p">)</span>
+<span class="n">Behind</span> <span class="n">the</span> <span class="n">Scenes</span> <span class="n">At</span> <span class="n">Yankee</span> <span class="n">Stadium</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="classifications">
+<h3>Classifications<a class="headerlink" href="#classifications" title="Permalink to this headline">¶</a></h3>
+<p>Searching for classifiations works similarly to the above:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ticketpy</span>
+
+<span class="n">tm_client</span> <span class="o">=</span> <span class="n">ticketpy</span><span class="o">.</span><span class="n">ApiClient</span><span class="p">(</span><span class="s2">&quot;your_api_key&quot;</span><span class="p">)</span>
+<span class="n">classifications</span> <span class="o">=</span> <span class="n">tm_client</span><span class="o">.</span><span class="n">classifications</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">keyword</span><span class="o">=</span><span class="s2">&quot;Drama&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">cl</span> <span class="ow">in</span> <span class="n">classifications</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Segment: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">segment</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">genre</span> <span class="ow">in</span> <span class="n">cl</span><span class="o">.</span><span class="n">segment</span><span class="o">.</span><span class="n">genres</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;--Genre: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">genre</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Segment</span><span class="p">:</span> <span class="n">Film</span>
+<span class="o">--</span><span class="n">Genre</span><span class="p">:</span> <span class="n">Drama</span>
+<span class="n">Segment</span><span class="p">:</span> <span class="n">Arts</span> <span class="o">&amp;</span> <span class="n">Theatre</span>
+<span class="o">--</span><span class="n">Genre</span><span class="p">:</span> <span class="n">Theatre</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
@@ -204,9 +259,11 @@ page.</p>
 <li><a class="reference internal" href="#">ticketpy</a><ul>
 <li><a class="reference internal" href="#requirements">Requirements</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#quickstart-examples">Quickstart/examples</a><ul>
+<li><a class="reference internal" href="#example-searches">Example searches</a><ul>
 <li><a class="reference internal" href="#events">Events</a></li>
 <li><a class="reference internal" href="#venues">Venues</a></li>
+<li><a class="reference internal" href="#attractions">Attractions</a></li>
+<li><a class="reference internal" href="#classifications">Classifications</a></li>
 </ul>
 </li>
 </ul>

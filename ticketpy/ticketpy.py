@@ -327,7 +327,8 @@ class BaseSearch:
         'sort': 'sort',
         'page': 'page',
         'size': 'size',
-        'locale': 'locale'
+        'locale': 'locale',
+        'latlong': 'latlong'
     }
 
     def __init__(self, api_client, method, model):
@@ -519,7 +520,7 @@ class _EventSearch(BaseSearch):
                       unit=unit, start_date_time=start_date_time,
                       end_date_time=end_date_time,
                       onsale_start_date_time=onsale_start_date_time,
-                      onsale_end_date_time= onsale_end_date_time,
+                      onsale_end_date_time=onsale_end_date_time,
                       country_code=country_code, state_code=state_code,
                       venue_id=venue_id, attraction_id=attraction_id,
                       segment_id=segment_id, segment_name=segment_name,
@@ -533,7 +534,7 @@ class _EventSearch(BaseSearch):
         return r
 
     def by_location(self, latitude, longitude, radius='10', unit='miles',
-                    **kwargs):
+                    sort='relevance, desc', **kwargs):
         """
         Searches events within a radius of a latitude/longitude coordinate.
 
@@ -579,13 +580,14 @@ class _AttractionSearch(BaseSearch):
 
 
 class _ClassificationSearch(BaseSearch):
+    """Classification search/query class"""
     def __init__(self, api_client):
         super().__init__(api_client, 'classifications', Classification)
 
     def find(self, sort=None, keyword=None, classification_id=None,
              source=None, include_test=None, page=None, size=None,
              locale=None, **kwargs):
-        """
+        """Search classifications
 
         :param sort: Response sort type (API default: *name,asc*)
         :param keyword: 
@@ -610,11 +612,14 @@ def assign_links(obj, json_obj):
     json_links = json_obj.get('_links')
     if not json_links:
         obj.links = None
-    obj_links = {}
-    for k, v in json_links.items():
-        obj_links[k] = v['href']
-    obj.links = obj_links
-
+    else:
+        obj_links = {}
+        for k, v in json_links.items():
+            if 'href' in v:
+                obj_links[k] = v['href']
+            else:
+                obj_links[k] = v
+        obj.links = obj_links
 
 
 class Venue:
@@ -671,7 +676,7 @@ class Venue:
                  parking_detail=None, accessible_seating_detail=None,
                  links=None):
         self.name = name  #: Venue's name
-        self.venue_id = venue_id  #: Venue ID (use to look up events)
+        self.id = venue_id  #: Venue ID (use to look up events)
         self.address = address  #: Street address (first line)
         self.postal_code = postal_code  #: Zip/postal code
         self.city = city  #: City name
@@ -715,7 +720,7 @@ class Venue:
         :return: `ticketpy.Venue`
         """
         v = Venue()
-        v.venue_id = json_venue['id']
+        v.id = json_venue['id']
         v.name = json_venue['name']
         v.url = json_venue.get('url')
 
@@ -797,7 +802,7 @@ class Event:
                  start_time=None, status=None, price_ranges=None,
                  venues=None, utc_datetime=None, classifications=None,
                  links=None):
-        self.event_id = event_id
+        self.id = event_id
         self.name = name
         #: **Local** start date (*YYYY-MM-DD*)
         self.local_start_date = start_date
@@ -865,7 +870,7 @@ class Event:
         :return: `ticketpy.Event`
         """
         e = Event()
-        e.event_id = json_event['id']
+        e.id = json_event['id']
         e.name = json_event.get('name')
 
         # Dates/times
@@ -942,47 +947,67 @@ class Attraction:
 
 
 class EventClassification:
+    """Classification as it's represented in event search results
+    
+    See Classification() for results from classification searches
+    """
     def __init__(self, genre=None, subgenre=None, segment=None,
                  classification_type=None, classification_subtype=None,
                  primary=None, links=None):
-        self.genre = genre
-        self.subgenre = subgenre
-        self.segment = segment
-        self.type = classification_type
-        self.subtype = classification_subtype
-        self.primary = primary
-        self.links = links
+        self.genre = genre  #: ``Genre()``
+        self.subgenre = subgenre  #: ``SubGenre()``
+        self.segment = segment  #: ``Segment()``
+        self.type = classification_type  #: ``ClassificationType()``
+        self.subtype = classification_subtype  #: ``ClassificationSubType()``
+        self.primary = primary  #: Bool
+        self.links = links  #: API links
 
     @staticmethod
     def from_json(json_obj):
+        """Create/return ``EventClassification`` object from JSON"""
         ec = EventClassification()
         ec.primary = json_obj.get('primary')
 
-        ec.genre = Genre.from_json(json_obj['genre'])
-        ec.subgenre = SubGenre.from_json(json_obj['subGenre'])
-        ec.segment = Segment.from_json(json_obj['segment'])
+        segment = json_obj.get('segment')
+        if segment:
+            ec.segment = Segment.from_json(segment)
 
-        cl_t = json_obj['type']
-        ec.type = ClassificationType(cl_t['id'], cl_t['name'])
+        genre = json_obj.get('genre')
+        if genre:
+            ec.genre = Genre.from_json(genre)
 
-        cl_st = json_obj['subType']
-        ec.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
+        subgenre = json_obj.get('subGenre')
+        if subgenre:
+            ec.subgenre = SubGenre.from_json(subgenre)
+
+        cl_t = json_obj.get('type')
+        if cl_t:
+            ec.type = ClassificationType(cl_t['id'], cl_t['name'])
+
+        cl_st = json_obj.get('subType')
+        if cl_st:
+            ec.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
+
         assign_links(ec, json_obj)
         return ec
 
 
 class Classification:
-    """Classification object (segment/genre/sub-genre)"""
+    """Classification object (segment/genre/sub-genre)
+    
+    For the structure returned by ``EventSearch``, see ``EventClassification``
+    """
     def __init__(self, segment=None, classification_type=None, subtype=None,
                  primary=None, links=None):
-        self.segment = segment
-        self.type = classification_type
-        self.subtype = subtype
-        self.primary = primary
-        self.links = links
+        self.segment = segment  #: ``Segment()``
+        self.type = classification_type  #: ``ClassificationType()``
+        self.subtype = subtype  #: ``ClassifictionSubType()``
+        self.primary = primary  #: Boolean
+        self.links = links  #: API links
 
     @staticmethod
     def from_json(json_obj):
+        """Create/return ``Classification()`` from JSON"""
         cl = Classification()
         cl.primary = json_obj.get('primary')
 
@@ -1005,6 +1030,7 @@ class Classification:
 
 
 class ClassificationType:
+    """Type of ``Classification``"""
     def __init__(self, type_id=None, type_name=None, subtypes=None):
         self.id = type_id
         self.name = type_name
@@ -1015,6 +1041,7 @@ class ClassificationType:
 
 
 class ClassificationSubType:
+    """Subtype of ``ClassificationType``"""
     def __init__(self, type_id=None, type_name=None):
         self.id = type_id
         self.name = type_name
@@ -1024,15 +1051,17 @@ class ClassificationSubType:
 
 
 class Segment:
+    """Segment, under ``Classification``"""
     def __init__(self, segment_id=None, segment_name=None, genres=None,
                  links=None):
         self.id = segment_id
         self.name = segment_name
-        self.genres = genres
-        self.links = links
+        self.genres = genres  #: List of ``Genre`` objects
+        self.links = links  #: API links
 
     @staticmethod
     def from_json(json_obj):
+        """Create and return a ``Segment`` from JSON"""
         seg = Segment()
         seg.id = json_obj['id']
         seg.name = json_obj['name']
@@ -1049,12 +1078,13 @@ class Segment:
 
 
 class Genre:
+    """Genre type"""
     def __init__(self, genre_id=None, genre_name=None, subgenres=None,
                  links=None):
         self.id = genre_id
         self.name = genre_name
-        self.subgenres = subgenres
-        self.links = links
+        self.subgenres = subgenres  #: List of ``SubGenre`` objects
+        self.links = links  #: API links
 
     @staticmethod
     def from_json(json_obj):
@@ -1074,6 +1104,7 @@ class Genre:
 
 
 class SubGenre:
+    """SubGenre type under ``Genre``"""
     def __init__(self, subgenre_id=None, subgenre_name=None, links=None):
         self.id = subgenre_id
         self.name = subgenre_name

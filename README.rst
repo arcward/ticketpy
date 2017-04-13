@@ -26,7 +26,7 @@ Or, locally from the same directory as ``setup.py``:
 
     $ python setup.py install
 
-Quickstart/examples
+Example searches
 -------------------
 
 Events
@@ -150,13 +150,57 @@ Output::
 
 Attractions
 ^^^^^^^^^^^
-Searching for attractions works similarly to events/venue searches:
+Searching for attractions works similarly to the above:
 
 .. code-block:: python
 
     import ticketpy
 
     tm_client = ticketpy.ApiClient("your_api_key")
-    attractions = tm_client.attractions.find(keyword="U2").limit()
+    attractions = tm_client.attractions.find(keyword="Yankees").limit(1)
     for attr in attractions:
-        print("Name: {} ".format(attr.name))
+        print(attr.name)
+
+Output::
+
+    New York Yankees
+    Scranton Wilkes-Barre RailRiders
+    Staten Island Yankees
+    Yankee Stadium Tours
+    Tampa Yankees
+    New York Yankees  Bomber Bucks
+    Hands On History At Yankee Stadium
+    Damn Yankees
+    Damn Yankees
+    Battle Creek Yankees
+    New York Yankees Parking
+    Offsite Parking at Yankee Stadium
+    Quikpark at Yankee Stadium- NYCFC
+    New York Yankees Fan Fest
+    New York Yankees 3 (Do Not Use)
+    New York Yankees 1 (Do Not Use)
+    New York Yankees 2 (Do Not Use)
+    Behind the Scenes At Yankee Stadium
+
+Classifications
+^^^^^^^^^^^^^^^
+Searching for classifiations works similarly to the above:
+
+.. code-block:: python
+
+    import ticketpy
+
+    tm_client = ticketpy.ApiClient("your_api_key")
+    classifications = tm_client.classifications.find(keyword="Drama").limit()
+
+    for cl in classifications:
+        print("Segment: {}".format(cl.segment.name))
+        for genre in cl.segment.genres:
+            print("--Genre: {}".format(genre.name))
+
+Output::
+
+    Segment: Film
+    --Genre: Drama
+    Segment: Arts & Theatre
+    --Genre: Theatre
