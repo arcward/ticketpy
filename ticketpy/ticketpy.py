@@ -320,8 +320,6 @@ class BaseSearch:
         'include_tbd': 'includeTBD',
         'client_visibility': 'clientVisibility',
         'include_test': 'includeTest',
-        'attraction_id': 'attractionId',
-        'classification_id': 'classificationId',
         'keyword': 'keyword',
         'id': 'id',
         'sort': 'sort',
@@ -340,12 +338,29 @@ class BaseSearch:
         response = self.api_client._search(self.method, **kwargs)
         return response
 
-    def _get(self, keyword=None, id=None, sort=None, include_test=None,
+    def _get(self, keyword=None, entity_id=None, sort=None, include_test=None,
              page=None, size=None, locale=None, **kwargs):
+        """Basic API search request, with only the parameters common to all 
+        search functions. Specific searches pass theirs through **kwargs.
+        
+        :param keyword: Keyword to search on
+        :param entity_id: ID of the object type (such as an event ID...)
+        :param sort: Sort method
+        :param include_test: ['yes', 'no', 'only'] to include test objects in 
+            results. Default: *no*
+        :param page: Page to return (default: 0)
+        :param size: Page size (default: 20)
+        :param locale: Locale (default: *en*)
+        :param kwargs: Additional search parameters
+        :return: 
+        """
+        # Combine universal parameters and supplied kwargs into single dict,
+        # then map our parameter names to the ones expected by the API and
+        # make the final request
         search_args = dict(kwargs)
         search_args.update({
             'keyword': keyword,
-            'id': id,
+            'id': entity_id,
             'sort': sort,
             'include_test': include_test,
             'page': page,
@@ -356,6 +371,7 @@ class BaseSearch:
         return self.__get(**params)
 
     def by_id(self, entity_id):
+        """Get a specific object by its ID"""
         get_tmpl = "{}/{}/{}"
         get_url = get_tmpl.format(self.api_client.url, self.method, entity_id)
         r = requests.get(get_url, params=self.api_client.api_key).json()
@@ -541,7 +557,9 @@ class _EventSearch(BaseSearch):
         :param latitude: Latitude of radius center
         :param longitude: Longitude of radius center
         :param radius: Radius to search outside given latitude/longitude
-        :param unit: Unit of radius ('miles' or 'km')
+        :param unit: Unit of radius ('miles' or 'km'),
+        :param sort: Sort method. (Default: *relevance, desc*). If changed, 
+            you may get wonky results (*date, asc* returns far-away events)
         :return: List of events within that area
         """
         latitude = str(latitude)
@@ -581,6 +599,13 @@ class _AttractionSearch(BaseSearch):
 
 class _ClassificationSearch(BaseSearch):
     """Classification search/query class"""
+    #: ``BaseSearch.by_id()`` renamed for this class, as classifications
+    #: don't have IDs, but the same query will return IDs for segments,
+    #: genres and subgenres (whichever matches).
+    #: ``_ClassificationSearch.by_id()`` will return the correct object,
+    #: rather than the entire parent structure of any given ID
+    query_subclass_id = BaseSearch.by_id
+
     def __init__(self, api_client):
         super().__init__(api_client, 'classifications', Classification)
 
@@ -604,19 +629,54 @@ class _ClassificationSearch(BaseSearch):
         return self._get(keyword, classification_id, sort, include_test,
                          page, size, locale, source=source, **kwargs)
 
+    def by_id(self, entity_id):
+        """Returns a ``Segment``, ``Genre`` or ``SubGenre`` matching the 
+        given entity ID. If no matching IDs are found, returns ``None``
+        
+        :param entity_id: Segment, genre or subgenre ID
+        :return: ``Segment``, ``Genre`` or ``SubGenre``, depending which 
+            matches the ID.
+        """
+        cl = self.query_subclass_id(entity_id)
+        # No segment = no match
+        if not cl.segment:
+            return None
+        elif cl.segment.id == entity_id:
+            return cl.segment
+
+        # Check deeper, return whatever object matches ``entity_id``
+        for genre in cl.segment.genres:
+            if genre.id == entity_id:
+                return genre
+            for subgenre in genre.subgenres:
+                if subgenre.id == entity_id:
+                    return subgenre
+
+        # Return ``None`` if one still wasn't found for some reason
+        return None
+
 
 # API object models
 
 
-def assign_links(obj, json_obj):
+def _assign_links(obj, json_obj):
+    """Assigns ``links`` attribute to the given object from JSON
+    
+    :param obj: Model object (such as an ``Event()`` object)
+    :param json_obj: JSON from API response
+    :return: 
+    """
+    # If the structure doesn't have _links, don't bother
     json_links = json_obj.get('_links')
     if not json_links:
         obj.links = None
     else:
         obj_links = {}
         for k, v in json_links.items():
+            # Normal structure with {link_name: {'href': url}}
             if 'href' in v:
                 obj_links[k] = v['href']
+            # Some responses add objects into the links section, leave as-is
             else:
                 obj_links[k] = v
         obj.links = obj_links
@@ -748,7 +808,7 @@ class Venue:
         v.images = json_venue.get('images')
         v.parking_detail = json_venue.get('parkingDetail')
         v.accessible_seating_detail = json_venue.get('accessibleSeatingDetail')
-        assign_links(v, json_venue)
+        _assign_links(v, json_venue)
         return v
 
 
@@ -904,7 +964,7 @@ class Event:
             for v in json_event['_embedded']['venues']:
                 venues.append(Venue.from_json(v))
         e.venues = venues
-        assign_links(e, json_event)
+        _assign_links(e, json_event)
         return e
 
 
@@ -942,7 +1002,7 @@ class Attraction:
         classifications = json_obj.get('classifications')
         att.classifications = [Classification.from_json(cl)
                                for cl in classifications]
-        assign_links(att, json_obj)
+        _assign_links(att, json_obj)
         return att
 
 
@@ -988,7 +1048,7 @@ class EventClassification:
         if cl_st:
             ec.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
 
-        assign_links(ec, json_obj)
+        _assign_links(ec, json_obj)
         return ec
 
 
@@ -1022,7 +1082,7 @@ class Classification:
             cl_st = json_obj['subType']
             cl.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
 
-        assign_links(cl, json_obj)
+        _assign_links(cl, json_obj)
         return cl
 
     def __str__(self):
@@ -1070,7 +1130,7 @@ class Segment:
             genres = json_obj['_embedded']['genres']
             seg.genres = [Genre.from_json(g) for g in genres]
 
-        assign_links(seg, json_obj)
+        _assign_links(seg, json_obj)
         return seg
 
     def __str__(self):
@@ -1096,7 +1156,7 @@ class Genre:
             subgenres = embedded['subgenres']
             g.subgenres = [SubGenre.from_json(sg) for sg in subgenres]
 
-        assign_links(g, json_obj)
+        _assign_links(g, json_obj)
         return g
 
     def __str__(self):
@@ -1115,7 +1175,7 @@ class SubGenre:
         sg = SubGenre()
         sg.id = json_obj['id']
         sg.name = json_obj['name']
-        assign_links(sg, json_obj)
+        _assign_links(sg, json_obj)
         return sg
 
     def __str__(self):

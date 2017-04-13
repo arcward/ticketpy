@@ -121,6 +121,14 @@ class TestTicketpy(TestCase):
                 matched = True
         self.assertTrue(matched)
 
+    def test_attraction_by_id(self):
+        attraction_id = 'K8vZ9171okV'
+        attraction_name = 'New York Yankees'
+
+        attr = self.tm.attractions.by_id(attraction_id)
+        self.assertEqual(attraction_id, attr.id)
+        self.assertEqual(attraction_name, attr.name)
+
     def test_classification_search(self):
         classif = self.tm.classifications.find(keyword="DRAMA").limit()
         segment_names = [cl.segment.name for cl in classif]
@@ -134,6 +142,26 @@ class TestTicketpy(TestCase):
             print('Segment: {}'.format(cl.segment.name))
             for genre in cl.segment.genres:
                 print('--Genre: {}'.format(genre.name))
+
+    def test_classification_segment(self):
+        seg_id = 'KZFzniwnSyZfZ7v7nJ'
+        seg_name = 'Music'
+        seg = self.tm.classifications.by_id(seg_id)
+        print(type(seg))
+        self.assertEqual(seg_id, seg.id)
+        self.assertEqual(seg_name, seg.name)
+
+        genre_id = 'KnvZfZ7vAvE'
+        genre_name = 'Jazz'
+        g = self.tm.classifications.by_id(genre_id)
+        self.assertEqual(genre_id, g.id)
+        self.assertEqual(genre_name, g.name)
+
+        subgenre_id = 'KZazBEonSMnZfZ7vkdl'
+        subgenre_name = 'Bebop'
+        sg = self.tm.classifications.by_id(subgenre_id)
+        self.assertEqual(subgenre_id, sg.id)
+        self.assertEqual(subgenre_name, sg.name)
 
     def test_get_event_id(self):
         event_id = 'vvG1zZfbJQpVWp'

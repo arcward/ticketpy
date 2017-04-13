@@ -184,7 +184,7 @@ Output::
 
 Classifications
 ^^^^^^^^^^^^^^^
-Searching for classifiations works similarly to the above:
+Searching for classifications works similarly to the above:
 
 .. code-block:: python
 
@@ -204,3 +204,29 @@ Output::
     --Genre: Drama
     Segment: Arts & Theatre
     --Genre: Theatre
+
+Querying details for classifications by ID will return either a ``Segment``,
+``Genre``, or``SubGenre``, whichever matches the given ID.
+
+For example,
+
+.. code-block:: python
+
+    import ticketpy
+
+    tm_client = ticketpy.ApiClient("your_api_key")
+    x = tm_client.classifications.by_id('KZFzniwnSyZfZ7v7nJ')
+    y = tm_client.classifications.by_id('KnvZfZ7vAvE')
+    z = tm_client.classifications.by_id('KZazBEonSMnZfZ7vkdl')
+
+    s = "Name: {} / Type: {}"
+    print(s.format(x.name, type(x)))
+    print(s.format(y.name, type(y)))
+    print(s.format(z.name, type(z)))
+
+Output::
+
+    Name: Music / Type: <class 'ticketpy.ticketpy.Segment'>
+    Name: Jazz / Type: <class 'ticketpy.ticketpy.Genre'>
+    Name: Bebop / Type: <class 'ticketpy.ticketpy.SubGenre'>
+
