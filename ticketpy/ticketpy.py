@@ -605,6 +605,18 @@ class _ClassificationSearch(BaseSearch):
 
 # API object models
 
+
+def assign_links(obj, json_obj):
+    json_links = json_obj.get('_links')
+    if not json_links:
+        obj.links = None
+    obj_links = {}
+    for k, v in json_links.items():
+        obj_links[k] = v['href']
+    obj.links = obj_links
+
+
+
 class Venue:
     """A Ticketmaster venue
     
@@ -656,7 +668,8 @@ class Venue:
                  markets=None, url=None, box_office_info=None,
                  dmas=None, general_info=None, venue_id=None,
                  social=None, timezone=None, images=None,
-                 parking_detail=None, accessible_seating_detail=None):
+                 parking_detail=None, accessible_seating_detail=None,
+                 links=None):
         self.name = name  #: Venue's name
         self.venue_id = venue_id  #: Venue ID (use to look up events)
         self.address = address  #: Street address (first line)
@@ -675,6 +688,7 @@ class Venue:
         self.images = images  #: Ticketmaster venue image links
         self.parking_detail = parking_detail  #: Parking details
         self.accessible_seating_detail = accessible_seating_detail
+        self.links = links
 
     @property
     def location(self):
@@ -729,7 +743,7 @@ class Venue:
         v.images = json_venue.get('images')
         v.parking_detail = json_venue.get('parkingDetail')
         v.accessible_seating_detail = json_venue.get('accessibleSeatingDetail')
-
+        assign_links(v, json_venue)
         return v
 
 
@@ -781,7 +795,8 @@ class Event:
     """
     def __init__(self, event_id=None, name=None, start_date=None,
                  start_time=None, status=None, price_ranges=None,
-                 venues=None, utc_datetime=None, classifications=None):
+                 venues=None, utc_datetime=None, classifications=None,
+                 links=None):
         self.event_id = event_id
         self.name = name
         #: **Local** start date (*YYYY-MM-DD*)
@@ -801,6 +816,8 @@ class Event:
         self.__utc_datetime = None
         if utc_datetime is not None:
             self.utc_datetime = utc_datetime
+
+        self.links = links
 
     @property
     def utc_datetime(self):
@@ -882,6 +899,7 @@ class Event:
             for v in json_event['_embedded']['venues']:
                 venues.append(Venue.from_json(v))
         e.venues = venues
+        assign_links(e, json_event)
         return e
 
 
@@ -889,7 +907,7 @@ class Attraction:
     """Attraction object"""
 
     def __init__(self, attraction_id=None, attraction_name=None, url=None,
-                 classifications=None, images=None, test=None):
+                 classifications=None, images=None, test=None, links=None):
         """
 
         :param attraction_id: Attraction ID
@@ -905,6 +923,7 @@ class Attraction:
         self.classifications = classifications
         self.images = images
         self.test = test
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):
@@ -918,19 +937,21 @@ class Attraction:
         classifications = json_obj.get('classifications')
         att.classifications = [Classification.from_json(cl)
                                for cl in classifications]
+        assign_links(att, json_obj)
         return att
 
 
 class EventClassification:
     def __init__(self, genre=None, subgenre=None, segment=None,
                  classification_type=None, classification_subtype=None,
-                 primary=None):
+                 primary=None, links=None):
         self.genre = genre
         self.subgenre = subgenre
         self.segment = segment
         self.type = classification_type
         self.subtype = classification_subtype
         self.primary = primary
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):
@@ -946,46 +967,42 @@ class EventClassification:
 
         cl_st = json_obj['subType']
         ec.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
-
+        assign_links(ec, json_obj)
         return ec
 
 
 class Classification:
     """Classification object (segment/genre/sub-genre)"""
-    def __init__(self, classification_id=None, classification_name=None,
-                 segment=None, classification_type=None, subtype=None,
-                 primary=None, genre=None, subgenre=None):
-        self.id = classification_id
-        self.name = classification_name
+    def __init__(self, segment=None, classification_type=None, subtype=None,
+                 primary=None, links=None):
         self.segment = segment
         self.type = classification_type
-
         self.subtype = subtype
         self.primary = primary
-        self.genre = genre
-        self.subgenre = subgenre
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):
         cl = Classification()
-        cl.id = json_obj.get('id')
-        cl.name = json_obj.get('name')
-        cl.type = json_obj.get('type')
-        cl.subtype = json_obj.get('subtype')
         cl.primary = json_obj.get('primary')
-        segment = json_obj.get('segment')
-        cl.segment = Segment.from_json(segment)
 
-        if 'genre' in json_obj:
-            cl.genre = Genre.from_json(json_obj['genre'])
+        if 'segment' in json_obj:
+            cl.segment = Segment.from_json(json_obj['segment'])
 
-        if 'subGenre' in json_obj:
-            cl.subgenre = SubGenre.from_json(json_obj['subGenre'])
+        if 'type' in json_obj:
+            cl_t = json_obj['type']
+            cl.type = ClassificationType(cl_t['id'], cl_t['name'])
 
+        if 'subType' in json_obj:
+            cl_st = json_obj['subType']
+            cl.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
+
+        assign_links(cl, json_obj)
         return cl
 
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
+
 
 class ClassificationType:
     def __init__(self, type_id=None, type_name=None, subtypes=None):
@@ -1007,10 +1024,12 @@ class ClassificationSubType:
 
 
 class Segment:
-    def __init__(self, segment_id=None, segment_name=None, genres=None):
+    def __init__(self, segment_id=None, segment_name=None, genres=None,
+                 links=None):
         self.id = segment_id
         self.name = segment_name
         self.genres = genres
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):
@@ -1021,6 +1040,8 @@ class Segment:
         if '_embedded' in json_obj:
             genres = json_obj['_embedded']['genres']
             seg.genres = [Genre.from_json(g) for g in genres]
+
+        assign_links(seg, json_obj)
         return seg
 
     def __str__(self):
@@ -1028,10 +1049,12 @@ class Segment:
 
 
 class Genre:
-    def __init__(self, genre_id=None, genre_name=None, subgenres=None):
+    def __init__(self, genre_id=None, genre_name=None, subgenres=None,
+                 links=None):
         self.id = genre_id
         self.name = genre_name
         self.subgenres = subgenres
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):
@@ -1042,6 +1065,8 @@ class Genre:
             embedded = json_obj['_embedded']
             subgenres = embedded['subgenres']
             g.subgenres = [SubGenre.from_json(sg) for sg in subgenres]
+
+        assign_links(g, json_obj)
         return g
 
     def __str__(self):
@@ -1049,20 +1074,21 @@ class Genre:
 
 
 class SubGenre:
-    def __init__(self, subgenre_id=None, subgenre_name=None):
+    def __init__(self, subgenre_id=None, subgenre_name=None, links=None):
         self.id = subgenre_id
         self.name = subgenre_name
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):
         sg = SubGenre()
         sg.id = json_obj['id']
         sg.name = json_obj['name']
+        assign_links(sg, json_obj)
         return sg
 
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
-
 
 
 
