@@ -1,5 +1,6 @@
 """Client/library for Ticketmaster's Discovery API"""
 import requests
+from datetime import datetime
 
 
 class ApiClient:
@@ -18,7 +19,7 @@ class ApiClient:
         :param version: API version (default: v2)
         :param response_type: Data format (JSON, XML...) (default: json)
         """
-        self.api_key = api_key  #: Ticketmaster API key
+        self.__api_key = api_key  #: Ticketmaster API key
         self.response_type = response_type  #: Response type (json, xml...)
         self.version = version
         self.events = _EventSearch(api_client=self)
@@ -31,22 +32,33 @@ class ApiClient:
 
     @property
     def events_url(self):
+        """URL for */events/*"""
         return self._method_tmpl.format(url=self.url,
                                         method='events',
                                         response_type=self.response_type)
 
     @property
     def venues_url(self):
+        """URL for */venues/*"""
         return self._method_tmpl.format(url=self.url,
                                         method='venues',
                                         response_type=self.response_type)
+
+    @property
+    def api_key(self):
+        """API key"""
+        return {'apikey': self.__api_key}
+
+    @api_key.setter
+    def api_key(self, api_key):
+        self.__api_key = api_key
 
     def _search(self, method, **kwargs):
         """Generic method for API requests.
         :param method: Search type (events, venues...)
         :param kwargs: Search parameters, ex. venueId, eventId, 
             latlong, radius..
-        :return: List of results
+        :return: ``PageIterator``
         """
         # Get basic request URL
         if method == 'events':
@@ -60,7 +72,8 @@ class ApiClient:
         # Make updates to parameters. Add apikey, make sure params that
         # may be passed as integers are cast, and cast bools to 'yes' 'no'
         kwargs = {k: v for (k, v) in kwargs.items() if v is not None}
-        updates = {'apikey': self.api_key}
+        updates = self.api_key
+
         for k, v in kwargs.items():
             if k in ['includeTBA', 'includeTBD', 'includeTest']:
                 updates[k] = self.__yes_no_only(v)
@@ -69,8 +82,10 @@ class ApiClient:
 
         kwargs.update(updates)
         response = requests.get(search_url, params=kwargs).json()
+
         if 'errors' in response:
             raise ApiException(search_url, kwargs, response)
+
         return PageIterator(self, **response)
 
     @staticmethod
@@ -133,8 +148,7 @@ class _VenueSearch:
         :return: Venue
         """
         get_url = "{}/venues/{}".format(self.api_client.url, venue_id)
-        r = requests.get(get_url,
-                         params={'apikey': self.api_client.api_key}).json()
+        r = requests.get(get_url, params=self.api_client.api_key).json()
         return Venue.from_json(r)
 
     def find(self, keyword=None, venue_id=None, sort=None, state_code=None,
@@ -227,8 +241,7 @@ class _EventSearch:
         :return: Event
         """
         get_url = "{}/events/{}".format(self.api_client.url, event_id)
-        r = requests.get(get_url,
-                         params={'apikey': self.api_client.api_key}).json()
+        r = requests.get(get_url, params=self.api_client.api_key).json()
         return Event.from_json(r)
 
     def find(self, sort='date,asc', latlong=None, radius=None, unit=None,
@@ -248,8 +261,10 @@ class _EventSearch:
         :param latlong: Latitude/longitude filter
         :param radius: Radius of area to search
         :param unit: Unit of radius, 'miles' or 'km' (default: miles)
-        :param start_date_time: 
-        :param end_date_time: 
+        :param start_date_time: Filter by start date/time.
+            Timestamp format: *YYYY-MM-DDTHH:MM:SSZ*
+        :param end_date_time: Filter by end date/time.
+            Timestamp format: *YYYY-MM-DDTHH:MM:SSZ*
         :param onsale_start_date_time: 
         :param onsale_end_date_time: 
         :param country_code: 
@@ -362,19 +377,49 @@ class _EventSearch:
 
 
 class Venue:
-    """A venue
+    """A Ticketmaster venue
     
-    JSON response from the Ticketmaster API looks similar to below 
-    (at least as far as what's being used here):
+    The JSON returned from the Discovery API looks something like this 
+    (*edited for brevity*):
     
-    ```json
-    {
-        "name": "Venue name",
-        "city": {"name": "Atlanta"},
-        "markets": [{"id": "12345"}, {"id": "67890"}],
-        "address": {"line1": "123 Fake St"}
-    }
-    ```
+    .. code-block:: json
+    
+        {
+            "id": "KovZpaFEZe",
+            "name": "The Tabernacle",
+            "url": "http://www.ticketmaster.com/venue/115031",
+            "timezone": "America/New_York",
+            "address": {
+                "line1": "152 Luckie Street"
+            },
+            "city": {
+                "name": "Atlanta"
+            },
+            "postalCode": "30303",
+            "state": {
+                "stateCode": "GA",
+                "name": "Georgia"
+            },
+            "country": {
+                "name": "United States Of America",
+                "countryCode": "US"
+            },
+            "location": {
+                "latitude": "33.758688",
+                "longitude": "-84.391449"
+            },
+            "social": {
+                "twitter": {
+                    "handle": "@TabernacleATL"
+                }
+            },
+            "markets": [
+                {
+                    "id": "10"
+                }
+            ]
+        }
+
     
     """
     def __init__(self, name=None, address=None, city=None, state_code=None,
@@ -460,43 +505,89 @@ class Venue:
 
 
 class Event:
-    """An event
+    """Ticketmaster event.
     
-    JSON from API response, as far as what's being used here, looks like: 
+    The JSON returned from the Discovery API (at least, as far as 
+    what's being used here) looks like:
     
-    ```json
-    {
-        "name": "Event name",
-        "dates": {
-            "start": {
-                "localDate": "2019-04-01", 
-                "localTime": "2019-04-01T23:00:00Z"
+    .. code-block:: json
+    
+        {
+            "name": "Event name",
+            "dates": {
+                "start": {
+                    "localDate": "2019-04-01",
+                    "localTime": "2019-04-01T23:00:00Z"
+                },
+                "status": {
+                    "code": "onsale"
+                }
             },
-            "status": {"code": "onsale"}
-        },
-        "classifications": [
-            {"genre": {"name": "Rock"}},
-            {"genre": {"name": "Funk"}
-        ],
-        "priceRanges": [{"min": 10, "max": 25}],
-        "_embedded": {
-            "venues": [{"name": "The Tabernacle"}]
+            "classifications": [
+                {
+                    "genre": {
+                        "name": "Rock"
+                    }
+                },
+                {
+                    "genre": {
+                        "name": "Funk"
+                    }
+                }
+            ],
+            "priceRanges": [
+                {
+                    "min": 10,
+                    "max": 25
+                }
+            ],
+            "_embedded": {
+                "venues": [
+                    {
+                        "name": "The Tabernacle"
+                    }
+                ]
+            }
         }
-    }
-    
-    ```
     """
     def __init__(self, event_id=None, name=None, start_date=None,
                  start_time=None, status=None, genres=None, price_ranges=None,
-                 venues=None):
-        self.event_id = event_id  #: Event ID
-        self.name = name  #: Event name/title
-        self.start_date = start_date  #: Local start date
-        self.start_time = start_time  #: Start time (YYYY-MM-DDTHH:MM:SSZ)
-        self.status = status  #: Sale status (such as *Cancelled, Offsale...*)
-        self.genres = genres  #: List of genre classifications
-        self.price_ranges = price_ranges  #: Price ranges found for tickets
-        self.venues = venues  #: List of venue names
+                 venues=None, utc_datetime=None):
+        self.event_id = event_id
+        self.name = name
+        #: **Local** start date (*YYYY-MM-DD*)
+        self.local_start_date = start_date
+        #: **Local** start time (*HH:MM:SS*)
+        self.local_start_time = start_time
+        #: Sale status (such as *Cancelled, Offsale...*)
+        self.status = status
+        #: List of genre classifications
+        self.genres = genres
+        #: Price ranges found for tickets
+        self.price_ranges = price_ranges
+        #: List of ``ticketpy.Venue`` objects associated with this event
+        self.venues = venues
+
+        self.__utc_datetime = None
+        if utc_datetime is not None:
+            self.utc_datetime = utc_datetime
+
+    @property
+    def utc_datetime(self):
+        """Start date/time in UTC (Format: *YYYY-MM-DDTHH:MM:SSZ*)
+        
+        :return: Start date/time in UTC
+        :rtype: ``datetime``
+        """
+        return self.__utc_datetime
+
+    @utc_datetime.setter
+    def utc_datetime(self, utc_datetime):
+        if not utc_datetime:
+            self.__utc_datetime = None
+        else:
+            ts_format = "%Y-%m-%dT%H:%M:%SZ"
+            self.__utc_datetime = datetime.strptime(utc_datetime, ts_format)
 
     def __str__(self):
         tmpl = ("Event:        {event_name}\n"
@@ -512,8 +603,8 @@ class Event:
         return tmpl.format(
             event_name=self.name,
             venues=' / '.join([str(v) for v in self.venues]),
-            start_date=self.start_date,
-            start_time=self.start_time,
+            start_date=self.local_start_date,
+            start_time=self.local_start_time,
             ranges=', '.join(ranges),
             status=self.status,
             genres=', '.join(self.genres)
@@ -533,8 +624,9 @@ class Event:
         # Dates/times
         dates = json_event.get('dates')
         start_dates = dates.get('start', {})
-        e.start_date = start_dates.get('localDate')
-        e.start_time = start_dates.get('localTime')
+        e.local_start_date = start_dates.get('localDate')
+        e.local_start_time = start_dates.get('localTime')
+        e.utc_datetime = start_dates.get('dateTime')
 
         # Event status (ex: 'onsale')
         status = dates.get('status', {})
@@ -581,51 +673,46 @@ class PageIterator:
     def __iter__(self):
         return self
 
-    def limit(self, limit=50, strict=False):
-        """Limit the number of items returned. NOTE: Will go over or under 
-        the actual limit depending on *strict*. Automatically paginates 
-        through response.
+    def limit(self, max_pages=10):
+        """Limit the number of page requests. Default: 5
         
-        If *strict* is False, all items in results pages are added until 
-        *limit* is either met or exceeded.
+        With a default page size of 20, ``limit(max_pages=5`` would 
+        return a maximum of 200 items (fewer, if there are fewer results).
         
-        If *strict* is True, items are added until the limit is either met, 
-        or until the next page size would exceed the limit.
+        Use this to contain the number of API calls being made, as the 
+        API restricts users to a maximum of 5,000 per day. Very 
+        broad searches can return a large number of pages.
         
-        Ex: 
-        5 pages of 20 results each (100 items)
+        To contrast, ``all()`` will automatically request every 
+        page available.
         
-        Limit=25, strict=False would return a list of size 40 (the initial 
-        page has len==20, so another page is returned)
-        
-        Limit=25, strict=True would return a list of size 20 (the initial 
-        page has len==20, though pulling another would exceed *limit*)
-        
-        :param limit: Return (roughly) this number of items
-        :param strict: *False* to come as close to *limit* as possible 
-            without falling below. *True* to come as close as possible 
-            to *limit* without exceeding it.
-        :return: List of items
+        :param max_pages: Maximum number of pages to request. 
+            Default: *10*. Set to *None* (or use ``all()``) to return 
+            all pages.
+        :return: Flat list of results from pages
         """
-        all_items = []
-        for idx, item_list in enumerate(self):
-            if idx > 0:
-                if strict and len(all_items)+self.page.size > limit:
-                    break
+        if max_pages is None:
+            return self.all()
 
-            all_items += item_list
-            if len(all_items) >= limit:
-                break
+        all_items = []
+        for i in range(0, max_pages):
+            all_items += self.next()
         return all_items
 
     def all(self):
-        """Return a flat list of results. Automatically paginates."""
+        """Returns a flat list of all results. Queries all possible pages.
+        
+        Use ``limit()`` to restrict the number of calls being made.
+        
+        :return: Flat list of results
+        """
         return [i for item_list in self for i in item_list]
 
     @staticmethod
     def __page(**kwargs):
         """Instantiate and return a Page(list)"""
         page = kwargs['page']
+
         links = kwargs['_links']
 
         if 'next' not in links:
@@ -640,23 +727,25 @@ class PageIterator:
             page['totalPages'],
             links['self']['href'],
             links_next,
-            kwargs['_embedded']
+            kwargs.get('_embedded', {})
         )
 
     def next(self):
         # Return initial Page result if we haven't yet
         if self.page.number == self.current_page:
             self.current_page += 1
-            return self.page
+            return [i for i in self.page]
 
-        # StopIteration if we know we've run out of pages
-        if self.current_page == self.end_page:
+        # StopIteration if we know we've run out of pages.
+        # Check for current>end as empty results still return
+        # a page and increment the counter.
+        if self.current_page >= self.end_page:
             raise StopIteration
 
         # Otherwise, +1 our count and pull the next page
         self.current_page += 1
         r = requests.get(self.page.link_next,
-                         params={'apikey': self.api_client.api_key}).json()
+                         params=self.api_client.api_key).json()
 
         self.page = self.__page(**r)
 
@@ -666,7 +755,7 @@ class PageIterator:
         if self.page.link_next is None:
             self.current_page = self.end_page
 
-        return self.page
+        return [i for i in self.page]
 
     __next__ = next
 

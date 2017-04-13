@@ -7,13 +7,13 @@ More info:
 http://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
 
 Requirements
-^^^^^^^^^^^^
+------------
 
 -  Python >= 3.5.2 (anything >= 3 is probably OK)
 -  Requests >= 2.13.0
 
 Installation
-^^^^^^^^^^^^
+------------
 To install via *pip*:
 
 .. code-block:: bash
@@ -26,47 +26,97 @@ Or, locally from the same directory as ``setup.py``:
 
     $ python setup.py install
 
-Usage examples
-==============
+Quickstart/examples
+-------------------
 
 Events
 ^^^^^^
-
-To pull ~20 events for *marketId=10* (Atlanta):
+To pull all Hip-Hop events in Georgia between May 19th, 2017 and
+May 21st, 2017:
 
 .. code-block:: python
 
     import ticketpy
 
-    tm_client = ticketpy.ApiClient("your_api_key")
-    events = tm_client.events.find(market_id=10).limit(20)
+    tm_client = ticketpy.ApiClient('your_api_key')
 
-        for e in events:
-            print("[What/When] {} / {}".format(e.name, e.start_date))
+    pages = tm_client.events.find(
+        classification_name='Hip-Hop',
+        state_code='GA',
+        start_date_time='2017-05-19T20:00:00Z',
+        end_date_time='2017-05-21T20:00:00Z'
+    )
+
+    for page in pages:
+        for event in page:
+            print(event)
 
 Output::
 
-    [What/When] Viva La Hop / 2017-04-07
-    [What/When] Gwinnett Braves vs. Durham Bulls / 2017-04-07
-    [What/When] Old Dominion / 2017-04-07
-    [What/When] Macon Mayhem vs. Roanoke Rail Yard Dawgs / 2017-04-07
-    [What/When] Rachmaninov / 2017-04-07
-    [What/When] The Young Dubliners / 2017-04-07
-    [What/When] The Whiskey Gentry / 2017-04-07
-    [What/When] Festival Of Laughs: Mike Epps, Bruce Bruce, Sommore, Arnez J / 2017-04-07
-    [What/When] Three Dog Night / 2017-04-07
-    [What/When] Permagroove and Friends / 2017-04-07
-    [What/When] Georgia Bulldogs v. Missouri Tigers Men's Baseball / 2017-04-08
-    [What/When] Gwinnett Braves vs. Durham Bulls / 2017-04-08
-    [What/When] Blurry / 2017-04-08
-    [What/When] Georgia Firebirds Vs Corpus Christi Rage / 2017-04-08
-    [What/When] Ron White / 2017-04-08
-    [What/When] Macon Mayhem vs. Roanoke Rail Yard Dawgs / 2017-04-08
-    [What/When] MAJIC 107.5/97.5 Presents Leela James & Daley / 2017-04-08
-    [What/When] JoJo - Mad Love Tour / 2017-04-08
-    [What/When] Duran Duran / 2017-04-08
-    [What/When] Glass Animals / 2017-04-08
+    Event:        Atlanta Funk Fest 2017 3 Day Ticket
+    Venue(s):     'Wolf Creek Amphitheater' at 3025 Merk Road in Atlanta GA
+    Start date:   2017-05-19
+    Start time:   19:00:00
+    Price ranges: 128.01-424.0
+    Status:       onsale
+    Genres:       R&B
 
+    Event:        Atlanta Funk Fest 2017
+    Venue(s):     'Wolf Creek Amphitheater' at 3025 Merk Road in Atlanta GA
+    Start date:   2017-05-19
+    Start time:   19:00:00
+    Price ranges: 63.0-158.0
+    Status:       onsale
+    Genres:       R&B
+
+    Event:        Atlanta Funk Fest 2017
+    Venue(s):     'Wolf Creek Amphitheater' at 3025 Merk Road in Atlanta GA
+    Start date:   2017-05-20
+    Start time:   17:00:00
+    Price ranges: 63.0-158.0
+    Status:       onsale
+    Genres:       Hip-Hop/Rap
+
+    Event:        NF
+    Venue(s):     'Center Stage Theater' at 1374 W Peachtree St. NW in Atlanta GA
+    Start date:   2017-05-20
+    Start time:   20:00:00
+    Price ranges: 22.0-83.0
+    Status:       onsale
+    Genres:       Hip-Hop/Rap
+
+Calling ``ApiClient.find()`` returns a ``ticketpy.PageIterator``
+object, which iterates through API response pages (as ``ticketpy.Page``).
+
+By default, pages have 20 elements. If there are >20 total elements,
+calling ``PageIterator.next()`` will request the next page from the API.
+
+You can simplify that/do away with the nested loop by using
+``PageIterator.limit()``. By default, this requests a maximum of 10 pages,
+and returns the elements of each in a flat list.
+
+For example, the previous example could also be written as:
+
+.. code-block:: python
+
+    import ticketpy
+
+    tm_client = ticketpy.ApiClient('your_api_key')
+
+    pages = tm_client.events.find(
+        classification_name='Hip-Hop',
+        state_code='GA',
+        start_date_time='2017-05-19T20:00:00Z',
+        end_date_time='2017-05-21T20:00:00Z'
+    ).limit()
+
+    for event in pages:
+        print(event)
+
+The output here would be the same as there was <1 page available, however,
+this can save you some wasted API calls for large result sets. If you
+really want *every page*, though, use ``all()`` to request every available
+page.
 
 Venues
 ^^^^^^

@@ -22,24 +22,36 @@ class TestTicketpy(TestCase):
         print(e)
 
     def test_get_venue(self):
-        v = self.tm.venues.get('KovZpZAJledA')
+        v = self.tm.venues.get('KovZpaFEZe')
         print(v)
 
     def test_iterator(self):
         event_list = self.tm.events.find(venue_id=self.venues['tabernacle'],
-                                         size='7').all()
+                                         size='1').limit(5)
         for e in event_list:
             print(e.event_id)
         
     def test_search_events(self):
         event_list = self.tm.events.find(venue_id=self.venues['tabernacle'],
-                                         size=1, include_tba=True).all()
+                                         size=5, include_tba=True).all()
         for e in event_list:
             print(str(e))
 
+    def test_event_search_genre(self):
+        pages = self.tm.events.find(
+            classification_name='Hip-Hop',
+            state_code='GA',
+            start_date_time="2017-05-19T20:00:00Z",
+            end_date_time="2017-05-21T20:00:00Z"
+        )
+        for page in pages:
+            for event in page:
+                print(event)
+
+
     def test_events_get(self):
         elist = self.tm.events.find(classification_name='Hip-Hop',
-                                    venue_id='KovZpZAJledA', size=7)
+                                    venue_id='KovZpZAJledA', size=7).all()
         for e in elist:
             print(e)
         
