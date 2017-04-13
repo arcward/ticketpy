@@ -225,7 +225,7 @@ page.</p>
 </div>
 <div class="section" id="classifications">
 <h3>Classifications<a class="headerlink" href="#classifications" title="Permalink to this headline">¶</a></h3>
-<p>Searching for classifiations works similarly to the above:</p>
+<p>Searching for classifications works similarly to the above:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ticketpy</span>
 
 <span class="n">tm_client</span> <span class="o">=</span> <span class="n">ticketpy</span><span class="o">.</span><span class="n">ApiClient</span><span class="p">(</span><span class="s2">&quot;your_api_key&quot;</span><span class="p">)</span>
@@ -242,6 +242,28 @@ page.</p>
 <span class="o">--</span><span class="n">Genre</span><span class="p">:</span> <span class="n">Drama</span>
 <span class="n">Segment</span><span class="p">:</span> <span class="n">Arts</span> <span class="o">&amp;</span> <span class="n">Theatre</span>
 <span class="o">--</span><span class="n">Genre</span><span class="p">:</span> <span class="n">Theatre</span>
+</pre></div>
+</div>
+<p>Querying details for classifications by ID will return either a <code class="docutils literal"><span class="pre">Segment</span></code>,
+<code class="docutils literal"><span class="pre">Genre</span></code>, or <code class="docutils literal"><span class="pre">SubGenre</span></code>, whichever matches the given ID.</p>
+<p>For example,</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ticketpy</span>
+
+<span class="n">tm_client</span> <span class="o">=</span> <span class="n">ticketpy</span><span class="o">.</span><span class="n">ApiClient</span><span class="p">(</span><span class="s2">&quot;your_api_key&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">tm_client</span><span class="o">.</span><span class="n">classifications</span><span class="o">.</span><span class="n">by_id</span><span class="p">(</span><span class="s1">&#39;KZFzniwnSyZfZ7v7nJ&#39;</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">tm_client</span><span class="o">.</span><span class="n">classifications</span><span class="o">.</span><span class="n">by_id</span><span class="p">(</span><span class="s1">&#39;KnvZfZ7vAvE&#39;</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">tm_client</span><span class="o">.</span><span class="n">classifications</span><span class="o">.</span><span class="n">by_id</span><span class="p">(</span><span class="s1">&#39;KZazBEonSMnZfZ7vkdl&#39;</span><span class="p">)</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Name: {} / Type: {}&quot;</span>
+<span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">z</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>Name: Music / Type: &lt;class &#39;ticketpy.ticketpy.Segment&#39;&gt;
+Name: Jazz / Type: &lt;class &#39;ticketpy.ticketpy.Genre&#39;&gt;
+Name: Bebop / Type: &lt;class &#39;ticketpy.ticketpy.SubGenre&#39;&gt;
 </pre></div>
 </div>
 </div>
