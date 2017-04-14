@@ -106,6 +106,7 @@ class ApiClient:
     def api_key(self, api_key):
         self.__api_key = api_key
 
+    # noinspection PyPep8,PySimplifyBooleanCheck
     @staticmethod
     def __yes_no_only(s):
         """Sanitizes some yes/no synonyms to API-friendly values

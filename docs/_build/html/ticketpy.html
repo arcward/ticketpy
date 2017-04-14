@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ticketpy package &#8212; ticketpy 1.0.6 documentation</title>
+    <title>ticketpy package &#8212; ticketpy 1.0.7 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.6',
+        VERSION:     '1.0.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="readme.html" title="ticketpy"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.6 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.7 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -65,7 +65,7 @@
 <dl class="attribute">
 <dt id="ticketpy.client.ApiClient.api_key">
 <code class="descname">api_key</code><a class="headerlink" href="#ticketpy.client.ApiClient.api_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>API key</p>
+<dd><p>API key header to pass with API requests</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -288,7 +288,7 @@ all pages.</td>
 <p>Base query/parent class for specific serach types.</p>
 <dl class="attribute">
 <dt id="ticketpy.query.BaseQuery.attr_map">
-<code class="descname">attr_map</code><em class="property"> = {'include_tba': 'includeTBA', 'venue_id': 'venueId', 'market_id': 'marketId', 'id': 'id', 'client_visibility': 'clientVisibility', 'start_date_time': 'startDateTime', 'latlong': 'latlong', 'include_test': 'includeTest', 'segment_name': 'segmentName', 'size': 'size', 'locale': 'locale', 'state_code': 'stateCode', 'onsale_start_date_time': 'onsaleStartDateTime', 'dma_id': 'dmaId', 'onsale_end_date_time': 'onsaleEndDateTime', 'segment_id': 'segmentId', 'include_tbd': 'includeTBD', 'sort': 'sort', 'classification_name': 'classificationName', 'end_date_time': 'endDateTime', 'page': 'page', 'promoter_id': 'promoterId', 'classification_id': 'classificationId', 'keyword': 'keyword', 'country_code': 'countryCode', 'attraction_id': 'attractionId'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attr_map</code><em class="property"> = {'segment_id': 'segmentId', 'page': 'page', 'latlong': 'latlong', 'include_tba': 'includeTBA', 'state_code': 'stateCode', 'promoter_id': 'promoterId', 'client_visibility': 'clientVisibility', 'include_tbd': 'includeTBD', 'locale': 'locale', 'segment_name': 'segmentName', 'sort': 'sort', 'onsale_end_date_time': 'onsaleEndDateTime', 'dma_id': 'dmaId', 'keyword': 'keyword', 'include_test': 'includeTest', 'attraction_id': 'attractionId', 'classification_name': 'classificationName', 'size': 'size', 'market_id': 'marketId', 'id': 'id', 'onsale_start_date_time': 'onsaleStartDateTime', 'venue_id': 'venueId', 'classification_id': 'classificationId', 'start_date_time': 'startDateTime', 'end_date_time': 'endDateTime', 'country_code': 'countryCode'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps parameter names to parameters expected by the API
 (ex: <em>market_id</em> maps to <em>marketId</em>)</p>
 </dd></dl>
@@ -525,7 +525,6 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 <dt id="ticketpy.model.Attraction">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Attraction</code><span class="sig-paren">(</span><em>attraction_id=None</em>, <em>attraction_name=None</em>, <em>url=None</em>, <em>classifications=None</em>, <em>images=None</em>, <em>test=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Attraction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Attraction object</p>
 <dl class="staticmethod">
 <dt id="ticketpy.model.Attraction.from_json">
 <em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Attraction.from_json" title="Permalink to this definition">¶</a></dt>
@@ -658,6 +657,12 @@ what&#8217;s being used here) looks like:</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.Event.links">
+<code class="descname">links</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.model.Event.links" title="Permalink to this definition">¶</a></dt>
+<dd><p>API links</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1038,7 +1043,7 @@ what&#8217;s being used here) looks like:</p>
         <li class="right" >
           <a href="readme.html" title="ticketpy"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.6 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.7 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

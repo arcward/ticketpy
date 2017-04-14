@@ -7,10 +7,10 @@ def read(fname):
 
 setup(
     name='ticketpy',
-    version='1.0.6',
+    version='1.0.7',
     author='Edward Wells',
     author_email='git@edward.sh',
-    description="Python wrapper/SDK for the Ticketmaster discovery API",
+    description="Python wrapper/SDK for the Ticketmaster Discovery API",
     long_description=read('README.rst'),
     license='MIT',
     keywords='Ticketmaster',

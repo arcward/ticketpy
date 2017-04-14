@@ -233,7 +233,7 @@ class EventQuery(BaseQuery):
                          classification_id=classification_id,
                          market_id=market_id, promoter_id=promoter_id,
                          dma_id=dma_id, include_tba=include_tba,
-                         include_tbd=include_tbd,
+                         include_tbd=include_tbd, source=source,
                          client_visibility=client_visibility, **kwargs)
 
     def by_location(self, latitude, longitude, radius='10', unit='miles',

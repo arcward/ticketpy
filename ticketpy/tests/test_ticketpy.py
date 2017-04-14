@@ -237,7 +237,7 @@ class TestTicketpy(TestCase):
         # Ensure we aren't passing the test on an empty list
         self.assertGreater(len(all_nearby), 0)
         # Every city in the (populated) list should be Atlanta
-        for v in nearby:
+        for v in all_nearby:
             self.assertEqual(city, v.city)
             self.assertEqual(city, v.location['city'])
 
