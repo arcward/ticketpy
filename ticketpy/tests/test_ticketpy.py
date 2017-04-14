@@ -126,6 +126,7 @@ class TestTicketpy(TestCase):
         attraction_name = 'New York Yankees'
 
         attr = self.tm.attractions.by_id(attraction_id)
+        print(attr)
         self.assertEqual(attraction_id, attr.id)
         self.assertEqual(attraction_name, attr.name)
 
@@ -139,39 +140,41 @@ class TestTicketpy(TestCase):
         self.assertIn("DRAMA", genre_names)
 
         for cl in classif:
-            print('Segment: {}'.format(cl.segment.name))
-            for genre in cl.segment.genres:
-                print('--Genre: {}'.format(genre.name))
+            print(cl)
 
     def test_classification_segment(self):
         seg_id = 'KZFzniwnSyZfZ7v7nJ'
         seg_name = 'Music'
         seg = self.tm.classifications.by_id(seg_id)
-        print(type(seg))
+        print(seg)
         self.assertEqual(seg_id, seg.id)
         self.assertEqual(seg_name, seg.name)
 
         genre_id = 'KnvZfZ7vAvE'
         genre_name = 'Jazz'
         g = self.tm.classifications.by_id(genre_id)
+        print(g)
         self.assertEqual(genre_id, g.id)
         self.assertEqual(genre_name, g.name)
 
         subgenre_id = 'KZazBEonSMnZfZ7vkdl'
         subgenre_name = 'Bebop'
         sg = self.tm.classifications.by_id(subgenre_id)
+        print(sg)
         self.assertEqual(subgenre_id, sg.id)
         self.assertEqual(subgenre_name, sg.name)
 
     def test_get_event_id(self):
         event_id = 'vvG1zZfbJQpVWp'
         e = self.tm.events.by_id(event_id)
+        print(e)
         self.assertEqual(event_id, e.id)
 
     def test_get_venue(self):
         venue_id = 'KovZpaFEZe'
         venue_name = 'The Tabernacle'
         v = self.tm.venues.by_id(venue_id)
+        print(v)
         self.assertEqual(venue_id, v.id)
         self.assertEqual(venue_name, v.name)
 

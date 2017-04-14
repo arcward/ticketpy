@@ -912,6 +912,10 @@ class Event:
 
         ranges = ['-'.join([str(pr['min']), str(pr['max'])])
                   for pr in self.price_ranges]
+
+        if self.classifications:
+            genres = [cl.genre.name for cl in self.classifications]
+
         return tmpl.format(
             event_name=self.name,
             venues=' / '.join([str(v) for v in self.venues]),
@@ -919,7 +923,7 @@ class Event:
             start_time=self.local_start_time,
             ranges=', '.join(ranges),
             status=self.status,
-            genres=', '.join(self.genres)
+            genres=', '.join(genres)
         )
 
     @staticmethod
@@ -1005,6 +1009,10 @@ class Attraction:
         _assign_links(att, json_obj)
         return att
 
+    def __str__(self):
+        return self.name if self.name is not None else 'Unknown'
+
+
 
 class EventClassification:
     """Classification as it's represented in event search results
@@ -1084,9 +1092,6 @@ class Classification:
 
         _assign_links(cl, json_obj)
         return cl
-
-    def __str__(self):
-        return self.name if self.name is not None else 'Unknown'
 
 
 class ClassificationType:
