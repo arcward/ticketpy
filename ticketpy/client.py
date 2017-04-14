@@ -9,8 +9,8 @@ from ticketpy.query import AttractionQuery, ClassificationQuery, \
 class ApiClient:
     """ApiClient for the Ticketmaster Discovery API
 
-    Request URLs end up looking like:
-    http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}
+    Request URLs look like::
+    *http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}*
     """
     base_url = "https://app.ticketmaster.com"
 
@@ -28,6 +28,9 @@ class ApiClient:
         self.venues = VenueQuery(api_client=self)
         self.attractions = AttractionQuery(api_client=self)
         self.classifications = ClassificationQuery(api_client=self)
+        self.segment_by_id = self.classifications.by_id
+        self.genre_by_id = self.classifications.by_id
+        self.subgenre_by_id = self.classifications.by_id
 
     def search(self, method, **kwargs):
         """Generic method for API requests.
@@ -255,3 +258,8 @@ class Page(list):
     def link_self(self):
         """Link to this page"""
         return "{}{}".format(ApiClient.base_url, self._link_self)
+
+    @staticmethod
+    def from_json(json_obj):
+        
+

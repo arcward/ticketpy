@@ -156,6 +156,10 @@ class TestTicketpy(TestCase):
         self.assertEqual(seg_id, seg.id)
         self.assertEqual(seg_name, seg.name)
 
+        seg_x = self.tm.segment_by_id(seg_id)
+        self.assertEqual(seg_id, seg_x.id)
+        self.assertEqual(seg_name, seg_x.name)
+
         genre_id = 'KnvZfZ7vAvE'
         genre_name = 'Jazz'
         g = self.tm.classifications.by_id(genre_id)
@@ -163,12 +167,20 @@ class TestTicketpy(TestCase):
         self.assertEqual(genre_id, g.id)
         self.assertEqual(genre_name, g.name)
 
+        g_x = self.tm.genre_by_id(genre_id)
+        self.assertEqual(genre_id, g_x.id)
+        self.assertEqual(genre_name, g_x.name)
+
         subgenre_id = 'KZazBEonSMnZfZ7vkdl'
         subgenre_name = 'Bebop'
         sg = self.tm.classifications.by_id(subgenre_id)
         print(sg)
         self.assertEqual(subgenre_id, sg.id)
         self.assertEqual(subgenre_name, sg.name)
+
+        sg_x = self.tm.segment_by_id(subgenre_id)
+        self.assertEqual(subgenre_id, sg_x.id)
+        self.assertEqual(subgenre_name, sg_x.name)
 
         fake_id = "afkjsdlfjkasdf"
         fake_response = self.tm.classifications.by_id(fake_id)

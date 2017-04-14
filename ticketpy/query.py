@@ -294,11 +294,9 @@ class AttractionQuery(BaseQuery):
 
 class ClassificationQuery(BaseQuery):
     """Classification search/query class"""
-    #: ``BaseQuery.by_id()`` renamed for this class, as classifications
-    #: don't have IDs, but the same query will return IDs for segments,
-    #: genres and subgenres (whichever matches).
-    #: ``ClassificationQuery.by_id()`` will return the correct object,
-    #: rather than the entire parent structure of any given ID
+    #: ``BaseQuery.by_id()``, inherited here, assigned to
+    #: ``ClassificationQuery.query_subclass_id()`` as the API
+    #: returns entire structure for matching ID
     query_subclass_id = BaseQuery.by_id
 
     def __init__(self, api_client):
@@ -330,14 +328,19 @@ class ClassificationQuery(BaseQuery):
 
     def by_id(self, entity_id):
         """Returns a ``Segment``, ``Genre`` or ``SubGenre`` matching the 
-        given entity ID. If no matching IDs are found, returns ``None``
+        given entity ID. (or ``None``)
+        
+        Aliased in ``ticketpy.client.ApiClient`` as 
+        methods ``segment_by_id()``, ``genre_by_id()`` and 
+        ``subgenre_by_id()`` although they're technically all 
+        the same method.
         
         :param entity_id: Segment, genre or subgenre ID
         :return: ``Segment``, ``Genre`` or ``SubGenre``, depending which 
             matches the ID.
         """
         cl = self.query_subclass_id(entity_id)
-        # No segment = no match
+        # No segment = no matches anywhere
         if not cl.segment:
             return None
         elif cl.segment.id == entity_id:
@@ -353,5 +356,3 @@ class ClassificationQuery(BaseQuery):
 
         # Return ``None`` if one still wasn't found for some reason
         return None
-
-
