@@ -1,10 +1,18 @@
 """API client classes"""
+import logging
 import requests
-
 from ticketpy.model import Attraction, Classification, Event, Venue, \
     _assign_links
 from ticketpy.query import AttractionQuery, ClassificationQuery, \
     EventQuery, VenueQuery
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+sh = logging.StreamHandler()
+sh.setLevel(logging.DEBUG)
+sf = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+sh.setFormatter(sf)
+log.addHandler(sh)
 
 
 class ApiClient:
@@ -44,6 +52,8 @@ class ApiClient:
         self.genre_by_id = self.classifications.by_id
         self.subgenre_by_id = self.classifications.by_id
 
+        log.debug("Root URL: {}".format(self.url))
+
     def search(self, method, **kwargs):
         """Generic method for API requests.
         :param method: Search type (events, venues...)
@@ -62,7 +72,7 @@ class ApiClient:
             elif k in ['size', 'radius', 'marketId']:
                 updates[k] = str(v)
         kwargs.update(updates)
-
+        log.debug(kwargs)
         urls = {
             'events': self.__method_url('events'),
             'venues': self.__method_url('venues'),
@@ -197,6 +207,7 @@ class PagedResponse:
         api_key = self.api_client.api_key
         next_url = self.page.links.get('next')
         while next_url:
+            log.debug("Requesting page: {}".format(next_url))
             next_pg = requests.get(next_url, params=api_key).json()
             pg = Page.from_json(next_pg)
             next_url = pg.links.get('next')

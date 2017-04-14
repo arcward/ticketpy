@@ -203,7 +203,7 @@ class TestTicketpy(TestCase):
     def test_search_events(self):
         venue_id = 'KovZpaFEZe'
         venue_name = 'The Tabernacle'
-        event_list = self.tm.events.find(venue_id=venue_id).limit(2)
+        event_list = self.tm.events.find(venue_id=venue_id, size=2).limit(4)
         for e in event_list:
             for v in e.venues:
                 self.assertEqual(venue_id, v.id)
