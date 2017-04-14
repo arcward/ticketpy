@@ -220,60 +220,24 @@ class EventQuery(BaseQuery):
         :param locale: Locale (default: 'en')
         :return: 
         """
-
-        # Translate parameters to API-friendly parameters
-        kw_map = {
-            'sort': sort,
-            'latlong': latlong,
-            'radius': radius,
-            'unit': unit,
-            'startDateTime': start_date_time,
-            'endDateTime': end_date_time,
-            'onsaleStartDateTime': onsale_start_date_time,
-            'onsaleEndDateTime': onsale_end_date_time,
-            'countryCode': country_code,
-            'stateCode': state_code,
-            'venueId': venue_id,
-            'attractionId': attraction_id,
-            'segmentId': segment_id,
-            'segmentName': segment_name,
-            'classificationName': classification_name,
-            'classificationId': classification_id,
-            'marketId': market_id,
-            'promoterId': promoter_id,
-            'dmaId': dma_id,
-            'includeTBA': include_tba,
-            'includeTBD': include_tbd,
-            'clientVisibility': client_visibility,
-            'keyword': keyword,
-            'id': event_id,
-            'source': source,
-            'includeTest': include_test,
-            'page': page,
-            'size': size,
-            'locale': locale
-        }
-
-        r = self._get(keyword, event_id, sort, include_test, page,
-                      size, locale, latlong=latlong, radius=radius,
-                      unit=unit, start_date_time=start_date_time,
-                      end_date_time=end_date_time,
-                      onsale_start_date_time=onsale_start_date_time,
-                      onsale_end_date_time=onsale_end_date_time,
-                      country_code=country_code, state_code=state_code,
-                      venue_id=venue_id, attraction_id=attraction_id,
-                      segment_id=segment_id, segment_name=segment_name,
-                      classification_name=classification_name,
-                      classification_id=classification_id,
-                      market_id=market_id, promoter_id=promoter_id,
-                      dma_id=dma_id, include_tba=include_tba,
-                      include_tbd=include_tbd,
-                      client_visibility=client_visibility, **kwargs)
-
-        return r
+        return self._get(keyword, event_id, sort, include_test, page,
+                         size, locale, latlong=latlong, radius=radius,
+                         unit=unit, start_date_time=start_date_time,
+                         end_date_time=end_date_time,
+                         onsale_start_date_time=onsale_start_date_time,
+                         onsale_end_date_time=onsale_end_date_time,
+                         country_code=country_code, state_code=state_code,
+                         venue_id=venue_id, attraction_id=attraction_id,
+                         segment_id=segment_id, segment_name=segment_name,
+                         classification_name=classification_name,
+                         classification_id=classification_id,
+                         market_id=market_id, promoter_id=promoter_id,
+                         dma_id=dma_id, include_tba=include_tba,
+                         include_tbd=include_tbd,
+                         client_visibility=client_visibility, **kwargs)
 
     def by_location(self, latitude, longitude, radius='10', unit='miles',
-                    sort='relevance, desc', **kwargs):
+                    sort='relevance,desc', **kwargs):
         """
         Searches events within a radius of a latitude/longitude coordinate.
 
@@ -289,7 +253,8 @@ class EventQuery(BaseQuery):
         longitude = str(longitude)
         radius = str(radius)
         latlong = "{lat},{long}".format(lat=latitude, long=longitude)
-        return self.find(latlong=latlong, radius=radius, unit=unit, **kwargs)
+        return self.find(latlong=latlong, radius=radius, unit=unit,
+                         sort=sort, **kwargs)
 
 
 class AttractionQuery(BaseQuery):

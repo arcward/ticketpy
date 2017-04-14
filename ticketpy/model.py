@@ -111,10 +111,6 @@ class Venue:
             'longitude': self.longitude
         }
 
-    def __str__(self):
-        return "'{}' at {} in {} {}".format(self.name, self.address,
-                                            self.city, self.state_code)
-
     @staticmethod
     def from_json(json_venue):
         """Create a `Venue` object from the API response's JSON data
@@ -132,13 +128,17 @@ class Venue:
 
         # Location data
         v.postal_code = json_venue.get('postalCode')
+
         if 'city' in json_venue:
             v.city = json_venue['city']['name']
+
         if 'address' in json_venue:
             v.address = json_venue['address']['line1']
+
         if 'location' in json_venue:
             v.latitude = json_venue['location']['latitude']
             v.longitude = json_venue['location']['longitude']
+
         if 'state' in json_venue:
             v.state_code = json_venue['state']['stateCode']
 
@@ -153,6 +153,10 @@ class Venue:
         v.accessible_seating_detail = json_venue.get('accessibleSeatingDetail')
         _assign_links(v, json_venue)
         return v
+
+    def __str__(self):
+        return "'{}' at {} in {} {}".format(self.name, self.address,
+                                            self.city, self.state_code)
 
 
 class Event:
@@ -215,17 +219,16 @@ class Event:
         self.status = status
         #: List of classifications
         self.classifications = classifications
-
         #: Price ranges found for tickets
         self.price_ranges = price_ranges
         #: List of ``ticketpy.Venue`` objects associated with this event
         self.venues = venues
+        #: API links
+        self.links = links
 
         self.__utc_datetime = None
         if utc_datetime is not None:
             self.utc_datetime = utc_datetime
-
-        self.links = links
 
     @property
     def utc_datetime(self):
@@ -243,31 +246,6 @@ class Event:
         else:
             ts_format = "%Y-%m-%dT%H:%M:%SZ"
             self.__utc_datetime = datetime.strptime(utc_datetime, ts_format)
-
-    def __str__(self):
-        tmpl = ("Event:        {event_name}\n"
-                "Venue(s):     {venues}\n"
-                "Start date:   {start_date}\n"
-                "Start time:   {start_time}\n"
-                "Price ranges: {ranges}\n"
-                "Status:       {status}\n"
-                "Genres:       {genres}\n")
-
-        ranges = ['-'.join([str(pr['min']), str(pr['max'])])
-                  for pr in self.price_ranges]
-
-        if self.classifications:
-            genres = [cl.genre.name for cl in self.classifications]
-
-        return tmpl.format(
-            event_name=self.name,
-            venues=' / '.join([str(v) for v in self.venues]),
-            start_date=self.local_start_date,
-            start_time=self.local_start_time,
-            ranges=', '.join(ranges),
-            status=self.status,
-            genres=', '.join(genres)
-        )
 
     @staticmethod
     def from_json(json_event):
@@ -314,9 +292,35 @@ class Event:
         _assign_links(e, json_event)
         return e
 
+    def __str__(self):
+        tmpl = ("Event:        {event_name}\n"
+                "Venue(s):     {venues}\n"
+                "Start date:   {start_date}\n"
+                "Start time:   {start_time}\n"
+                "Price ranges: {ranges}\n"
+                "Status:       {status}\n"
+                "Genres:       {genres}\n")
+
+        ranges = ['-'.join([str(pr['min']), str(pr['max'])])
+                  for pr in self.price_ranges]
+
+        genres = []
+        if self.classifications:
+            genres = [cl.genre.name for cl in self.classifications]
+
+        return tmpl.format(
+            event_name=self.name,
+            venues=' / '.join([str(v) for v in self.venues]),
+            start_date=self.local_start_date,
+            start_time=self.local_start_time,
+            ranges=', '.join(ranges),
+            status=self.status,
+            genres=', '.join(genres)
+        )
+
 
 class Attraction:
-    """Attraction object"""
+    """Attraction"""
 
     def __init__(self, attraction_id=None, attraction_name=None, url=None,
                  classifications=None, images=None, test=None, links=None):
@@ -346,9 +350,11 @@ class Attraction:
         att.url = json_obj.get('url')
         att.test = json_obj.get('test')
         att.images = json_obj.get('images')
+
         classifications = json_obj.get('classifications')
         att.classifications = [Classification.from_json(cl)
                                for cl in classifications]
+
         _assign_links(att, json_obj)
         return att
 

@@ -28,7 +28,7 @@ def haversine(latlon1, latlon2):
     dlat = lat2 - lat1
     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
     c = 2 * asin(sqrt(a))
-    r = 3956 # Radius of earth in kilometers. Use 6371 for kilometers
+    r = 3956  # Radius of earth in kilometers. Use 6371 for kilometers
     return c * r
 
 
@@ -76,8 +76,7 @@ class TestApiClient(TestCase):
         self.assertEqual(yno('Only'), 'only')
 
 
-class Test_VenueSearch(TestCase):
-    # TODO write tests for get() and find()
+class TestVenueQuery(TestCase):
     def setUp(self):
         config = ConfigParser()
         config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
@@ -224,20 +223,23 @@ class TestTicketpy(TestCase):
         event_list = self.tm.events.by_location(
             latitude=latlon1['latitude'],
             longitude=latlon1['longitude'],
-            radius=1,
+            radius=3,
             unit='miles'
-        ).limit(2)
+        ).limit(3)
 
+        all_nearby = []
         for e in event_list:
-            nearby = [v for v in e.venues
-                      if haversine(latlon1, {
-                    'latitude': v.location['latitude'],
-                    'longitude': v.location['longitude']
-                }) <= 3]
-
-            for v in nearby:
-                self.assertEqual(city, v.city)
-                self.assertEqual(city, v.location['city'])
+            nearby = [v for v in e.venues if
+                      haversine(latlon1,
+                                {'latitude': v.location['latitude'],
+                                 'longitude': v.location['longitude']}) <= 3]
+            all_nearby += nearby
+        # Ensure we aren't passing the test on an empty list
+        self.assertGreater(len(all_nearby), 0)
+        # Every city in the (populated) list should be Atlanta
+        for v in nearby:
+            self.assertEqual(city, v.city)
+            self.assertEqual(city, v.location['city'])
 
 
 

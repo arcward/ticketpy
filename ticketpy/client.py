@@ -13,7 +13,6 @@ class ApiClient:
     http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}
     """
     base_url = "https://app.ticketmaster.com"
-    _method_tmpl = "{url}/{method}.{response_type}"
 
     def __init__(self, api_key, version='v2', response_type='json'):
         """Initialize the API client.
@@ -29,48 +28,6 @@ class ApiClient:
         self.venues = VenueQuery(api_client=self)
         self.attractions = AttractionQuery(api_client=self)
         self.classifications = ClassificationQuery(api_client=self)
-
-    @property
-    def url(self):
-        """Root URL"""
-        return "{}/discovery/{}".format(self.base_url, self.version)
-
-    @property
-    def events_url(self):
-        """URL for */events/*"""
-        return self._method_tmpl.format(url=self.url,
-                                        method='events',
-                                        response_type=self.response_type)
-
-    @property
-    def venues_url(self):
-        """URL for */venues/*"""
-        return self._method_tmpl.format(url=self.url,
-                                        method='venues',
-                                        response_type=self.response_type)
-
-    @property
-    def attractions_url(self):
-        """URL for */attractions/*"""
-        return self._method_tmpl.format(url=self.url,
-                                        method='attractions',
-                                        response_type=self.response_type)
-
-    @property
-    def classifications_url(self):
-        """URL for */attractions/*"""
-        return self._method_tmpl.format(url=self.url,
-                                        method='classifications',
-                                        response_type=self.response_type)
-
-    @property
-    def api_key(self):
-        """API key"""
-        return {'apikey': self.__api_key}
-
-    @api_key.setter
-    def api_key(self, api_key):
-        self.__api_key = api_key
 
     def _search(self, method, **kwargs):
         """Generic method for API requests.
@@ -89,8 +46,9 @@ class ApiClient:
         elif method == 'classifications':
             search_url = self.classifications_url
         else:
+            methods = ['events', 'venues', 'attractions', 'classifications']
             raise ValueError("Received: '{}' but was expecting "
-                             "one of: {}".format(method, ['events', 'venues']))
+                             "one of: {}".format(method, methods))
 
         # Make updates to parameters. Add apikey, make sure params that
         # may be passed as integers are cast, and cast bools to 'yes' 'no'
@@ -110,6 +68,43 @@ class ApiClient:
             raise ApiException(search_url, kwargs, response)
 
         return PageIterator(self, **response)
+
+    @property
+    def url(self):
+        """Root URL"""
+        return "{}/discovery/{}".format(self.base_url, self.version)
+
+    def __method_url(self, method):
+        return "{}/{}.{}".format(self.url, method, self.response_type)
+
+    @property
+    def events_url(self):
+        """URL for */events/*"""
+        return self.__method_url('events')
+
+    @property
+    def venues_url(self):
+        """URL for */venues/*"""
+        return self.__method_url('venues')
+
+    @property
+    def attractions_url(self):
+        """URL for */attractions/*"""
+        return self.__method_url('attractions')
+
+    @property
+    def classifications_url(self):
+        """URL for */attractions/*"""
+        return self.__method_url('classifications')
+
+    @property
+    def api_key(self):
+        """API key header to pass with API requests"""
+        return {'apikey': self.__api_key}
+
+    @api_key.setter
+    def api_key(self, api_key):
+        self.__api_key = api_key
 
     @staticmethod
     def __yes_no_only(s):
@@ -293,8 +288,8 @@ class Page(list):
         elif 'attractions' in embedded:
             items = [Attraction.from_json(a) for a in embedded['attractions']]
         elif 'classifications' in embedded:
-            items = [Classification.from_json(cl)
-                     for cl in embedded['classifications']]
+            items = [Classification.from_json(cl) for cl in
+                     embedded['classifications']]
 
         for i in items:
             self.append(i)
@@ -309,13 +304,6 @@ class Page(list):
     def link_self(self):
         """Link to this page"""
         return "{}{}".format(ApiClient.base_url, self._link_self)
-
-
-# Query/search classes
-
-
-# API object models
-
 
 
 
