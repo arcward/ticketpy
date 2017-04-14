@@ -85,14 +85,14 @@ Output::
     Status:       onsale
     Genres:       Hip-Hop/Rap
 
-Calling ``ApiClient.find()`` returns a ``ticketpy.PageIterator``
+Calling ``ApiClient.find()`` returns a ``ticketpy.PagedResponse``
 object, which iterates through API response pages (as ``ticketpy.Page``).
 
 By default, pages have 20 elements. If there are >20 total elements,
-calling ``PageIterator.next()`` will request the next page from the API.
+calling ``PagedResponse.next()`` will request the next page from the API.
 
 You can simplify that/do away with the nested loop by using
-``PageIterator.limit()``. By default, this requests a maximum of 10 pages,
+``PagedResponse.limit()``. By default, this requests a maximum of 10 pages,
 and returns the elements of each in a flat list.
 
 For example, the previous example could also be written as:

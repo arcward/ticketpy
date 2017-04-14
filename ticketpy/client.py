@@ -1,7 +1,8 @@
 """API client classes"""
 import requests
 
-from ticketpy.model import Attraction, Classification, Event, Venue
+from ticketpy.model import Attraction, Classification, Event, Venue, \
+    _assign_links
 from ticketpy.query import AttractionQuery, ClassificationQuery, \
     EventQuery, VenueQuery
 
@@ -37,7 +38,7 @@ class ApiClient:
         :param method: Search type (events, venues...)
         :param kwargs: Search parameters, ex. venueId, eventId, 
             latlong, radius..
-        :return: ``PageIterator``
+        :return: ``PagedResponse``
         """
         # Remove unneeded parameters and add apikey header
         kwargs = {k: v for (k, v) in kwargs.items() if v is not None}
@@ -60,7 +61,7 @@ class ApiClient:
         response = requests.get(urls[method], params=kwargs).json()
         if 'errors' in response:
             raise ApiException(urls[method], kwargs, response)
-        return PageIterator(self, **response)
+        return PagedResponse(self, response)
 
     @property
     def api_key(self):
@@ -131,10 +132,10 @@ class ApiException(Exception):
         return '\n'.join(msgs)
 
 
-class PageIterator:
+class PagedResponse:
     """Iterates through API response pages"""
 
-    def __init__(self, api_client, **kwargs):
+    def __init__(self, api_client, response, **kwargs):
         """
         
         :param api_client: Instance of ``ticketpy.client.ApiClient``
@@ -142,13 +143,9 @@ class PageIterator:
         """
         self.api_client = api_client  #: Parent API client
         self.page = None  #: Current page
-        self.page = self.__page(**kwargs)
+        self.page = Page.from_json(response)
 
-        self.start_page = self.page.number  #: Initial page number
-        self.current_page = self.start_page  #: Current page number
-        self.end_page = self.page.total_pages  #: Final page number
-
-    def limit(self, max_pages=10):
+    def limit(self, max_pages=5):
         """Limit the number of page requests. Default: 5
 
         With a default page size of 20, ``limit(max_pages=5`` would 
@@ -166,15 +163,13 @@ class PageIterator:
             all pages.
         :return: Flat list of results from pages
         """
-        if max_pages is None:
-            return self.all()
-
         all_items = []
-        for i in range(0, max_pages):
-            try:
-                all_items += self.next()
-            except StopIteration:
+        counter = 0
+        for pg in self:
+            if counter >= max_pages:
                 break
+            counter += 1
+            all_items += pg
         return all_items
 
     def all(self):
@@ -186,56 +181,41 @@ class PageIterator:
         """
         return [i for item_list in self for i in item_list]
 
-    @staticmethod
-    def __page(**kwargs):
-        """Instantiate and return a Page(list)"""
-        page = kwargs['page']
-        links = kwargs['_links']
-
-        if 'next' not in links:
-            links_next = None
-        else:
-            links_next = links['next']['href']
-
-        return Page(page['number'], page['size'], page['totalElements'],
-                    page['totalPages'], links['self']['href'], links_next,
-                    kwargs.get('_embedded', {}))
-
-    def next(self):
-        # First call to next(), return initial page
-        if self.page.number == self.current_page:
-            self.current_page += 1
-            return [i for i in self.page]
-
-        if self.current_page >= self.end_page:
-            raise StopIteration
-
-        self.current_page += 1
-        r = requests.get(self.page.link_next,
-                         params=self.api_client.api_key).json()
-        self.page = self.__page(**r)
-
-        if self.page.link_next is None:
-            self.current_page = self.end_page
-
-        return [i for i in self.page]
-
     def __iter__(self):
-        return self
+        yield self.page
+        api_key = self.api_client.api_key
+        next_url = self.page.links.get('next')
+        while next_url:
+            next_pg = requests.get(next_url, params=api_key).json()
+            pg = Page.from_json(next_pg)
+            next_url = pg.links.get('next')
+            yield pg
 
 
 class Page(list):
     """API response page"""
 
-    def __init__(self, number, size, total_elements, total_pages,
-                 link_self, link_next, embedded):
+    def __init__(self, number=None, size=None, total_elements=None,
+                 total_pages=None):
         super().__init__([])
         self.number = number
         self.size = size
         self.total_elements = total_elements
         self.total_pages = total_pages
-        self._link_self = link_self
-        self._link_next = link_next
+
+    @staticmethod
+    def from_json(json_obj):
+        """Instantiate and return a Page(list)"""
+        p = Page()
+        _assign_links(p, json_obj, ApiClient.base_url)
+        p.number = json_obj['page']['number']
+        p.size = json_obj['page']['size']
+        p.total_pages = json_obj['page']['totalPages']
+        p.total_elements = json_obj['page']['totalElements']
+
+        embedded = json_obj.get('_embedded')
+        if not embedded:
+            return p
 
         object_models = {
             'events': Event,
@@ -246,20 +226,6 @@ class Page(list):
         for k, v in embedded.items():
             if k in object_models:
                 obj_type = object_models[k]
-                self += [obj_type.from_json(obj) for obj in v]
+                p += [obj_type.from_json(obj) for obj in v]
 
-    @property
-    def link_next(self):
-        """Link to the next page"""
-        link = "{}{}".format(ApiClient.base_url, self._link_next)
-        return link.replace('{&sort}', '')
-
-    @property
-    def link_self(self):
-        """Link to this page"""
-        return "{}{}".format(ApiClient.base_url, self._link_self)
-
-    @staticmethod
-    def from_json(json_obj):
-        
-
+        return p

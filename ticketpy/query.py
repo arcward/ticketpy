@@ -144,7 +144,7 @@ class VenueQuery(BaseQuery):
         :param size: Page size of the response (default: 20)
         :param locale: Locale (default: 'en')
         :return: Venues found matching criteria 
-        :rtype: ``ticketpy.PageIterator``
+        :rtype: ``ticketpy.PagedResponse``
         """
         r = self._get(keyword, venue_id, sort, include_test, page,
                       size, locale, state_code=state_code,

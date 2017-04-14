@@ -133,12 +133,12 @@ May 21st, 2017:</p>
 <span class="n">Genres</span><span class="p">:</span>       <span class="n">Hip</span><span class="o">-</span><span class="n">Hop</span><span class="o">/</span><span class="n">Rap</span>
 </pre></div>
 </div>
-<p>Calling <code class="docutils literal"><span class="pre">ApiClient.find()</span></code> returns a <code class="docutils literal"><span class="pre">ticketpy.PageIterator</span></code>
+<p>Calling <code class="docutils literal"><span class="pre">ApiClient.find()</span></code> returns a <code class="docutils literal"><span class="pre">ticketpy.PagedResponse</span></code>
 object, which iterates through API response pages (as <code class="docutils literal"><span class="pre">ticketpy.Page</span></code>).</p>
 <p>By default, pages have 20 elements. If there are &gt;20 total elements,
-calling <code class="docutils literal"><span class="pre">PageIterator.next()</span></code> will request the next page from the API.</p>
+calling <code class="docutils literal"><span class="pre">PagedResponse.next()</span></code> will request the next page from the API.</p>
 <p>You can simplify that/do away with the nested loop by using
-<code class="docutils literal"><span class="pre">PageIterator.limit()</span></code>. By default, this requests a maximum of 10 pages,
+<code class="docutils literal"><span class="pre">PagedResponse.limit()</span></code>. By default, this requests a maximum of 10 pages,
 and returns the elements of each in a flat list.</p>
 <p>For example, the previous example could also be written as:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ticketpy</span>

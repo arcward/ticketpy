@@ -1,22 +1,24 @@
 """Models for API objects"""
 from datetime import datetime
-
 import re
 
 
-def _assign_links(obj, json_obj):
+def _assign_links(obj, json_obj, base_url=None):
     """Assigns ``links`` attribute to an object from JSON"""
     # Normal link strucutre is {link_name: {'href': url}},
     # but some responses also have lists of other models.
     # API occasionally returns bad URLs (with {&sort} and similar)
     json_links = json_obj.get('_links')
     if not json_links:
-        obj.links = None
+        obj.links = {}
     else:
         obj_links = {}
         for k, v in json_links.items():
             if 'href' in v:
-                obj_links[k] = re.sub("({.+})", "", v['href'])
+                href = re.sub("({.+})", "", v['href'])
+                if base_url:
+                    href = "{}{}".format(base_url, href)
+                obj_links[k] = href
             else:
                 obj_links[k] = v
         obj.links = obj_links
