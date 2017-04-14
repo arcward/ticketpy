@@ -8,15 +8,26 @@ from ticketpy.query import AttractionQuery, ClassificationQuery, \
 
 
 class ApiClient:
-    """ApiClient for the Ticketmaster Discovery API
+    """ApiClient is the main wrapper for the Discovery API.
+    
+    Example
+    -------
+    
+    .. code-block:: python
+    
+        import ticketpy
+        
+        client = ticketpy.ApiClient("your_api_key")
+        r = client.venues.find(keyword="Tabernacle")
+        
 
-    Request URLs look like::
-    *http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}*
+    Request URLs end up looking like:
+    http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}
     """
     base_url = "https://app.ticketmaster.com"
 
     def __init__(self, api_key, version='v2', response_type='json'):
-        """Initialize the API client.
+        """
 
         :param api_key: Ticketmaster discovery API key
         :param version: API version (default: v2)

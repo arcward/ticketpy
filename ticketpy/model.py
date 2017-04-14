@@ -25,7 +25,7 @@ def _assign_links(obj, json_obj, base_url=None):
 
 
 class Venue:
-    """Venue
+    """A Ticketmaster venue
     
     The JSON returned from the Discovery API looks something like this 
     (*edited for brevity*):
