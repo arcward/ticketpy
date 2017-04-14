@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ticketpy package &#8212; ticketpy 1.0.5 documentation</title>
+    <title>ticketpy package &#8212; ticketpy 1.0.6 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.5',
+        VERSION:     '1.0.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="readme.html" title="ticketpy"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.5 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.6 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -285,10 +285,13 @@ all pages.</td>
 <dt id="ticketpy.query.BaseQuery">
 <em class="property">class </em><code class="descclassname">ticketpy.query.</code><code class="descname">BaseQuery</code><span class="sig-paren">(</span><em>api_client</em>, <em>method</em>, <em>model</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.BaseQuery" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base query/parent class for specific serach types.</p>
 <dl class="attribute">
 <dt id="ticketpy.query.BaseQuery.attr_map">
-<code class="descname">attr_map</code><em class="property"> = {'keyword': 'keyword', 'dma_id': 'dmaId', 'sort': 'sort', 'attraction_id': 'attractionId', 'page': 'page', 'end_date_time': 'endDateTime', 'country_code': 'countryCode', 'size': 'size', 'classification_name': 'classificationName', 'latlong': 'latlong', 'state_code': 'stateCode', 'include_tba': 'includeTBA', 'venue_id': 'venueId', 'id': 'id', 'include_test': 'includeTest', 'classification_id': 'classificationId', 'segment_id': 'segmentId', 'onsale_start_date_time': 'onsaleStartDateTime', 'client_visibility': 'clientVisibility', 'market_id': 'marketId', 'include_tbd': 'includeTBD', 'locale': 'locale', 'start_date_time': 'startDateTime', 'segment_name': 'segmentName', 'promoter_id': 'promoterId', 'onsale_end_date_time': 'onsaleEndDateTime'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">attr_map</code><em class="property"> = {'include_tba': 'includeTBA', 'venue_id': 'venueId', 'market_id': 'marketId', 'id': 'id', 'client_visibility': 'clientVisibility', 'start_date_time': 'startDateTime', 'latlong': 'latlong', 'include_test': 'includeTest', 'segment_name': 'segmentName', 'size': 'size', 'locale': 'locale', 'state_code': 'stateCode', 'onsale_start_date_time': 'onsaleStartDateTime', 'dma_id': 'dmaId', 'onsale_end_date_time': 'onsaleEndDateTime', 'segment_id': 'segmentId', 'include_tbd': 'includeTBD', 'sort': 'sort', 'classification_name': 'classificationName', 'end_date_time': 'endDateTime', 'page': 'page', 'promoter_id': 'promoterId', 'classification_id': 'classificationId', 'keyword': 'keyword', 'country_code': 'countryCode', 'attraction_id': 'attractionId'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps parameter names to parameters expected by the API
+(ex: <em>market_id</em> maps to <em>marketId</em>)</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ticketpy.query.BaseQuery.by_id">
@@ -1035,7 +1038,7 @@ what&#8217;s being used here) looks like:</p>
         <li class="right" >
           <a href="readme.html" title="ticketpy"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.5 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.0.6 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

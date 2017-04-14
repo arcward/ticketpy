@@ -4,6 +4,9 @@ from ticketpy.model import Venue, Event, Attraction, Classification
 
 
 class BaseQuery:
+    """Base query/parent class for specific serach types."""
+    #: Maps parameter names to parameters expected by the API
+    #: (ex: *market_id* maps to *marketId*)
     attr_map = {
         'start_date_time': 'startDateTime',
         'end_date_time': 'endDateTime',
@@ -34,11 +37,19 @@ class BaseQuery:
     }
 
     def __init__(self, api_client, method, model):
+        """
+        
+        :param api_client: Instance of ``ticketpy.client.ApiClient``
+        :param method: API method (ex: *events*, *venues*...)
+        :param model: Model from ``ticketpy.model``. Either 
+            ``Event``, ``Venue``, ``Attraction`` or ``Classification``
+        """
         self.api_client = api_client
         self.method = method
         self.model = model
 
     def __get(self, **kwargs):
+        """Sends final request to ``ApiClient``"""
         response = self.api_client._search(self.method, **kwargs)
         return response
 
@@ -82,6 +93,14 @@ class BaseQuery:
         return self.model.from_json(r)
 
     def _search_params(self, **kwargs):
+        """Returns API-friendly search parameters from kwargs
+        
+        Maps parameter names to ``self.attr_map`` and removes 
+        paramters == ``None``
+        
+        :param kwargs: Keyword arguments
+        :return: API-friendly parameters
+        """
         # Update search parameters with kwargs
         kw_map = {}
         for k, v in kwargs.items():
@@ -277,6 +296,10 @@ class AttractionQuery(BaseQuery):
     """Query class for Attractions"""
 
     def __init__(self, api_client):
+        """
+        
+        :param api_client: Instance of ``ticketpy.client.ApiClient``
+        """
         self.api_client = api_client
         super().__init__(api_client, 'attractions', Attraction)
 
@@ -311,6 +334,10 @@ class ClassificationQuery(BaseQuery):
     query_subclass_id = BaseQuery.by_id
 
     def __init__(self, api_client):
+        """
+        
+        :param api_client: Instance of ``ticketpy.client.ApiClient``
+        """
         super().__init__(api_client, 'classifications', Classification)
 
     def find(self, sort=None, keyword=None, classification_id=None,

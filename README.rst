@@ -1,7 +1,7 @@
 ticketpy
 ========
 
-**Client/library for Ticketmaster's Discovery API**
+**Python wrapper/SDK for Ticketmaster's Discovery API**
 
 More info:
 http://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
@@ -226,7 +226,7 @@ For example,
 
 Output::
 
-    Name: Music / Type: <class 'ticketpy.ticketpy.Segment'>
-    Name: Jazz / Type: <class 'ticketpy.ticketpy.Genre'>
-    Name: Bebop / Type: <class 'ticketpy.ticketpy.SubGenre'>
+    Name: Music / Type: <class 'ticketpy.model.Segment'>
+    Name: Jazz / Type: <class 'ticketpy.model.Genre'>
+    Name: Bebop / Type: <class 'ticketpy.model.SubGenre'>
 

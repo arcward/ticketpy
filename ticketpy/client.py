@@ -113,6 +113,13 @@ class ApiClient:
 
     @staticmethod
     def __yes_no_only(s):
+        """Sanitizes some yes/no synonyms to API-friendly values
+        
+        Booleans returned as 'yes' or 'no' and strings matched to yes/no
+        
+        :param s: str/bool to fix
+        :return: 'yes' 'no' or 'only' (or the original str in lowercase)
+        """
         if s in ['yes', 'no', 'only']:
             pass
         elif s == True:
@@ -157,6 +164,11 @@ class PageIterator:
     """Iterates through API response pages"""
 
     def __init__(self, api_client, **kwargs):
+        """
+        
+        :param api_client: Instance of ``ticketpy.client.ApiClient``
+        :param kwargs: 
+        """
         self.api_client = api_client  #: Parent API client
         self.page = None  #: Current page
         self.page = self.__page(**kwargs)
