@@ -51,13 +51,26 @@ class TestApiClient(TestCase):
         expected_url = "https://app.ticketmaster.com/discovery/v2/venues.json"
         self.assertEqual(self.api_client.venues_url, expected_url)
 
-    def test__search(self):
+    def test__bad_request(self):
         # Should be 'events' or 'venues' and anything else: ValueError!
         self.assertRaises(ValueError, self.api_client._search, 'asdf')
 
         # Radius should be a whole number, so 1.5 should raise ApiException
+        radius = '1.5'
+        lat = '33.7838737'
+        long = '-84.366088'
+
         self.assertRaises(ApiException, self.api_client._search, 'events',
-                          latlon='33.7838737, -84.366088', radius='1.5')
+                          latlon="{},{}".format(lat, long), radius=radius)
+
+        # Make sure ApiException.__str__() hasn't broken for some reason...
+        try:
+            r = self.api_client.events.by_location(latitude=lat,
+                                                   longitude=long,
+                                                   radius=radius)
+        except ApiException as e:
+            print(e)
+
 
     def test___yes_no_only(self):
         yno = self.api_client._ApiClient__yes_no_only
@@ -162,6 +175,10 @@ class TestTicketpy(TestCase):
         print(sg)
         self.assertEqual(subgenre_id, sg.id)
         self.assertEqual(subgenre_name, sg.name)
+
+        fake_id = "afkjsdlfjkasdf"
+        fake_response = self.tm.classifications.by_id(fake_id)
+        self.assertIsNone(fake_response)
 
     def test_get_event_id(self):
         event_id = 'vvG1zZfbJQpVWp'

@@ -33,7 +33,8 @@ class BaseQuery:
         'page': 'page',
         'size': 'size',
         'locale': 'locale',
-        'latlong': 'latlong'
+        'latlong': 'latlong',
+        'radius': 'radius'
     }
 
     def __init__(self, api_client, method, model):
@@ -108,6 +109,8 @@ class BaseQuery:
             if k in self.attr_map.keys():
                 kw_map[self.attr_map[k]] = v
             elif k in self.attr_map.values():
+                kw_map[k] = v
+            else:
                 kw_map[k] = v
 
         return {k: v for (k, v) in kw_map.items() if v is not None}

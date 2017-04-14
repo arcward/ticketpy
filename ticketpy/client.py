@@ -70,12 +70,18 @@ class ApiClient:
         return PageIterator(self, **response)
 
     @property
+    def api_key(self):
+        """API key header to pass with API requests"""
+        return {'apikey': self.__api_key}
+
+    @api_key.setter
+    def api_key(self, api_key):
+        self.__api_key = api_key
+
+    @property
     def url(self):
         """Root URL"""
         return "{}/discovery/{}".format(self.base_url, self.version)
-
-    def __method_url(self, method):
-        return "{}/{}.{}".format(self.url, method, self.response_type)
 
     @property
     def events_url(self):
@@ -97,14 +103,15 @@ class ApiClient:
         """URL for */attractions/*"""
         return self.__method_url('classifications')
 
-    @property
-    def api_key(self):
-        """API key header to pass with API requests"""
-        return {'apikey': self.__api_key}
+    def __method_url(self, method):
+        """Formats search method URL
 
-    @api_key.setter
-    def api_key(self, api_key):
-        self.__api_key = api_key
+        :param method: Method (ex: 'events' 'venues' ...)
+        :return: Search method URL
+        """
+        return "{}/{}.{}".format(self.url, method, self.response_type)
+
+
 
     # noinspection PyPep8,PySimplifyBooleanCheck
     @staticmethod
@@ -144,15 +151,12 @@ class ApiException(Exception):
                 "Status: {status}")
         msgs = []
         for e in self.errors:
-            msgs.append(tmpl.format(
-                url=self.url,
-                sp=', '.join('({}={})'.format(k, v) for
-                             (k, v) in self.params.items()),
-                code=e['code'],
-                status=e['status'],
-                detail=e['detail'],
-                link=e['_links']['about']['href']
-            ))
+            sp_joined = ', '.join('({}={})'.format(k, v)
+                                  for (k, v) in self.params.items())
+            msgs.append(tmpl.format(url=self.url, code=e['code'],
+                                    status=e['status'], detail=e['detail'],
+                                    link=e['_links']['about']['href'],
+                                    sp=sp_joined))
         return '\n'.join(msgs)
 
 
