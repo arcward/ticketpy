@@ -17,12 +17,9 @@ def haversine(latlon1, latlon2):
     # convert decimal degrees to radians
     lat1 = float(latlon1['latitude'])
     lon1 = float(latlon1['longitude'])
-
     lat2 = float(latlon2['latitude'])
     lon2 = float(latlon2['longitude'])
-
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-
     # haversine formula
     dlon = lon2 - lon1
     dlat = lat2 - lat1

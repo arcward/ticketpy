@@ -1,17 +1,14 @@
 """Models for API objects"""
 from datetime import datetime
 
+import re
+
 
 def _assign_links(obj, json_obj):
-    """Assigns ``links`` attribute to the given object from JSON
-
-    :param obj: Model object (such as an ``Event()`` object)
-    :param json_obj: JSON from API response
-    :return: 
-    """
-    # If the structure doesn't have _links, don't bother.
+    """Assigns ``links`` attribute to an object from JSON"""
     # Normal link strucutre is {link_name: {'href': url}},
-    # but some responses also have lists of other models
+    # but some responses also have lists of other models.
+    # API occasionally returns bad URLs (with {&sort} and similar)
     json_links = json_obj.get('_links')
     if not json_links:
         obj.links = None
@@ -19,14 +16,14 @@ def _assign_links(obj, json_obj):
         obj_links = {}
         for k, v in json_links.items():
             if 'href' in v:
-                obj_links[k] = v['href']
+                obj_links[k] = re.sub("({.+})", "", v['href'])
             else:
                 obj_links[k] = v
         obj.links = obj_links
 
 
 class Venue:
-    """A Ticketmaster venue
+    """Venue
     
     The JSON returned from the Discovery API looks something like this 
     (*edited for brevity*):
@@ -78,29 +75,30 @@ class Venue:
                  social=None, timezone=None, images=None,
                  parking_detail=None, accessible_seating_detail=None,
                  links=None):
-        self.name = name  #: Venue's name
-        self.id = venue_id  #: Venue ID (use to look up events)
-        self.address = address  #: Street address (first line)
-        self.postal_code = postal_code  #: Zip/postal code
-        self.city = city  #: City name
-        self.state_code = state_code  #: State code (ex: 'GA' not 'Georgia')
-        self.latitude = latitude  #: Latitude
-        self.longitude = longitude  #: Longitude
-        self.timezone = timezone  #: Timezone venue's located in
-        self.url = url  #: Ticketmaster internal venue URL
+        self.name = name
+        self.id = venue_id
+        self.address = address
+        self.postal_code = postal_code
+        self.city = city
+        #: State code (ex: 'GA' not 'Georgia')
+        self.state_code = state_code
+        self.latitude = latitude
+        self.longitude = longitude
+        self.timezone = timezone
+        self.url = url
         self.box_office_info = box_office_info
-        self.dmas = dmas  # TODO what is this
-        self.markets = markets  #: List of market IDs
-        self.general_info = general_info  #: General info on the venue
-        self.social = social  #: Social media links (Twitter, etc)
-        self.images = images  #: Ticketmaster venue image links
-        self.parking_detail = parking_detail  #: Parking details
+        self.dmas = dmas
+        self.markets = markets
+        self.general_info = general_info
+        self.social = social
+        self.images = images
+        self.parking_detail = parking_detail
         self.accessible_seating_detail = accessible_seating_detail
         self.links = links
 
     @property
     def location(self):
-        """All location-based data (full address, lat/lon, timezone"""
+        """Location-based data (full address, lat/lon, timezone"""
         return {
             'address': self.address,
             'postal_code': self.postal_code,
@@ -113,11 +111,7 @@ class Venue:
 
     @staticmethod
     def from_json(json_venue):
-        """Create a `Venue` object from the API response's JSON data
-        
-        :param json_venue: Deserialized JSON from API response
-        :return: `ticketpy.Venue`
-        """
+        """Returns a ``Venue`` object from JSON"""
         v = Venue()
         v.id = json_venue['id']
         v.name = json_venue['name']
@@ -126,7 +120,6 @@ class Venue:
         if 'markets' in json_venue:
             v.markets = [m['id'] for m in json_venue['markets']]
 
-        # Location data
         v.postal_code = json_venue.get('postalCode')
 
         if 'city' in json_venue:
@@ -142,7 +135,6 @@ class Venue:
         if 'state' in json_venue:
             v.state_code = json_venue['state']['stateCode']
 
-        # Other general data
         v.general_info = json_venue.get('generalInfo')
         v.box_office_info = json_venue.get('boxOfficeInfo')
         v.dmas = json_venue.get('dmas')
@@ -160,7 +152,7 @@ class Venue:
 
 
 class Event:
-    """Ticketmaster event.
+    """Ticketmaster event
     
     The JSON returned from the Discovery API (at least, as far as 
     what's being used here) looks like:
@@ -217,13 +209,9 @@ class Event:
         self.local_start_time = start_time
         #: Sale status (such as *Cancelled, Offsale...*)
         self.status = status
-        #: List of classifications
         self.classifications = classifications
-        #: Price ranges found for tickets
         self.price_ranges = price_ranges
-        #: List of ``ticketpy.Venue`` objects associated with this event
         self.venues = venues
-        #: API links
         self.links = links
 
         self.__utc_datetime = None
@@ -232,11 +220,7 @@ class Event:
 
     @property
     def utc_datetime(self):
-        """Start date/time in UTC (Format: *YYYY-MM-DDTHH:MM:SSZ*)
-        
-        :return: Start date/time in UTC
-        :rtype: ``datetime``
-        """
+        """Start date/time in UTC (*YYYY-MM-DDTHH:MM:SSZ*)"""
         return self.__utc_datetime
 
     @utc_datetime.setter
@@ -249,23 +233,17 @@ class Event:
 
     @staticmethod
     def from_json(json_event):
-        """Creates an ``Event`` from API's JSON response
-        
-        :param json_event: Deserialized JSON object from API response
-        :return: `ticketpy.Event`
-        """
+        """Creates an ``Event`` from API's JSON response"""
         e = Event()
         e.id = json_event['id']
         e.name = json_event.get('name')
 
-        # Dates/times
         dates = json_event.get('dates')
         start_dates = dates.get('start', {})
         e.local_start_date = start_dates.get('localDate')
         e.local_start_time = start_dates.get('localTime')
         e.utc_datetime = start_dates.get('dateTime')
 
-        # Event status (ex: 'onsale')
         status = dates.get('status', {})
         e.status = status.get('code')
 
@@ -273,14 +251,12 @@ class Event:
             e.classifications = [EventClassification.from_json(cl)
                                  for cl in json_event['classifications']]
 
-        # min/max price ranges
         price_ranges = []
         if 'priceRanges' in json_event:
             for pr in json_event['priceRanges']:
                 price_ranges.append({'min': pr['min'], 'max': pr['max']})
         e.price_ranges = price_ranges
 
-        # venue list (occasionally >1 venue)
         venues = []
         if 'venues' in json_event.get('_embedded', {}):
             for v in json_event['_embedded']['venues']:
@@ -318,18 +294,8 @@ class Event:
 
 class Attraction:
     """Attraction"""
-
     def __init__(self, attraction_id=None, attraction_name=None, url=None,
                  classifications=None, images=None, test=None, links=None):
-        """
-
-        :param attraction_id: Attraction ID
-        :param attraction_name: Name of the attraction (ex: '*U2*'
-        :param url: Ticketmaster URL
-        :param classifications: Genres, subgenres, etc
-        :param images: Images
-        :param test: Test (bool)
-        """
         self.id = attraction_id
         self.name = attraction_name
         self.url = url
@@ -362,18 +328,18 @@ class Attraction:
 class EventClassification:
     """Classification as it's represented in event search results
     
-    See Classification() for results from classification searches
+    See ``Classification()`` for results from classification searches
     """
     def __init__(self, genre=None, subgenre=None, segment=None,
                  classification_type=None, classification_subtype=None,
                  primary=None, links=None):
-        self.genre = genre  #: ``Genre()``
-        self.subgenre = subgenre  #: ``SubGenre()``
-        self.segment = segment  #: ``Segment()``
-        self.type = classification_type  #: ``ClassificationType()``
-        self.subtype = classification_subtype  #: ``ClassificationSubType()``
-        self.primary = primary  #: Bool
-        self.links = links  #: API links
+        self.genre = genre
+        self.subgenre = subgenre
+        self.segment = segment
+        self.type = classification_type
+        self.subtype = classification_subtype
+        self.primary = primary
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):
@@ -412,15 +378,15 @@ class Classification:
     """
     def __init__(self, segment=None, classification_type=None, subtype=None,
                  primary=None, links=None):
-        self.segment = segment  #: ``Segment()``
-        self.type = classification_type  #: ``ClassificationType()``
-        self.subtype = subtype  #: ``ClassifictionSubType()``
-        self.primary = primary  #: Boolean
-        self.links = links  #: API links
+        self.segment = segment
+        self.type = classification_type
+        self.subtype = subtype
+        self.primary = primary
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):
-        """Create/return ``Classification()`` from JSON"""
+        """Create/return ``Classification`` object from JSON"""
         cl = Classification()
         cl.primary = json_obj.get('primary')
 
@@ -466,8 +432,8 @@ class Segment:
                  links=None):
         self.id = segment_id
         self.name = segment_name
-        self.genres = genres  #: List of ``Genre`` objects
-        self.links = links  #: API links
+        self.genres = genres
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):
@@ -493,8 +459,8 @@ class Genre:
                  links=None):
         self.id = genre_id
         self.name = genre_name
-        self.subgenres = subgenres  #: List of ``SubGenre`` objects
-        self.links = links  #: API links
+        self.subgenres = subgenres
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):

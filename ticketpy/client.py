@@ -204,18 +204,14 @@ class PageIterator:
             self.current_page += 1
             return [i for i in self.page]
 
-        # No more pages!
         if self.current_page >= self.end_page:
             raise StopIteration
 
-        # Or, keep going
         self.current_page += 1
         r = requests.get(self.page.link_next,
                          params=self.api_client.api_key).json()
         self.page = self.__page(**r)
 
-        # If 'next' link goes missing, there were fewer pages than
-        # expected for some reason
         if self.page.link_next is None:
             self.current_page = self.end_page
 
