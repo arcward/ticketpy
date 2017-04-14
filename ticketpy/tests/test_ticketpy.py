@@ -1,8 +1,8 @@
 from unittest import TestCase
 from configparser import ConfigParser
 import os
-from ticketpy import ticketpy
-from ticketpy.ticketpy import ApiException
+import ticketpy
+from ticketpy.client import ApiException
 from math import radians, cos, sin, asin, sqrt
 
 

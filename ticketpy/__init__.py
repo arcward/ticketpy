@@ -1,3 +1,3 @@
-from ticketpy.ticketpy import ApiClient
+from ticketpy.client import ApiClient
 
-__all__ = ['ticketpy']
+__all__ = ['client', 'model', 'query']
