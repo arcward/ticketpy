@@ -9,17 +9,17 @@ def _assign_links(obj, json_obj):
     :param json_obj: JSON from API response
     :return: 
     """
-    # If the structure doesn't have _links, don't bother
+    # If the structure doesn't have _links, don't bother.
+    # Normal link strucutre is {link_name: {'href': url}},
+    # but some responses also have lists of other models
     json_links = json_obj.get('_links')
     if not json_links:
         obj.links = None
     else:
         obj_links = {}
         for k, v in json_links.items():
-            # Normal structure with {link_name: {'href': url}}
             if 'href' in v:
                 obj_links[k] = v['href']
-            # Some responses add objects into the links section, leave as-is
             else:
                 obj_links[k] = v
         obj.links = obj_links
@@ -277,10 +277,7 @@ class Event:
         price_ranges = []
         if 'priceRanges' in json_event:
             for pr in json_event['priceRanges']:
-                price_ranges.append({
-                    'min': pr['min'],
-                    'max': pr['max']
-                })
+                price_ranges.append({'min': pr['min'], 'max': pr['max']})
         e.price_ranges = price_ranges
 
         # venue list (occasionally >1 venue)

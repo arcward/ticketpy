@@ -51,7 +51,7 @@ class BaseQuery:
 
     def __get(self, **kwargs):
         """Sends final request to ``ApiClient``"""
-        response = self.api_client._search(self.method, **kwargs)
+        response = self.api_client.search(self.method, **kwargs)
         return response
 
     def _get(self, keyword=None, entity_id=None, sort=None, include_test=None,

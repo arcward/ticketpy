@@ -43,34 +43,28 @@ class TestApiClient(TestCase):
         expected_url = "https://app.ticketmaster.com/discovery/v2"
         self.assertEqual(self.api_client.url, expected_url)
 
-    def test_events_url(self):
+    def test_method_url(self):
+        murl = self.api_client._ApiClient__method_url
         expected_url = "https://app.ticketmaster.com/discovery/v2/events.json"
-        self.assertEqual(self.api_client.events_url, expected_url)
-
-    def test_venues_url(self):
-        expected_url = "https://app.ticketmaster.com/discovery/v2/venues.json"
-        self.assertEqual(self.api_client.venues_url, expected_url)
+        events_url = murl('events')
+        self.assertEqual(expected_url, events_url)
 
     def test__bad_request(self):
-        # Should be 'events' or 'venues' and anything else: ValueError!
-        self.assertRaises(ValueError, self.api_client._search, 'asdf')
-
         # Radius should be a whole number, so 1.5 should raise ApiException
         radius = '1.5'
         lat = '33.7838737'
         long = '-84.366088'
 
-        self.assertRaises(ApiException, self.api_client._search, 'events',
+        self.assertRaises(ApiException, self.api_client.search, 'events',
                           latlon="{},{}".format(lat, long), radius=radius)
 
         # Make sure ApiException.__str__() hasn't broken for some reason...
         try:
-            r = self.api_client.events.by_location(latitude=lat,
-                                                   longitude=long,
-                                                   radius=radius)
+            self.api_client.events.by_location(latitude=lat,
+                                               longitude=long,
+                                               radius=radius)
         except ApiException as e:
             print(e)
-
 
     def test___yes_no_only(self):
         yno = self.api_client._ApiClient__yes_no_only
@@ -87,6 +81,9 @@ class TestApiClient(TestCase):
         self.assertEqual(yno('only'), 'only')
         self.assertEqual(yno('ONLY'), 'only')
         self.assertEqual(yno('Only'), 'only')
+
+        self.assertEqual(yno('asdf'), 'asdf')
+        self.assertEqual(yno('Asdf'), 'asdf')
 
 
 class TestVenueQuery(TestCase):

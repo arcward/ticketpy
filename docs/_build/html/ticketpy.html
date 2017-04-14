@@ -69,27 +69,9 @@
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ticketpy.client.ApiClient.attractions_url">
-<code class="descname">attractions_url</code><a class="headerlink" href="#ticketpy.client.ApiClient.attractions_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>URL for <em>/attractions/</em></p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ticketpy.client.ApiClient.base_url">
 <code class="descname">base_url</code><em class="property"> = 'https://app.ticketmaster.com'</em><a class="headerlink" href="#ticketpy.client.ApiClient.base_url" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.client.ApiClient.classifications_url">
-<code class="descname">classifications_url</code><a class="headerlink" href="#ticketpy.client.ApiClient.classifications_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>URL for <em>/attractions/</em></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.client.ApiClient.events_url">
-<code class="descname">events_url</code><a class="headerlink" href="#ticketpy.client.ApiClient.events_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>URL for <em>/events/</em></p>
-</dd></dl>
 
 <dl class="attribute">
 <dt id="ticketpy.client.ApiClient.response_type">
@@ -97,16 +79,28 @@
 <dd><p>Response type (json, xml...)</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ticketpy.client.ApiClient.search">
+<code class="descname">search</code><span class="sig-paren">(</span><em>method</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiClient.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic method for API requests.
+:param method: Search type (events, venues...)
+:param kwargs: Search parameters, ex. venueId, eventId,</p>
+<blockquote>
+<div>latlong, radius..</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">PageIterator</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ticketpy.client.ApiClient.url">
 <code class="descname">url</code><a class="headerlink" href="#ticketpy.client.ApiClient.url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Root URL</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.client.ApiClient.venues_url">
-<code class="descname">venues_url</code><a class="headerlink" href="#ticketpy.client.ApiClient.venues_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>URL for <em>/venues/</em></p>
 </dd></dl>
 
 </dd></dl>
@@ -133,30 +127,6 @@
 <dt id="ticketpy.client.Page.link_self">
 <code class="descname">link_self</code><a class="headerlink" href="#ticketpy.client.Page.link_self" title="Permalink to this definition">¶</a></dt>
 <dd><p>Link to this page</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.client.Page.number">
-<code class="descname">number</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.client.Page.number" title="Permalink to this definition">¶</a></dt>
-<dd><p>Page number</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.client.Page.size">
-<code class="descname">size</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.client.Page.size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Page size</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.client.Page.total_elements">
-<code class="descname">total_elements</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.client.Page.total_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Total elements (all pages)</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.client.Page.total_pages">
-<code class="descname">total_pages</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.client.Page.total_pages" title="Permalink to this definition">¶</a></dt>
-<dd><p>Total pages</p>
 </dd></dl>
 
 </dd></dl>
@@ -288,7 +258,7 @@ all pages.</td>
 <p>Base query/parent class for specific serach types.</p>
 <dl class="attribute">
 <dt id="ticketpy.query.BaseQuery.attr_map">
-<code class="descname">attr_map</code><em class="property"> = {'locale': 'locale', 'country_code': 'countryCode', 'end_date_time': 'endDateTime', 'onsale_start_date_time': 'onsaleStartDateTime', 'segment_id': 'segmentId', 'dma_id': 'dmaId', 'sort': 'sort', 'promoter_id': 'promoterId', 'include_tba': 'includeTBA', 'classification_name': 'classificationName', 'market_id': 'marketId', 'radius': 'radius', 'client_visibility': 'clientVisibility', 'id': 'id', 'keyword': 'keyword', 'page': 'page', 'segment_name': 'segmentName', 'size': 'size', 'attraction_id': 'attractionId', 'latlong': 'latlong', 'classification_id': 'classificationId', 'venue_id': 'venueId', 'onsale_end_date_time': 'onsaleEndDateTime', 'start_date_time': 'startDateTime', 'include_tbd': 'includeTBD', 'include_test': 'includeTest', 'state_code': 'stateCode'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attr_map</code><em class="property"> = {'onsale_start_date_time': 'onsaleStartDateTime', 'promoter_id': 'promoterId', 'sort': 'sort', 'end_date_time': 'endDateTime', 'market_id': 'marketId', 'include_tba': 'includeTBA', 'venue_id': 'venueId', 'start_date_time': 'startDateTime', 'radius': 'radius', 'latlong': 'latlong', 'classification_name': 'classificationName', 'include_tbd': 'includeTBD', 'dma_id': 'dmaId', 'state_code': 'stateCode', 'onsale_end_date_time': 'onsaleEndDateTime', 'segment_id': 'segmentId', 'attraction_id': 'attractionId', 'size': 'size', 'segment_name': 'segmentName', 'keyword': 'keyword', 'id': 'id', 'country_code': 'countryCode', 'include_test': 'includeTest', 'client_visibility': 'clientVisibility', 'locale': 'locale', 'page': 'page', 'classification_id': 'classificationId'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps parameter names to parameters expected by the API
 (ex: <em>market_id</em> maps to <em>marketId</em>)</p>
 </dd></dl>

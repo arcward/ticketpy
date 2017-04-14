@@ -29,44 +29,34 @@ class ApiClient:
         self.attractions = AttractionQuery(api_client=self)
         self.classifications = ClassificationQuery(api_client=self)
 
-    def _search(self, method, **kwargs):
+    def search(self, method, **kwargs):
         """Generic method for API requests.
         :param method: Search type (events, venues...)
         :param kwargs: Search parameters, ex. venueId, eventId, 
             latlong, radius..
         :return: ``PageIterator``
         """
-        # Get basic request URL
-        if method == 'events':
-            search_url = self.events_url
-        elif method == 'venues':
-            search_url = self.venues_url
-        elif method == 'attractions':
-            search_url = self.attractions_url
-        elif method == 'classifications':
-            search_url = self.classifications_url
-        else:
-            methods = ['events', 'venues', 'attractions', 'classifications']
-            raise ValueError("Received: '{}' but was expecting "
-                             "one of: {}".format(method, methods))
-
-        # Make updates to parameters. Add apikey, make sure params that
-        # may be passed as integers are cast, and cast bools to 'yes' 'no'
+        # Remove unneeded parameters and add apikey header
         kwargs = {k: v for (k, v) in kwargs.items() if v is not None}
         updates = self.api_key
 
+        # Cast bools to 'yes' 'no' and integers to str
         for k, v in kwargs.items():
             if k in ['includeTBA', 'includeTBD', 'includeTest']:
                 updates[k] = self.__yes_no_only(v)
             elif k in ['size', 'radius', 'marketId']:
                 updates[k] = str(v)
-
         kwargs.update(updates)
-        response = requests.get(search_url, params=kwargs).json()
 
+        urls = {
+            'events': self.__method_url('events'),
+            'venues': self.__method_url('venues'),
+            'attractions': self.__method_url('attractions'),
+            'classifications': self.__method_url('classifications')
+        }
+        response = requests.get(urls[method], params=kwargs).json()
         if 'errors' in response:
-            raise ApiException(search_url, kwargs, response)
-
+            raise ApiException(urls[method], kwargs, response)
         return PageIterator(self, **response)
 
     @property
@@ -83,26 +73,6 @@ class ApiClient:
         """Root URL"""
         return "{}/discovery/{}".format(self.base_url, self.version)
 
-    @property
-    def events_url(self):
-        """URL for */events/*"""
-        return self.__method_url('events')
-
-    @property
-    def venues_url(self):
-        """URL for */venues/*"""
-        return self.__method_url('venues')
-
-    @property
-    def attractions_url(self):
-        """URL for */attractions/*"""
-        return self.__method_url('attractions')
-
-    @property
-    def classifications_url(self):
-        """URL for */attractions/*"""
-        return self.__method_url('classifications')
-
     def __method_url(self, method):
         """Formats search method URL
 
@@ -111,52 +81,50 @@ class ApiClient:
         """
         return "{}/{}.{}".format(self.url, method, self.response_type)
 
-
-
-    # noinspection PyPep8,PySimplifyBooleanCheck
     @staticmethod
     def __yes_no_only(s):
-        """Sanitizes some yes/no synonyms to API-friendly values
+        """Helper function for parameters expecting yes/no/only
         
-        Booleans returned as 'yes' or 'no' and strings matched to yes/no
-        
-        :param s: str/bool to fix
+        :param s: str/bool to change
         :return: 'yes' 'no' or 'only' (or the original str in lowercase)
         """
-        if s in ['yes', 'no', 'only']:
-            pass
-        elif s == True:
+        s = str(s).lower()
+        if s in ['true', 'yes']:
             s = 'yes'
-        elif s == False:
+        elif s in ['false', 'no']:
             s = 'no'
-        else:
-            s = s.lower()
         return s
 
 
 class ApiException(Exception):
     """Exception thrown for API-related error messages"""
     def __init__(self, url, params, response):
+        """
+        
+        :param url: Original request url
+        :param params: Request parameters
+        :param response: Request response
+        """
         self.url = url
         del params['apikey']
         self.params = params
         self.errors = response['errors']
         super().__init__()
 
-    def __str__(self):
-        tmpl = ("Reason: {detail}\n"
-                "Request URL: {url}\n"
-                "Query parameters: {sp}\n"
-                "Code: {code} ({link})\n"
+    def __msg(self, error):
+        """Format an error message"""
+        tmpl = ("Reason: {detail}\nRequest URL: {url}\n"
+                "Query parameters: {sp}\nCode: {code} ({link})\n"
                 "Status: {status}")
-        msgs = []
-        for e in self.errors:
-            sp_joined = ', '.join('({}={})'.format(k, v)
+        search_params = ', '.join("({}={})".format(k, v)
                                   for (k, v) in self.params.items())
-            msgs.append(tmpl.format(url=self.url, code=e['code'],
-                                    status=e['status'], detail=e['detail'],
-                                    link=e['_links']['about']['href'],
-                                    sp=sp_joined))
+        return tmpl.format(url=self.url, code=error['code'],
+                           status=error['status'], detail=error['detail'],
+                           link=error['_links']['about']['href'],
+                           sp=search_params)
+
+    def __str__(self):
+        msgs = [self.__msg(e) for e in self.errors]
         return '\n'.join(msgs)
 
 
@@ -176,9 +144,6 @@ class PageIterator:
         self.start_page = self.page.number  #: Initial page number
         self.current_page = self.start_page  #: Current page number
         self.end_page = self.page.total_pages  #: Final page number
-
-    def __iter__(self):
-        return self
 
     def limit(self, max_pages=10):
         """Limit the number of page requests. Default: 5
@@ -222,7 +187,6 @@ class PageIterator:
     def __page(**kwargs):
         """Instantiate and return a Page(list)"""
         page = kwargs['page']
-
         links = kwargs['_links']
 
         if 'next' not in links:
@@ -230,44 +194,35 @@ class PageIterator:
         else:
             links_next = links['next']['href']
 
-        return Page(
-            page['number'],
-            page['size'],
-            page['totalElements'],
-            page['totalPages'],
-            links['self']['href'],
-            links_next,
-            kwargs.get('_embedded', {})
-        )
+        return Page(page['number'], page['size'], page['totalElements'],
+                    page['totalPages'], links['self']['href'], links_next,
+                    kwargs.get('_embedded', {}))
 
     def next(self):
-        # Return initial Page result if we haven't yet
+        # First call to next(), return initial page
         if self.page.number == self.current_page:
             self.current_page += 1
             return [i for i in self.page]
 
-        # StopIteration if we know we've run out of pages.
-        # Check for current>end as empty results still return
-        # a page and increment the counter.
+        # No more pages!
         if self.current_page >= self.end_page:
             raise StopIteration
 
-        # Otherwise, +1 our count and pull the next page
+        # Or, keep going
         self.current_page += 1
         r = requests.get(self.page.link_next,
                          params=self.api_client.api_key).json()
-
         self.page = self.__page(**r)
 
         # If 'next' link goes missing, there were fewer pages than
-        # expected for some reason, so bump current_page to end_page to
-        # throw StopIteration next time next() is called
+        # expected for some reason
         if self.page.link_next is None:
             self.current_page = self.end_page
 
         return [i for i in self.page]
 
-    __next__ = next
+    def __iter__(self):
+        return self
 
 
 class Page(list):
@@ -276,28 +231,23 @@ class Page(list):
     def __init__(self, number, size, total_elements, total_pages,
                  link_self, link_next, embedded):
         super().__init__([])
-        self.number = number  #: Page number
-        self.size = size  #: Page size
-        self.total_elements = total_elements  #: Total elements (all pages)
-        self.total_pages = total_pages  #: Total pages
+        self.number = number
+        self.size = size
+        self.total_elements = total_elements
+        self.total_pages = total_pages
+        self._link_self = link_self
+        self._link_next = link_next
 
-        self._link_self = link_self  #: Link to this page
-        self._link_next = link_next  #: Link to the next page
-
-        # Parse embedded objects and add them to ourself
-        items = []
-        if 'events' in embedded:
-            items = [Event.from_json(e) for e in embedded['events']]
-        elif 'venues' in embedded:
-            items = [Venue.from_json(v) for v in embedded['venues']]
-        elif 'attractions' in embedded:
-            items = [Attraction.from_json(a) for a in embedded['attractions']]
-        elif 'classifications' in embedded:
-            items = [Classification.from_json(cl) for cl in
-                     embedded['classifications']]
-
-        for i in items:
-            self.append(i)
+        object_models = {
+            'events': Event,
+            'venues': Venue,
+            'attractions': Attraction,
+            'classifications': Classification
+        }
+        for k, v in embedded.items():
+            if k in object_models:
+                obj_type = object_models[k]
+                self += [obj_type.from_json(obj) for obj in v]
 
     @property
     def link_next(self):
@@ -309,9 +259,3 @@ class Page(list):
     def link_self(self):
         """Link to this page"""
         return "{}{}".format(ApiClient.base_url, self._link_self)
-
-
-
-
-
-
