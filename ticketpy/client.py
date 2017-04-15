@@ -71,6 +71,27 @@ class ApiClient:
             raise ApiException(urls[method], kwargs, response)
         return PagedResponse(self, response)
 
+    def get_url(self, link):
+        """Gets a specific href from '_links' object in a response"""
+        # API sometimes return incorrectly-formatted strings, need
+        # to parse out parameters and pass them into a new request
+        # rather than implicitly trusting the href in _links
+        link_arr = link.split('?')
+        params = self._link_params(link_arr[1])
+        resp = requests.get(link_arr[0], params).json()
+        if 'errors' in resp:
+            raise ApiException(link, params, resp)
+        return Page.from_json(resp)
+
+    def _link_params(self, param_str):
+        """Parse URL parameters from href split on '?' character"""
+        search_params = {}
+        params = parse.parse_qs(param_str)
+        for k, v in params.items():
+            search_params[k] = v[0]
+            search_params.update(self.api_key)
+        return search_params
+
     @property
     def api_key(self):
         return self.__api_key
@@ -83,7 +104,7 @@ class ApiClient:
     @staticmethod
     def __method_url(method):
         """Formats a search method URL"""
-        return "{}/{}".format(ApiClient.url, method)
+        return "{}/{}.json".format(ApiClient.url, method)
 
     @staticmethod
     def __yes_no_only(s):
@@ -168,14 +189,12 @@ class PagedResponse:
 
     def __iter__(self):
         yield self.page
-        api_key = self.api_client.api_key
         next_url = self.page.links.get('next')
-        par = parse.parse_qs(next_url)
-        print('')
         while next_url:
-            next_pg = requests.get(next_url, params=api_key).json()
-            if 'errors' in next_pg:
-                raise ApiException(next_url, None, next_pg)
-            pg = Page.from_json(next_pg)
+            pg = self.api_client.get_url(next_url)
             next_url = pg.links.get('next')
             yield pg
+
+
+
+

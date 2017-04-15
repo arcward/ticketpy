@@ -173,7 +173,7 @@ class EventQuery(BaseQuery):
         """Search for events matching given criteria.
 
         :param sort: Sorting order of search result 
-            (default: *'relevance, desc'*)
+            (default: *'relevance,desc'*)
         :param latlong: Latitude/longitude filter
         :param radius: Radius of area to search
         :param unit: Unit of radius, 'miles' or 'km' (default: miles)
