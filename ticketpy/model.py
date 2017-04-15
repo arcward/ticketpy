@@ -1,6 +1,7 @@
 """Models for API objects"""
 from datetime import datetime
 import re
+import ticketpy
 
 
 def _assign_links(obj, json_obj, base_url=None):
@@ -118,25 +119,7 @@ class Venue:
         v.id = json_venue['id']
         v.name = json_venue['name']
         v.url = json_venue.get('url')
-
-        if 'markets' in json_venue:
-            v.markets = [m['id'] for m in json_venue['markets']]
-
         v.postal_code = json_venue.get('postalCode')
-
-        if 'city' in json_venue:
-            v.city = json_venue['city']['name']
-
-        if 'address' in json_venue:
-            v.address = json_venue['address']['line1']
-
-        if 'location' in json_venue:
-            v.latitude = json_venue['location']['latitude']
-            v.longitude = json_venue['location']['longitude']
-
-        if 'state' in json_venue:
-            v.state_code = json_venue['state']['stateCode']
-
         v.general_info = json_venue.get('generalInfo')
         v.box_office_info = json_venue.get('boxOfficeInfo')
         v.dmas = json_venue.get('dmas')
@@ -145,6 +128,19 @@ class Venue:
         v.images = json_venue.get('images')
         v.parking_detail = json_venue.get('parkingDetail')
         v.accessible_seating_detail = json_venue.get('accessibleSeatingDetail')
+
+        if 'markets' in json_venue:
+            v.markets = [m['id'] for m in json_venue['markets']]
+        if 'city' in json_venue:
+            v.city = json_venue['city']['name']
+        if 'address' in json_venue:
+            v.address = json_venue['address']['line1']
+        if 'location' in json_venue:
+            v.latitude = json_venue['location']['latitude']
+            v.longitude = json_venue['location']['longitude']
+        if 'state' in json_venue:
+            v.state_code = json_venue['state']['stateCode']
+
         _assign_links(v, json_venue)
         return v
 
@@ -215,7 +211,6 @@ class Event:
         self.price_ranges = price_ranges
         self.venues = venues
         self.links = links
-
         self.__utc_datetime = None
         if utc_datetime is not None:
             self.utc_datetime = utc_datetime
@@ -315,7 +310,6 @@ class Attraction:
         att.url = json_obj.get('url')
         att.test = json_obj.get('test')
         att.images = json_obj.get('images')
-
         classifications = json_obj.get('classifications')
         att.classifications = [Classification.from_json(cl)
                                for cl in classifications]
@@ -329,7 +323,6 @@ class Attraction:
 
 class EventClassification:
     """Classification as it's represented in event search results
-    
     See ``Classification()`` for results from classification searches
     """
     def __init__(self, genre=None, subgenre=None, segment=None,
@@ -500,3 +493,40 @@ class SubGenre:
         return self.name if self.name is not None else 'Unknown'
 
 
+class Page(list):
+    """API response page"""
+
+    def __init__(self, number=None, size=None, total_elements=None,
+                 total_pages=None):
+        super().__init__([])
+        self.number = number
+        self.size = size
+        self.total_elements = total_elements
+        self.total_pages = total_pages
+
+    @staticmethod
+    def from_json(json_obj):
+        """Instantiate and return a Page(list)"""
+        p = Page()
+        _assign_links(p, json_obj, ticketpy.ApiClient.root_url)
+        p.number = json_obj['page']['number']
+        p.size = json_obj['page']['size']
+        p.total_pages = json_obj['page']['totalPages']
+        p.total_elements = json_obj['page']['totalElements']
+
+        embedded = json_obj.get('_embedded')
+        if not embedded:
+            return p
+
+        object_models = {
+            'events': Event,
+            'venues': Venue,
+            'attractions': Attraction,
+            'classifications': Classification
+        }
+        for k, v in embedded.items():
+            if k in object_models:
+                obj_type = object_models[k]
+                p += [obj_type.from_json(obj) for obj in v]
+
+        return p
