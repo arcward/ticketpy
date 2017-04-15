@@ -57,41 +57,63 @@
 <p>API client classes</p>
 <dl class="class">
 <dt id="ticketpy.client.ApiClient">
-<em class="property">class </em><code class="descclassname">ticketpy.client.</code><code class="descname">ApiClient</code><span class="sig-paren">(</span><em>api_key</em>, <em>version='v2'</em>, <em>response_type='json'</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiClient" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.client.</code><code class="descname">ApiClient</code><span class="sig-paren">(</span><em>api_key</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiClient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>ApiClient for the Ticketmaster Discovery API</p>
-<p>Request URLs look like::
-<em>http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}</em></p>
+<p>ApiClient is the main wrapper for the Discovery API.</p>
+<p><strong>Example</strong>:    
+Get the first page result for venues matching keyword &#8216;<em>Tabernacle</em>&#8216;:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ticketpy</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">ticketpy</span><span class="o">.</span><span class="n">ApiClient</span><span class="p">(</span><span class="s2">&quot;your_api_key&quot;</span><span class="p">)</span>
+<span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">venues</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">keyword</span><span class="o">=</span><span class="s2">&quot;Tabernacle&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">venue</span> <span class="ow">in</span> <span class="n">resp</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">venue</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Tabernacle</span>
+<span class="n">The</span> <span class="n">Tabernacle</span>
+<span class="n">Tabernacle</span><span class="p">,</span> <span class="n">Notting</span> <span class="n">Hill</span>
+<span class="n">Bethel</span> <span class="n">Tabernacle</span>
+<span class="n">Revivaltime</span> <span class="n">Tabernacle</span>
+<span class="o">...</span>       
+</pre></div>
+</div>
+<p>Request URLs end up looking like:
+<a class="reference external" href="http://app.ticketmaster.com/discovery/v2/events.json">http://app.ticketmaster.com/discovery/v2/events.json</a>?apikey={api_key}</p>
 <dl class="attribute">
 <dt id="ticketpy.client.ApiClient.api_key">
 <code class="descname">api_key</code><a class="headerlink" href="#ticketpy.client.ApiClient.api_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>API key header to pass with API requests</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.client.ApiClient.base_url">
-<code class="descname">base_url</code><em class="property"> = 'https://app.ticketmaster.com'</em><a class="headerlink" href="#ticketpy.client.ApiClient.base_url" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="ticketpy.client.ApiClient.response_type">
-<code class="descname">response_type</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.client.ApiClient.response_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Response type (json, xml...)</p>
+<dl class="method">
+<dt id="ticketpy.client.ApiClient.get_url">
+<code class="descname">get_url</code><span class="sig-paren">(</span><em>link</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiClient.get_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a specific href from &#8216;_links&#8217; object in a response</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.client.ApiClient.root_url">
+<code class="descname">root_url</code><em class="property"> = 'https://app.ticketmaster.com'</em><a class="headerlink" href="#ticketpy.client.ApiClient.root_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ticketpy.client.ApiClient.search">
 <code class="descname">search</code><span class="sig-paren">(</span><em>method</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiClient.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generic method for API requests.
-:param method: Search type (events, venues...)
-:param kwargs: Search parameters, ex. venueId, eventId,</p>
-<blockquote>
-<div>latlong, radius..</div></blockquote>
+<dd><p>Generic API request</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">PagedResponse</span></code></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>method</strong> &#8211; Search type (<em>events</em>, <em>venues</em>...)</li>
+<li><strong>kwargs</strong> &#8211; Search parameters (<em>venueId</em>, <em>eventId</em>, 
+<em>latlong</em>, etc...)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">PagedResponse</span></code></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -99,9 +121,8 @@
 
 <dl class="attribute">
 <dt id="ticketpy.client.ApiClient.url">
-<code class="descname">url</code><a class="headerlink" href="#ticketpy.client.ApiClient.url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Root URL</p>
-</dd></dl>
+<code class="descname">url</code><em class="property"> = 'https://app.ticketmaster.com/discovery/v2'</em><a class="headerlink" href="#ticketpy.client.ApiClient.url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -113,28 +134,16 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="ticketpy.client.Page">
-<em class="property">class </em><code class="descclassname">ticketpy.client.</code><code class="descname">Page</code><span class="sig-paren">(</span><em>number=None</em>, <em>size=None</em>, <em>total_elements=None</em>, <em>total_pages=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.Page" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">list</span></code></p>
-<p>API response page</p>
-<dl class="staticmethod">
-<dt id="ticketpy.client.Page.from_json">
-<em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.Page.from_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Instantiate and return a Page(list)</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="ticketpy.client.PagedResponse">
-<em class="property">class </em><code class="descclassname">ticketpy.client.</code><code class="descname">PagedResponse</code><span class="sig-paren">(</span><em>api_client</em>, <em>response</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.PagedResponse" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.client.</code><code class="descname">PagedResponse</code><span class="sig-paren">(</span><em>api_client</em>, <em>response</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.PagedResponse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Iterates through API response pages</p>
 <dl class="method">
 <dt id="ticketpy.client.PagedResponse.all">
 <code class="descname">all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.PagedResponse.all" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a flat list of all results. Queries all possible pages.</p>
-<p>Use <code class="docutils literal"><span class="pre">limit()</span></code> to restrict the number of calls being made.</p>
+<dd><p>Retrieves <strong>all</strong> pages in a result, returning a flat list.</p>
+<p>Use <code class="docutils literal"><span class="pre">limit()</span></code> to restrict the number of page requests being made.
+<strong>WARNING</strong>: Generic searches may involve <em>a lot</em> of pages...</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -145,30 +154,19 @@
 </table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="ticketpy.client.PagedResponse.api_client">
-<code class="descname">api_client</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.client.PagedResponse.api_client" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parent API client</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ticketpy.client.PagedResponse.limit">
 <code class="descname">limit</code><span class="sig-paren">(</span><em>max_pages=5</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.PagedResponse.limit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Limit the number of page requests. Default: 5</p>
-<p>With a default page size of 20, <code class="docutils literal"><span class="pre">limit(max_pages=5</span></code> would 
-return a maximum of 200 items (fewer, if there are fewer results).</p>
-<p>Use this to contain the number of API calls being made, as the 
-API restricts users to a maximum of 5,000 per day. Very 
-broad searches can return a large number of pages.</p>
-<p>To contrast, <code class="docutils literal"><span class="pre">all()</span></code> will automatically request every 
-page available.</p>
+<dd><p>Retrieve X number of pages, returning a <code class="docutils literal"><span class="pre">list</span></code> of all entities.</p>
+<p>Rather than iterating through <code class="docutils literal"><span class="pre">PagedResponse</span></code> to retrieve 
+each page (and its events/venues/etc), <code class="docutils literal"><span class="pre">limit()</span></code>  will 
+automatically iterate up to <code class="docutils literal"><span class="pre">max_pages</span></code> and return 
+a flat/joined list of items in each <code class="docutils literal"><span class="pre">Page</span></code></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>max_pages</strong> &#8211; Maximum number of pages to request. 
-Default: <em>10</em>. Set to <em>None</em> (or use <code class="docutils literal"><span class="pre">all()</span></code>) to return 
-all pages.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>max_pages</strong> &#8211; Max page requests to make before returning list</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Flat list of results from pages</td>
 </tr>
@@ -176,10 +174,10 @@ all pages.</td>
 </table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="ticketpy.client.PagedResponse.page">
-<code class="descname">page</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.client.PagedResponse.page" title="Permalink to this definition">¶</a></dt>
-<dd><p>Current page</p>
+<dl class="method">
+<dt id="ticketpy.client.PagedResponse.one">
+<code class="descname">one</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.PagedResponse.one" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get items from first page result</p>
 </dd></dl>
 
 </dd></dl>
@@ -229,7 +227,7 @@ all pages.</td>
 <p>Base query/parent class for specific serach types.</p>
 <dl class="attribute">
 <dt id="ticketpy.query.BaseQuery.attr_map">
-<code class="descname">attr_map</code><em class="property"> = {'dma_id': 'dmaId', 'include_test': 'includeTest', 'end_date_time': 'endDateTime', 'onsale_start_date_time': 'onsaleStartDateTime', 'sort': 'sort', 'country_code': 'countryCode', 'classification_id': 'classificationId', 'latlong': 'latlong', 'keyword': 'keyword', 'id': 'id', 'segment_name': 'segmentName', 'onsale_end_date_time': 'onsaleEndDateTime', 'state_code': 'stateCode', 'promoter_id': 'promoterId', 'include_tbd': 'includeTBD', 'size': 'size', 'page': 'page', 'market_id': 'marketId', 'start_date_time': 'startDateTime', 'radius': 'radius', 'classification_name': 'classificationName', 'attraction_id': 'attractionId', 'client_visibility': 'clientVisibility', 'venue_id': 'venueId', 'locale': 'locale', 'segment_id': 'segmentId', 'include_tba': 'includeTBA'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attr_map</code><em class="property"> = {'dma_id': 'dmaId', 'end_date_time': 'endDateTime', 'country_code': 'countryCode', 'segment_id': 'segmentId', 'onsale_end_date_time': 'onsaleEndDateTime', 'market_id': 'marketId', 'segment_name': 'segmentName', 'radius': 'radius', 'latlong': 'latlong', 'classification_name': 'classificationName', 'include_tbd': 'includeTBD', 'classification_id': 'classificationId', 'include_test': 'includeTest', 'attraction_id': 'attractionId', 'size': 'size', 'page': 'page', 'promoter_id': 'promoterId', 'keyword': 'keyword', 'onsale_start_date_time': 'onsaleStartDateTime', 'state_code': 'stateCode', 'sort': 'sort', 'include_tba': 'includeTBA', 'venue_id': 'venueId', 'locale': 'locale', 'client_visibility': 'clientVisibility', 'start_date_time': 'startDateTime', 'id': 'id'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps parameter names to parameters expected by the API
 (ex: <em>market_id</em> maps to <em>marketId</em>)</p>
 </dd></dl>
@@ -301,9 +299,7 @@ matches the ID.</td>
 <dl class="method">
 <dt id="ticketpy.query.ClassificationQuery.query_subclass_id">
 <code class="descname">query_subclass_id</code><span class="sig-paren">(</span><em>entity_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery.query_subclass_id" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="docutils literal"><span class="pre">BaseQuery.by_id()</span></code>, inherited here, assigned to
-<code class="docutils literal"><span class="pre">ClassificationQuery.query_subclass_id()</span></code> as the API
-returns entire structure for matching ID</p>
+<dd><p>Inherited method reassigned as classifications don&#8217;t have IDs</p>
 </dd></dl>
 
 </dd></dl>
@@ -316,7 +312,7 @@ returns entire structure for matching ID</p>
 <dl class="method">
 <dt id="ticketpy.query.EventQuery.by_location">
 <code class="descname">by_location</code><span class="sig-paren">(</span><em>latitude</em>, <em>longitude</em>, <em>radius='10'</em>, <em>unit='miles'</em>, <em>sort='relevance</em>, <em>desc'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.EventQuery.by_location" title="Permalink to this definition">¶</a></dt>
-<dd><p>Searches events within a radius of a latitude/longitude coordinate.</p>
+<dd><p>Search events within a radius of a latitude/longitude coordinate.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -348,7 +344,7 @@ you may get wonky results (<em>date, asc</em> returns far-away events)</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>sort</strong> &#8211; Sorting order of search result 
-(default: <em>&#8216;relevance, desc&#8217;</em>)</li>
+(default: <em>&#8216;relevance,desc&#8217;</em>)</li>
 <li><strong>latlong</strong> &#8211; Latitude/longitude filter</li>
 <li><strong>radius</strong> &#8211; Radius of area to search</li>
 <li><strong>unit</strong> &#8211; Unit of radius, &#8216;miles&#8217; or &#8216;km&#8217; (default: miles)</li>
@@ -586,8 +582,8 @@ what&#8217;s being used here) looks like:</p>
 <dt id="ticketpy.model.EventClassification">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">EventClassification</code><span class="sig-paren">(</span><em>genre=None</em>, <em>subgenre=None</em>, <em>segment=None</em>, <em>classification_type=None</em>, <em>classification_subtype=None</em>, <em>primary=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.EventClassification" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Classification as it&#8217;s represented in event search results</p>
-<p>See <code class="docutils literal"><span class="pre">Classification()</span></code> for results from classification searches</p>
+<p>Classification as it&#8217;s represented in event search results
+See <code class="docutils literal"><span class="pre">Classification()</span></code> for results from classification searches</p>
 <dl class="staticmethod">
 <dt id="ticketpy.model.EventClassification.from_json">
 <em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.EventClassification.from_json" title="Permalink to this definition">¶</a></dt>
@@ -605,6 +601,19 @@ what&#8217;s being used here) looks like:</p>
 <dt id="ticketpy.model.Genre.from_json">
 <em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Genre.from_json" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.model.Page">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Page</code><span class="sig-paren">(</span><em>number=None</em>, <em>size=None</em>, <em>total_elements=None</em>, <em>total_pages=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">list</span></code></p>
+<p>API response page</p>
+<dl class="staticmethod">
+<dt id="ticketpy.model.Page.from_json">
+<em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Page.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiate and return a Page(list)</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -637,6 +646,7 @@ what&#8217;s being used here) looks like:</p>
 <dt id="ticketpy.model.Venue">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Venue</code><span class="sig-paren">(</span><em>name=None</em>, <em>address=None</em>, <em>city=None</em>, <em>state_code=None</em>, <em>postal_code=None</em>, <em>latitude=None</em>, <em>longitude=None</em>, <em>markets=None</em>, <em>url=None</em>, <em>box_office_info=None</em>, <em>dmas=None</em>, <em>general_info=None</em>, <em>venue_id=None</em>, <em>social=None</em>, <em>timezone=None</em>, <em>images=None</em>, <em>parking_detail=None</em>, <em>accessible_seating_detail=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Venue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A Ticketmaster venue</p>
 <p>The JSON returned from the Discovery API looks something like this 
 (<em>edited for brevity</em>):</p>
 <div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span>

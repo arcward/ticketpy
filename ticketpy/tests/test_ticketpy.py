@@ -231,6 +231,17 @@ class TestTicketpy(TestCase):
                     matches = True
             self.assertTrue(matches)
 
+    def test_single_page(self):
+        event_list = self.tm.events.find(state_code='GA', size=7).one()
+        self.assertEqual(7, len(event_list))
+        for e in event_list:
+            print(e.name)
+
+        resp = self.tm.venues.find(keyword='Tabernacle', size=5).one()
+        self.assertEqual(5, len(resp))
+        for v in resp:
+            print(v.name)
+
     def test_search_events_by_location(self):
         # Search for events within 1 mile of lat/lon
         # Coordinates here are vaguely within Virginia Highlands

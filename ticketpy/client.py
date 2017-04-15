@@ -10,16 +10,26 @@ from ticketpy.model import Page
 class ApiClient:
     """ApiClient is the main wrapper for the Discovery API.
     
-    Example
-    -------
+    **Example**:    
+    Get the first page result for venues matching keyword '*Tabernacle*':
     
     .. code-block:: python
     
         import ticketpy
         
         client = ticketpy.ApiClient("your_api_key")
-        r = client.venues.find(keyword="Tabernacle")
-        
+        resp = client.venues.find(keyword="Tabernacle").one()
+        for venue in resp:
+            print(venue.name)
+    
+    Output::
+    
+        Tabernacle
+        The Tabernacle
+        Tabernacle, Notting Hill
+        Bethel Tabernacle
+        Revivaltime Tabernacle
+        ...       
 
     Request URLs end up looking like:
     http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}
@@ -153,7 +163,7 @@ class PagedResponse:
     """Iterates through API response pages"""
 
     def __init__(self, api_client, response):
-        self.api_client = api_client  #: Parent API client
+        self.api_client = api_client
         self.page = None
         self.page = Page.from_json(response)
 
@@ -176,6 +186,10 @@ class PagedResponse:
             counter += 1
             all_items += pg
         return all_items
+
+    def one(self):
+        """Get items from first page result"""
+        return [i for i in self.page]
 
     def all(self):
         """Retrieves **all** pages in a result, returning a flat list.

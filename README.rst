@@ -92,8 +92,10 @@ By default, pages have 20 elements. If there are >20 total elements,
 calling ``PagedResponse.next()`` will request the next page from the API.
 
 You can simplify that/do away with the nested loop by using
-``PagedResponse.limit()``. By default, this requests a maximum of 10 pages,
+``PagedResponse.limit()``. By default, this requests a maximum of 5 pages,
 and returns the elements of each in a flat list.
+
+Use ``PagedResponse.one()`` to return just the list from the first page.
 
 For example, the previous example could also be written as:
 
@@ -157,7 +159,7 @@ Searching for attractions works similarly to the above:
     import ticketpy
 
     tm_client = ticketpy.ApiClient("your_api_key")
-    attractions = tm_client.attractions.find(keyword="Yankees").limit(1)
+    attractions = tm_client.attractions.find(keyword="Yankees").one()
     for attr in attractions:
         print(attr.name)
 
@@ -191,7 +193,7 @@ Searching for classifications works similarly to the above:
     import ticketpy
 
     tm_client = ticketpy.ApiClient("your_api_key")
-    classifications = tm_client.classifications.find(keyword="Drama").limit()
+    classifications = tm_client.classifications.find(keyword="Drama").one()
 
     for cl in classifications:
         print("Segment: {}".format(cl.segment.name))
