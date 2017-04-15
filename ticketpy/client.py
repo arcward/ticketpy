@@ -1,13 +1,7 @@
 """API client classes"""
 import logging
 import requests
-<<<<<<< HEAD
-from ticketpy.model import Attraction, Classification, Event, Venue, \
-    _assign_links
-=======
 from urllib import parse
-from urllib.parse import quote, unquote
->>>>>>> doc_updates
 from ticketpy.query import AttractionQuery, ClassificationQuery, \
     EventQuery, VenueQuery
 from ticketpy.model import Page
@@ -221,13 +215,8 @@ class PagedResponse:
         yield self.page
         next_url = self.page.links.get('next')
         while next_url:
-<<<<<<< HEAD
             log.debug("Requesting page: {}".format(next_url))
-            next_pg = requests.get(next_url, params=api_key).json()
-            pg = Page.from_json(next_pg)
-=======
             pg = self.api_client.get_url(next_url)
->>>>>>> doc_updates
             next_url = pg.links.get('next')
             yield pg
 
