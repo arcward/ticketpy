@@ -1,10 +1,10 @@
 """API client classes"""
 import requests
-
-from ticketpy.model import Attraction, Classification, Event, Venue, \
-    _assign_links
+from urllib import parse
+from urllib.parse import quote, unquote
 from ticketpy.query import AttractionQuery, ClassificationQuery, \
     EventQuery, VenueQuery
+from ticketpy.model import Page
 
 
 class ApiClient:
@@ -24,18 +24,12 @@ class ApiClient:
     Request URLs end up looking like:
     http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}
     """
-    base_url = "https://app.ticketmaster.com"
+    root_url = 'https://app.ticketmaster.com'
+    url = 'https://app.ticketmaster.com/discovery/v2'
 
-    def __init__(self, api_key, version='v2', response_type='json'):
-        """
-
-        :param api_key: Ticketmaster discovery API key
-        :param version: API version (default: v2)
-        :param response_type: Data format (JSON, XML...) (default: json)
-        """
-        self.__api_key = api_key  #: Ticketmaster API key
-        self.response_type = response_type  #: Response type (json, xml...)
-        self.version = version
+    def __init__(self, api_key):
+        self.__api_key = None
+        self.api_key = api_key
         self.events = EventQuery(api_client=self)
         self.venues = VenueQuery(api_client=self)
         self.attractions = AttractionQuery(api_client=self)
@@ -45,17 +39,20 @@ class ApiClient:
         self.subgenre_by_id = self.classifications.by_id
 
     def search(self, method, **kwargs):
-        """Generic method for API requests.
-        :param method: Search type (events, venues...)
-        :param kwargs: Search parameters, ex. venueId, eventId, 
-            latlong, radius..
+        """Generic API request
+        
+        :param method: Search type (*events*, *venues*...)
+        :param kwargs: Search parameters (*venueId*, *eventId*, 
+            *latlong*, etc...)
         :return: ``PagedResponse``
         """
-        # Remove unneeded parameters and add apikey header
+        # Remove unfilled parameters, add apikey header.
+        # Clean up values that might be passed in multiple ways.
+        # Ex: 'includeTBA' might be passed as bool(True) instead of 'yes'
+        # and 'radius' might be passed as int(2) instead of '2'
         kwargs = {k: v for (k, v) in kwargs.items() if v is not None}
         updates = self.api_key
 
-        # Cast bools to 'yes' 'no' and integers to str
         for k, v in kwargs.items():
             if k in ['includeTBA', 'includeTBD', 'includeTest']:
                 updates[k] = self.__yes_no_only(v)
@@ -76,33 +73,21 @@ class ApiClient:
 
     @property
     def api_key(self):
-        """API key header to pass with API requests"""
-        return {'apikey': self.__api_key}
+        return self.__api_key
 
     @api_key.setter
     def api_key(self, api_key):
-        self.__api_key = api_key
+        # Set this way by default to pass in request params
+        self.__api_key = {'apikey': api_key}
 
-    @property
-    def url(self):
-        """Root URL"""
-        return "{}/discovery/{}".format(self.base_url, self.version)
-
-    def __method_url(self, method):
-        """Formats search method URL
-
-        :param method: Method (ex: 'events' 'venues' ...)
-        :return: Search method URL
-        """
-        return "{}/{}.{}".format(self.url, method, self.response_type)
+    @staticmethod
+    def __method_url(method):
+        """Formats a search method URL"""
+        return "{}/{}".format(ApiClient.url, method)
 
     @staticmethod
     def __yes_no_only(s):
-        """Helper function for parameters expecting yes/no/only
-        
-        :param s: str/bool to change
-        :return: 'yes' 'no' or 'only' (or the original str in lowercase)
-        """
+        """Helper for parameters expecting ['yes', 'no', 'only']"""
         s = str(s).lower()
         if s in ['true', 'yes']:
             s = 'yes'
@@ -115,19 +100,19 @@ class ApiException(Exception):
     """Exception thrown for API-related error messages"""
     def __init__(self, url, params, response):
         """
-        
-        :param url: Original request url
-        :param params: Request parameters
+        :param url: Original (full) request url
+        :param params: Request/search parameters
         :param response: Request response
         """
         self.url = url
-        del params['apikey']
+        if not params:
+            params = {}
         self.params = params
         self.errors = response['errors']
         super().__init__()
 
     def __msg(self, error):
-        """Format an error message"""
+        """Formats an exception message"""
         tmpl = ("Reason: {detail}\nRequest URL: {url}\n"
                 "Query parameters: {sp}\nCode: {code} ({link})\n"
                 "Status: {status}")
@@ -146,32 +131,20 @@ class ApiException(Exception):
 class PagedResponse:
     """Iterates through API response pages"""
 
-    def __init__(self, api_client, response, **kwargs):
-        """
-        
-        :param api_client: Instance of ``ticketpy.client.ApiClient``
-        :param kwargs: 
-        """
+    def __init__(self, api_client, response):
         self.api_client = api_client  #: Parent API client
-        self.page = None  #: Current page
+        self.page = None
         self.page = Page.from_json(response)
 
     def limit(self, max_pages=5):
-        """Limit the number of page requests. Default: 5
+        """Retrieve X number of pages, returning a ``list`` of all entities.
+        
+        Rather than iterating through ``PagedResponse`` to retrieve 
+        each page (and its events/venues/etc), ``limit()``  will 
+        automatically iterate up to ``max_pages`` and return 
+        a flat/joined list of items in each ``Page``
 
-        With a default page size of 20, ``limit(max_pages=5`` would 
-        return a maximum of 200 items (fewer, if there are fewer results).
-
-        Use this to contain the number of API calls being made, as the 
-        API restricts users to a maximum of 5,000 per day. Very 
-        broad searches can return a large number of pages.
-
-        To contrast, ``all()`` will automatically request every 
-        page available.
-
-        :param max_pages: Maximum number of pages to request. 
-            Default: *10*. Set to *None* (or use ``all()``) to return 
-            all pages.
+        :param max_pages: Max page requests to make before returning list
         :return: Flat list of results from pages
         """
         all_items = []
@@ -184,10 +157,11 @@ class PagedResponse:
         return all_items
 
     def all(self):
-        """Returns a flat list of all results. Queries all possible pages.
+        """Retrieves **all** pages in a result, returning a flat list.
 
-        Use ``limit()`` to restrict the number of calls being made.
-
+        Use ``limit()`` to restrict the number of page requests being made.
+        **WARNING**: Generic searches may involve *a lot* of pages...
+        
         :return: Flat list of results
         """
         return [i for item_list in self for i in item_list]
@@ -196,47 +170,12 @@ class PagedResponse:
         yield self.page
         api_key = self.api_client.api_key
         next_url = self.page.links.get('next')
+        par = parse.parse_qs(next_url)
+        print('')
         while next_url:
             next_pg = requests.get(next_url, params=api_key).json()
+            if 'errors' in next_pg:
+                raise ApiException(next_url, None, next_pg)
             pg = Page.from_json(next_pg)
             next_url = pg.links.get('next')
             yield pg
-
-
-class Page(list):
-    """API response page"""
-
-    def __init__(self, number=None, size=None, total_elements=None,
-                 total_pages=None):
-        super().__init__([])
-        self.number = number
-        self.size = size
-        self.total_elements = total_elements
-        self.total_pages = total_pages
-
-    @staticmethod
-    def from_json(json_obj):
-        """Instantiate and return a Page(list)"""
-        p = Page()
-        _assign_links(p, json_obj, ApiClient.base_url)
-        p.number = json_obj['page']['number']
-        p.size = json_obj['page']['size']
-        p.total_pages = json_obj['page']['totalPages']
-        p.total_elements = json_obj['page']['totalElements']
-
-        embedded = json_obj.get('_embedded')
-        if not embedded:
-            return p
-
-        object_models = {
-            'events': Event,
-            'venues': Venue,
-            'attractions': Attraction,
-            'classifications': Classification
-        }
-        for k, v in embedded.items():
-            if k in object_models:
-                obj_type = object_models[k]
-                p += [obj_type.from_json(obj) for obj in v]
-
-        return p

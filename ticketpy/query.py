@@ -39,7 +39,6 @@ class BaseQuery:
 
     def __init__(self, api_client, method, model):
         """
-        
         :param api_client: Instance of ``ticketpy.client.ApiClient``
         :param method: API method (ex: *events*, *venues*...)
         :param model: Model from ``ticketpy.model``. Either 
@@ -118,12 +117,7 @@ class BaseQuery:
 
 class VenueQuery(BaseQuery):
     """Queries for venues"""
-
     def __init__(self, api_client):
-        """Init VenueSearch
-        
-        :param api_client: Instance of `ticketpy.ApiClient`
-        """
         super().__init__(api_client, 'venues', Venue)
 
     def find(self, keyword=None, venue_id=None, sort=None, state_code=None,
@@ -146,10 +140,9 @@ class VenueQuery(BaseQuery):
         :return: Venues found matching criteria 
         :rtype: ``ticketpy.PagedResponse``
         """
-        r = self._get(keyword, venue_id, sort, include_test, page,
-                      size, locale, state_code=state_code,
-                      country_code=country_code, source=source, **kwargs)
-        return r
+        return self._get(keyword, venue_id, sort, include_test, page,
+                         size, locale, state_code=state_code,
+                         country_code=country_code, source=source, **kwargs)
 
     def by_name(self, venue_name, state_code=None, **kwargs):
         """Search for a venue by name.
@@ -165,10 +158,6 @@ class VenueQuery(BaseQuery):
 class EventQuery(BaseQuery):
     """Abstraction to search API for events"""
     def __init__(self, api_client):
-        """Init EventSearch
-        
-        :param api_client: Instance of `ticketpy.ApiClient`
-        """
         super().__init__(api_client, 'events', Event)
 
     def find(self, sort='date,asc', latlong=None, radius=None, unit=None,
@@ -241,8 +230,7 @@ class EventQuery(BaseQuery):
 
     def by_location(self, latitude, longitude, radius='10', unit='miles',
                     sort='relevance,desc', **kwargs):
-        """
-        Searches events within a radius of a latitude/longitude coordinate.
+        """Search events within a radius of a latitude/longitude coordinate.
 
         :param latitude: Latitude of radius center
         :param longitude: Longitude of radius center
@@ -262,12 +250,7 @@ class EventQuery(BaseQuery):
 
 class AttractionQuery(BaseQuery):
     """Query class for Attractions"""
-
     def __init__(self, api_client):
-        """
-        
-        :param api_client: Instance of ``ticketpy.client.ApiClient``
-        """
         self.api_client = api_client
         super().__init__(api_client, 'attractions', Attraction)
 
@@ -275,7 +258,6 @@ class AttractionQuery(BaseQuery):
              source=None, include_test=None, page=None, size=None,
              locale=None, **kwargs):
         """
-        
         :param sort: Response sort type (API default: *name,asc*)
         :param keyword: 
         :param attraction_id: 
@@ -287,23 +269,16 @@ class AttractionQuery(BaseQuery):
         :param kwargs: 
         :return: 
         """
-        r = self._get(keyword, attraction_id, sort, include_test,
-                      page, size, locale, source=source, **kwargs)
-        return r
+        return self._get(keyword, attraction_id, sort, include_test,
+                         page, size, locale, source=source, **kwargs)
 
 
 class ClassificationQuery(BaseQuery):
     """Classification search/query class"""
-    #: ``BaseQuery.by_id()``, inherited here, assigned to
-    #: ``ClassificationQuery.query_subclass_id()`` as the API
-    #: returns entire structure for matching ID
+    #: Inherited method reassigned as classifications don't have IDs
     query_subclass_id = BaseQuery.by_id
 
     def __init__(self, api_client):
-        """
-        
-        :param api_client: Instance of ``ticketpy.client.ApiClient``
-        """
         super().__init__(api_client, 'classifications', Classification)
 
     def find(self, sort=None, keyword=None, classification_id=None,
