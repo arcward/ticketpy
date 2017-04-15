@@ -1,7 +1,6 @@
 """API client classes"""
 import requests
 from urllib import parse
-from urllib.parse import quote, unquote
 from ticketpy.query import AttractionQuery, ClassificationQuery, \
     EventQuery, VenueQuery
 from ticketpy.model import Page
