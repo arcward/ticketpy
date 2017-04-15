@@ -98,7 +98,7 @@ class ApiClient:
         params = parse.parse_qs(param_str)
         for k, v in params.items():
             search_params[k] = v[0]
-            search_params.update(self.api_key)
+        search_params.update(self.api_key)
         return search_params
 
     @property
@@ -198,6 +198,7 @@ class PagedResponse:
         
         :return: Flat list of results
         """
+        # TODO Rename this since all() is a built-in function...
         return [i for item_list in self for i in item_list]
 
     def __iter__(self):
@@ -207,6 +208,7 @@ class PagedResponse:
             pg = self.api_client.get_url(next_url)
             next_url = pg.links.get('next')
             yield pg
+        return
 
 
 
