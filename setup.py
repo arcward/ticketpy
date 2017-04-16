@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name='ticketpy',
-    version='1.1',
+    version='1.1.1',
     author='Edward Wells',
     author_email='git@edward.sh',
     description="Python wrapper/SDK for the Ticketmaster Discovery API",

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ticketpy package &#8212; ticketpy 1.1 documentation</title>
+    <title>ticketpy package &#8212; ticketpy 1.1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1',
+        VERSION:     '1.1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="readme.html" title="ticketpy"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.1.1 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -227,7 +227,7 @@ a flat/joined list of items in each <code class="docutils literal"><span class="
 <p>Base query/parent class for specific serach types.</p>
 <dl class="attribute">
 <dt id="ticketpy.query.BaseQuery.attr_map">
-<code class="descname">attr_map</code><em class="property"> = {'attraction_id': 'attractionId', 'onsale_start_date_time': 'onsaleStartDateTime', 'country_code': 'countryCode', 'venue_id': 'venueId', 'page': 'page', 'size': 'size', 'latlong': 'latlong', 'onsale_end_date_time': 'onsaleEndDateTime', 'client_visibility': 'clientVisibility', 'keyword': 'keyword', 'classification_name': 'classificationName', 'sort': 'sort', 'include_test': 'includeTest', 'promoter_id': 'promoterId', 'state_code': 'stateCode', 'locale': 'locale', 'end_date_time': 'endDateTime', 'segment_id': 'segmentId', 'radius': 'radius', 'include_tbd': 'includeTBD', 'include_tba': 'includeTBA', 'classification_id': 'classificationId', 'market_id': 'marketId', 'segment_name': 'segmentName', 'start_date_time': 'startDateTime', 'dma_id': 'dmaId', 'id': 'id'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attr_map</code><em class="property"> = {'venue_id': 'venueId', 'include_test': 'includeTest', 'promoter_id': 'promoterId', 'page': 'page', 'sort': 'sort', 'latlong': 'latlong', 'classification_name': 'classificationName', 'country_code': 'countryCode', 'segment_name': 'segmentName', 'market_id': 'marketId', 'onsale_start_date_time': 'onsaleStartDateTime', 'start_date_time': 'startDateTime', 'end_date_time': 'endDateTime', 'classification_id': 'classificationId', 'id': 'id', 'include_tba': 'includeTBA', 'size': 'size', 'onsale_end_date_time': 'onsaleEndDateTime', 'segment_id': 'segmentId', 'locale': 'locale', 'state_code': 'stateCode', 'keyword': 'keyword', 'client_visibility': 'clientVisibility', 'attraction_id': 'attractionId', 'dma_id': 'dmaId', 'include_tbd': 'includeTBD', 'radius': 'radius'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps parameter names to parameters expected by the API
 (ex: <em>market_id</em> maps to <em>marketId</em>)</p>
 </dd></dl>
@@ -245,28 +245,6 @@ a flat/joined list of items in each <code class="docutils literal"><span class="
 <em class="property">class </em><code class="descclassname">ticketpy.query.</code><code class="descname">ClassificationQuery</code><span class="sig-paren">(</span><em>api_client</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ticketpy.query.BaseQuery" title="ticketpy.query.BaseQuery"><code class="xref py py-class docutils literal"><span class="pre">ticketpy.query.BaseQuery</span></code></a></p>
 <p>Classification search/query class</p>
-<dl class="method">
-<dt id="ticketpy.query.ClassificationQuery.by_id">
-<code class="descname">by_id</code><span class="sig-paren">(</span><em>entity_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery.by_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a <code class="docutils literal"><span class="pre">Segment</span></code>, <code class="docutils literal"><span class="pre">Genre</span></code> or <code class="docutils literal"><span class="pre">SubGenre</span></code> matching the 
-given entity ID. (or <code class="docutils literal"><span class="pre">None</span></code>)</p>
-<p>Aliased in <code class="docutils literal"><span class="pre">ticketpy.client.ApiClient</span></code> as 
-methods <code class="docutils literal"><span class="pre">segment_by_id()</span></code>, <code class="docutils literal"><span class="pre">genre_by_id()</span></code> and 
-<code class="docutils literal"><span class="pre">subgenre_by_id()</span></code> although they&#8217;re technically all 
-the same method.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entity_id</strong> &#8211; Segment, genre or subgenre ID</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">Segment</span></code>, <code class="docutils literal"><span class="pre">Genre</span></code> or <code class="docutils literal"><span class="pre">SubGenre</span></code>, depending which 
-matches the ID.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="method">
 <dt id="ticketpy.query.ClassificationQuery.find">
 <code class="descname">find</code><span class="sig-paren">(</span><em>sort=None</em>, <em>keyword=None</em>, <em>classification_id=None</em>, <em>source=None</em>, <em>include_test=None</em>, <em>page=None</em>, <em>size=None</em>, <em>locale=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery.find" title="Permalink to this definition">¶</a></dt>
@@ -297,9 +275,21 @@ matches the ID.</td>
 </dd></dl>
 
 <dl class="method">
-<dt id="ticketpy.query.ClassificationQuery.query_subclass_id">
-<code class="descname">query_subclass_id</code><span class="sig-paren">(</span><em>entity_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery.query_subclass_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Inherited method reassigned as classifications don&#8217;t have IDs</p>
+<dt id="ticketpy.query.ClassificationQuery.genre_by_id">
+<code class="descname">genre_by_id</code><span class="sig-paren">(</span><em>genre_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery.genre_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="docutils literal"><span class="pre">Genre</span></code> matching this ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ticketpy.query.ClassificationQuery.segment_by_id">
+<code class="descname">segment_by_id</code><span class="sig-paren">(</span><em>segment_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery.segment_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="docutils literal"><span class="pre">Segment</span></code> matching this ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ticketpy.query.ClassificationQuery.subgenre_by_id">
+<code class="descname">subgenre_by_id</code><span class="sig-paren">(</span><em>subgenre_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery.subgenre_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="docutils literal"><span class="pre">SubGenre</span></code> matching this ID</p>
 </dd></dl>
 
 </dd></dl>
@@ -490,14 +480,12 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 <dt id="ticketpy.model.ClassificationSubType">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">ClassificationSubType</code><span class="sig-paren">(</span><em>type_id=None</em>, <em>type_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.ClassificationSubType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Subtype of <code class="docutils literal"><span class="pre">ClassificationType</span></code></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="ticketpy.model.ClassificationType">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">ClassificationType</code><span class="sig-paren">(</span><em>type_id=None</em>, <em>type_name=None</em>, <em>subtypes=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.ClassificationType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Type of <code class="docutils literal"><span class="pre">Classification</span></code></p>
 </dd></dl>
 
 <dl class="class">
@@ -596,7 +584,6 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 <dt id="ticketpy.model.Genre">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Genre</code><span class="sig-paren">(</span><em>genre_id=None</em>, <em>genre_name=None</em>, <em>subgenres=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Genre" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Genre type</p>
 <dl class="staticmethod">
 <dt id="ticketpy.model.Genre.from_json">
 <em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Genre.from_json" title="Permalink to this definition">¶</a></dt>
@@ -621,7 +608,6 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 <dt id="ticketpy.model.Segment">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Segment</code><span class="sig-paren">(</span><em>segment_id=None</em>, <em>segment_name=None</em>, <em>genres=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Segment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Segment, under <code class="docutils literal"><span class="pre">Classification</span></code></p>
 <dl class="staticmethod">
 <dt id="ticketpy.model.Segment.from_json">
 <em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Segment.from_json" title="Permalink to this definition">¶</a></dt>
@@ -634,7 +620,6 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 <dt id="ticketpy.model.SubGenre">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">SubGenre</code><span class="sig-paren">(</span><em>subgenre_id=None</em>, <em>subgenre_name=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.SubGenre" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>SubGenre type under <code class="docutils literal"><span class="pre">Genre</span></code></p>
 <dl class="staticmethod">
 <dt id="ticketpy.model.SubGenre.from_json">
 <em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.SubGenre.from_json" title="Permalink to this definition">¶</a></dt>
@@ -761,7 +746,7 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
         <li class="right" >
           <a href="readme.html" title="ticketpy"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ticketpy 1.1.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
