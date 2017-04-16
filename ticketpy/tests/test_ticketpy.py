@@ -46,22 +46,18 @@ class TestApiClient(TestCase):
         events_url = murl('events')
         self.assertEqual(expected_url, events_url)
 
+    def test_bad_key(self):
+        bad_client = ticketpy.ApiClient('asdf')
+        self.assertRaises(ApiException, bad_client.venues.find, keyword="a")
+
     def test__bad_request(self):
         # Radius should be a whole number, so 1.5 should raise ApiException
         radius = '1.5'
         lat = '33.7838737'
         long = '-84.366088'
 
-        self.assertRaises(ApiException, self.api_client.search, 'events',
-                          latlon="{},{}".format(lat, long), radius=radius)
-
-        # Make sure ApiException.__str__() hasn't broken for some reason...
-        try:
-            self.api_client.events.by_location(latitude=lat,
-                                               longitude=long,
-                                               radius=radius)
-        except ApiException as e:
-            print(e)
+        self.assertRaises(ApiException, self.api_client.events.by_location,
+                          latitude=lat, longitude=long, radius=radius)
 
     def test___yes_no_only(self):
         yno = self.api_client._ApiClient__yes_no_only

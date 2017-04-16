@@ -75,10 +75,28 @@ class ApiClient:
             'attractions': self.__method_url('attractions'),
             'classifications': self.__method_url('classifications')
         }
-        response = requests.get(urls[method], params=kwargs).json()
-        if 'errors' in response:
-            raise ApiException(urls[method], kwargs, response)
-        return PagedResponse(self, response)
+        resp = requests.get(urls[method], params=kwargs)
+        return PagedResponse(self, self._handle_response(resp))
+
+    @staticmethod
+    def _handle_response(response):
+        """Raises ``ApiException`` if needed, or returns response JSON obj"""
+        rj = response.json()
+        if response.status_code == 401:
+            f = rj['fault']
+            raise ApiException(response.status_code, f['faultstring'],
+                               f['detail'], response.url)
+        elif response.status_code == 400:
+            errs = rj['errors']
+            new_errs = []
+            for err in errs:
+                new_errs.append({
+                     'code': err['code'],
+                     'detail': err['detail'],
+                     'href': err['_links']['about']['href']
+                })
+            raise ApiException(response.status_code, new_errs, response.url)
+        return rj
 
     def get_url(self, link):
         """Gets a specific href from '_links' object in a response"""
@@ -87,10 +105,8 @@ class ApiClient:
         # rather than implicitly trusting the href in _links
         link_arr = link.split('?')
         params = self._link_params(link_arr[1])
-        resp = requests.get(link_arr[0], params).json()
-        if 'errors' in resp:
-            raise ApiException(link, params, resp)
-        return Page.from_json(resp)
+        resp = requests.get(link_arr[0], params)
+        return Page.from_json(self._handle_response(resp))
 
     def _link_params(self, param_str):
         """Parse URL parameters from href split on '?' character"""
@@ -128,34 +144,13 @@ class ApiClient:
 
 class ApiException(Exception):
     """Exception thrown for API-related error messages"""
-    def __init__(self, url, params, response):
+    def __init__(self, *args):
         """
         :param url: Original (full) request url
         :param params: Request/search parameters
         :param response: Request response
         """
-        self.url = url
-        if not params:
-            params = {}
-        self.params = params
-        self.errors = response['errors']
-        super().__init__()
-
-    def __msg(self, error):
-        """Formats an exception message"""
-        tmpl = ("Reason: {detail}\nRequest URL: {url}\n"
-                "Query parameters: {sp}\nCode: {code} ({link})\n"
-                "Status: {status}")
-        search_params = ', '.join("({}={})".format(k, v)
-                                  for (k, v) in self.params.items())
-        return tmpl.format(url=self.url, code=error['code'],
-                           status=error['status'], detail=error['detail'],
-                           link=error['_links']['about']['href'],
-                           sp=search_params)
-
-    def __str__(self):
-        msgs = [self.__msg(e) for e in self.errors]
-        return '\n'.join(msgs)
+        super().__init__(*args)
 
 
 class PagedResponse:
