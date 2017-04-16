@@ -128,7 +128,7 @@ Get the first page result for venues matching keyword &#8216;<em>Tabernacle</em>
 
 <dl class="exception">
 <dt id="ticketpy.client.ApiException">
-<em class="property">exception </em><code class="descclassname">ticketpy.client.</code><code class="descname">ApiException</code><span class="sig-paren">(</span><em>url</em>, <em>params</em>, <em>response</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiException" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">ticketpy.client.</code><code class="descname">ApiException</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
 <p>Exception thrown for API-related error messages</p>
 </dd></dl>
@@ -227,7 +227,7 @@ a flat/joined list of items in each <code class="docutils literal"><span class="
 <p>Base query/parent class for specific serach types.</p>
 <dl class="attribute">
 <dt id="ticketpy.query.BaseQuery.attr_map">
-<code class="descname">attr_map</code><em class="property"> = {'classification_name': 'classificationName', 'locale': 'locale', 'include_test': 'includeTest', 'keyword': 'keyword', 'state_code': 'stateCode', 'classification_id': 'classificationId', 'latlong': 'latlong', 'size': 'size', 'segment_id': 'segmentId', 'dma_id': 'dmaId', 'end_date_time': 'endDateTime', 'promoter_id': 'promoterId', 'market_id': 'marketId', 'include_tba': 'includeTBA', 'onsale_end_date_time': 'onsaleEndDateTime', 'radius': 'radius', 'country_code': 'countryCode', 'include_tbd': 'includeTBD', 'attraction_id': 'attractionId', 'client_visibility': 'clientVisibility', 'onsale_start_date_time': 'onsaleStartDateTime', 'sort': 'sort', 'venue_id': 'venueId', 'id': 'id', 'segment_name': 'segmentName', 'start_date_time': 'startDateTime', 'page': 'page'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attr_map</code><em class="property"> = {'latlong': 'latlong', 'locale': 'locale', 'classification_id': 'classificationId', 'radius': 'radius', 'classification_name': 'classificationName', 'client_visibility': 'clientVisibility', 'size': 'size', 'state_code': 'stateCode', 'market_id': 'marketId', 'venue_id': 'venueId', 'onsale_start_date_time': 'onsaleStartDateTime', 'start_date_time': 'startDateTime', 'segment_name': 'segmentName', 'keyword': 'keyword', 'segment_id': 'segmentId', 'dma_id': 'dmaId', 'include_tbd': 'includeTBD', 'end_date_time': 'endDateTime', 'attraction_id': 'attractionId', 'sort': 'sort', 'page': 'page', 'onsale_end_date_time': 'onsaleEndDateTime', 'promoter_id': 'promoterId', 'country_code': 'countryCode', 'id': 'id', 'include_test': 'includeTest', 'include_tba': 'includeTBA'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps parameter names to parameters expected by the API
 (ex: <em>market_id</em> maps to <em>marketId</em>)</p>
 </dd></dl>

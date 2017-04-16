@@ -95,6 +95,7 @@ class ApiClient:
         rj = response.json()
         if response.status_code == 401:
             f = rj['fault']
+            log.error('URL: {}'.format(response.url))
             log.error(f['faultstring'])
             raise ApiException(response.status_code, f['faultstring'],
                                f['detail'], response.url)
@@ -107,6 +108,8 @@ class ApiClient:
                      'detail': err['detail'],
                      'href': err['_links']['about']['href']
                 })
+            log.error('URL: {}'.format(response.url))
+            log.error(new_errs)
             raise ApiException(response.status_code, new_errs, response.url)
         return rj
 
