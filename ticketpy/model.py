@@ -145,8 +145,11 @@ class Venue:
         return v
 
     def __str__(self):
-        return "'{}' at {} in {} {}".format(self.name, self.address,
-                                            self.city, self.state_code)
+        return ("{name} at {address} in "
+                "{city} {state_code}").format(**self.__dict__)
+
+    def __repr__(self):
+        return str(self)
 
 
 class Event:
@@ -263,30 +266,17 @@ class Event:
         return e
 
     def __str__(self):
-        tmpl = ("Event:        {event_name}\n"
-                "Venue(s):     {venues}\n"
-                "Start date:   {start_date}\n"
-                "Start time:   {start_time}\n"
-                "Price ranges: {ranges}\n"
-                "Status:       {status}\n"
-                "Genres:       {genres}\n")
+        tmpl = ("Event:            {name}\n"
+                "Venues:           {venues}\n"
+                "Start date:       {local_start_date}\n"
+                "Start time:       {local_start_time}\n"
+                "Price ranges:     {price_ranges}\n"
+                "Status:           {status}\n"
+                "Classifications:  {classifications!s}\n")
+        return tmpl.format(**self.__dict__)
 
-        ranges = ['-'.join([str(pr['min']), str(pr['max'])])
-                  for pr in self.price_ranges]
-
-        genres = []
-        if self.classifications:
-            genres = [cl.genre.name for cl in self.classifications]
-
-        return tmpl.format(
-            event_name=self.name,
-            venues=' / '.join([str(v) for v in self.venues]),
-            start_date=self.local_start_date,
-            start_time=self.local_start_time,
-            ranges=', '.join(ranges),
-            status=self.status,
-            genres=', '.join(genres)
-        )
+    def __repr__(self):
+        return str(self)
 
 
 class Attraction:
@@ -319,6 +309,9 @@ class Attraction:
 
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
+
+    def __repr__(self):
+        return str(self)
 
 
 class EventClassification:
@@ -365,6 +358,13 @@ class EventClassification:
         _assign_links(ec, json_obj)
         return ec
 
+    def __str__(self):
+        return ("Segment: {segment} / Genre: {genre} / Subgenre: {subgenre} / "
+                "Type: {type} / Subtype: {subtype}").format(**self.__dict__)
+
+    def __repr__(self):
+        return str(self)
+
 
 class Classification:
     """Classification object (segment/genre/sub-genre)
@@ -410,6 +410,9 @@ class ClassificationType:
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
 
+    def __repr__(self):
+        return str(self)
+
 
 class ClassificationSubType:
     """Subtype of ``ClassificationType``"""
@@ -419,6 +422,9 @@ class ClassificationSubType:
 
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
+
+    def __repr__(self):
+        return str(self)
 
 
 class Segment:
@@ -447,6 +453,9 @@ class Segment:
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
 
+    def __repr__(self):
+        return str(self)
+
 
 class Genre:
     """Genre type"""
@@ -473,6 +482,9 @@ class Genre:
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
 
+    def __repr__(self):
+        return str(self)
+
 
 class SubGenre:
     """SubGenre type under ``Genre``"""
@@ -492,10 +504,12 @@ class SubGenre:
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
 
+    def __repr__(self):
+        return str(self)
+
 
 class Page(list):
     """API response page"""
-
     def __init__(self, number=None, size=None, total_elements=None,
                  total_pages=None):
         super().__init__([])
@@ -507,16 +521,16 @@ class Page(list):
     @staticmethod
     def from_json(json_obj):
         """Instantiate and return a Page(list)"""
-        p = Page()
-        _assign_links(p, json_obj, ticketpy.ApiClient.root_url)
-        p.number = json_obj['page']['number']
-        p.size = json_obj['page']['size']
-        p.total_pages = json_obj['page']['totalPages']
-        p.total_elements = json_obj['page']['totalElements']
+        pg = Page()
+        _assign_links(pg, json_obj, ticketpy.ApiClient.root_url)
+        pg.number = json_obj['page']['number']
+        pg.size = json_obj['page']['size']
+        pg.total_pages = json_obj['page']['totalPages']
+        pg.total_elements = json_obj['page']['totalElements']
 
         embedded = json_obj.get('_embedded')
         if not embedded:
-            return p
+            return pg
 
         object_models = {
             'events': Event,
@@ -527,6 +541,13 @@ class Page(list):
         for k, v in embedded.items():
             if k in object_models:
                 obj_type = object_models[k]
-                p += [obj_type.from_json(obj) for obj in v]
+                pg += [obj_type.from_json(obj) for obj in v]
 
-        return p
+        return pg
+
+    def __str__(self):
+        return ("Page {number}/{total_pages}, Size: {size}, "
+                "Total elements: {total_elements}").format(**self.__dict__)
+
+    def __repr__(self):
+        return str(self)

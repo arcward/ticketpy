@@ -252,7 +252,3 @@ class PagedResponse:
             next_url = pg.links.get('next')
             yield pg
         return
-
-
-
-

@@ -231,7 +231,7 @@ class TestEventQuery(TestCase):
     def test_get_event_id(self):
         event_id = 'vvG1zZfbJQpVWp'
         e = self.tm.events.by_id(event_id)
-        print(e)
+        print(str(e))
         self.assertEqual(event_id, e.id)
 
     def test_search_events_by_location(self):
@@ -330,6 +330,7 @@ class TestPagedResponse(TestCase):
 
         page_counter = 0
         for pg in page_iter:
+            print(pg)
             if page_counter == 0:
                 total_pages = pg.total_pages
             page_counter += 1
