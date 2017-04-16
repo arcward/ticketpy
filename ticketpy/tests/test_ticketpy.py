@@ -40,6 +40,26 @@ class TestApiClient(TestCase):
     def setUp(self):
         self.api_client = get_client()
 
+    def test_parse_link(self):
+        base_str = "https://app.ticketmaster.com/discovery/v2/events"
+        param_str = ("sort=date,asc"
+                     "&marketId=10"
+                     "&keyword=LCD%20Soundsystem")
+        full_url = '{}?{}'.format(base_str, param_str)
+        parsed_link = self.api_client.parse_link(full_url)
+        self.assertEqual(base_str, parsed_link.url)
+
+        params = parsed_link.params
+        self.assertEqual('date,asc', params['sort'])
+        self.assertEqual('10', params['marketId'])
+        self.assertEqual('LCD Soundsystem', params['keyword'])
+        self.assertEqual(self.api_client.api_key['apikey'], params['apikey'])
+
+    def test_apikey(self):
+        tmp_client = ticketpy.ApiClient('random_key')
+        self.assertIn('apikey', tmp_client.api_key)
+        self.assertEqual('random_key', tmp_client.api_key['apikey'])
+
     def test_url(self):
         expected_url = "https://app.ticketmaster.com/discovery/v2"
         self.assertEqual(self.api_client.url, expected_url)
@@ -198,7 +218,6 @@ class TestAttractionQuery(TestCase):
     def test_attraction_by_id(self):
         attraction_id = 'K8vZ9171okV'
         attraction_name = 'New York Yankees'
-
         attr = self.tm.attractions.by_id(attraction_id)
         print(attr)
         self.assertEqual(attraction_id, attr.id)
@@ -280,20 +299,49 @@ class TestEventQuery(TestCase):
             self.assertTrue(matches)
 
 
-class TestTicketpy(TestCase):
+class TestPagedResponse(TestCase):
     def setUp(self):
         self.tm = get_client()
 
-    def test_single_page(self):
+    def test_one(self):
+        # Generic search returns numerous pages, ensure only 1 is returned
         event_list = self.tm.events.find(state_code='GA', size=7).one()
         self.assertEqual(7, len(event_list))
-        for e in event_list:
-            print(e.name)
-
         resp = self.tm.venues.find(keyword='Tabernacle', size=5).one()
         self.assertEqual(5, len(resp))
-        for v in resp:
-            print(v.name)
+
+    def test_limit(self):
+        # API page size default=20, limit(max_pages) default=5
+        with_defaults = self.tm.events.find().limit()
+        self.assertEqual(100, len(with_defaults))
+
+        # Switch up defaults
+        multi = self.tm.events.find(state_code='GA', size=8).limit(3)
+        self.assertEqual(24, len(multi))
+
+    def test_all(self):
+        # Manually iterate through response, then iterate automatically
+        # via all(), so both lists of venue IDs should be equal.
+        # page_counter should eventually equal the total_pages
+        # from the first page as well
+        page_iter = self.tm.venues.find(keyword="TABERNACLE", size=5)
+        iter_all = [venue.id for venue in page_iter.all()]
+        iter_manual = []
+
+        page_counter = 0
+        for pg in page_iter:
+            if page_counter == 0:
+                total_pages = pg.total_pages
+            page_counter += 1
+            iter_manual += [venue.id for venue in pg]
+
+        self.assertEqual(page_counter, total_pages)
+        self.assertListEqual(iter_all, iter_manual)
+
+
+
+
+
 
 
 

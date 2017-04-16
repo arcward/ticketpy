@@ -148,10 +148,18 @@ class ApiClient:
         # API sometimes return incorrectly-formatted strings, need
         # to parse out parameters and pass them into a new request
         # rather than implicitly trusting the href in _links
-        link_arr = link.split('?')
-        params = self._link_params(link_arr[1])
-        resp = requests.get(link_arr[0], params)
+        #link_arr = link.split('?')
+        #link_url, link_params = link.split('?')
+        #params = self._link_params(link_params)
+        link = self.parse_link(link)
+        resp = requests.get(link.url, link.params)
         return Page.from_json(self._handle_response(resp))
+
+    def parse_link(self, link):
+        parsed_link = namedtuple('link', ['url', 'params'])
+        link_url, link_params = link.split('?')
+        params = self._link_params(link_params)
+        return parsed_link(link_url, params)
 
     def _link_params(self, param_str):
         """Parse URL parameters from href split on '?' character"""
