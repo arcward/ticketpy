@@ -29,12 +29,16 @@ def haversine(latlon1, latlon2):
     return c * r
 
 
+def get_client():
+    config = ConfigParser()
+    config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
+    api_key = config.get('ticketmaster', 'api_key')
+    return ticketpy.ApiClient(api_key)
+
+
 class TestApiClient(TestCase):
     def setUp(self):
-        config = ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
-        api_key = config.get('ticketmaster', 'api_key')
-        self.api_client = ticketpy.ApiClient(api_key)
+        self.api_client = get_client()
 
     def test_url(self):
         expected_url = "https://app.ticketmaster.com/discovery/v2"
@@ -81,13 +85,14 @@ class TestApiClient(TestCase):
 
 class TestVenueQuery(TestCase):
     def setUp(self):
-        config = ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
-        api_key = config.get('ticketmaster', 'api_key')
-        self.api_client = ticketpy.ApiClient(api_key)
+        self.tm = get_client()
+        self.venues = {
+            'smithes': 'KovZpZAJledA',
+            'tabernacle': 'KovZpaFEZe'
+        }
 
     def test_find(self):
-        venue_list = self.api_client.venues.find(keyword="TABERNACLE").limit(2)
+        venue_list = self.tm.venues.find(keyword="TABERNACLE").limit(2)
         for v in venue_list:
             self.assertIn("TABERNACLE", v.name.upper())
 
@@ -95,22 +100,89 @@ class TestVenueQuery(TestCase):
         # Make sure this returns only venues matching search terms...
         venue_name = "TABERNACLE"
         state = "GA"
-        venue_list = self.api_client.venues.by_name(venue_name, state).limit(2)
+        venue_list = self.tm.venues.by_name(venue_name, state).limit(2)
         for venue in venue_list:
             self.assertIn(venue_name, venue.name.upper())
 
+    def test_get_venue(self):
+        venue_name = 'The Tabernacle'
+        v = self.tm.venues.by_id(self.venues['tabernacle'])
+        print(v)
+        self.assertEqual(self.venues['tabernacle'], v.id)
+        self.assertEqual(venue_name, v.name)
 
-class TestTicketpy(TestCase):
+
+class TestClassificationQuery(TestCase):
     def setUp(self):
-        config = ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
-        api_key = config.get('ticketmaster', 'api_key')
+        self.tm = get_client()
 
-        self.tm = ticketpy.ApiClient(api_key)
-        self.venues = {
-            'smithes': 'KovZpZAJledA',
-            'tabernacle': 'KovZpaFEZe'
-        }
+    def test_classification_search(self):
+        classif = self.tm.classifications.find(keyword="DRAMA").limit()
+        segment_names = [cl.segment.name for cl in classif]
+        self.assertIn('Film', segment_names)
+        genre_names = []
+        for cl in classif:
+            genre_names += [g.name.upper() for g in cl.segment.genres]
+        self.assertIn("DRAMA", genre_names)
+
+        for cl in classif:
+            print(cl)
+
+    def test_classification_by_id(self):
+        genre_id = 'KnvZfZ7vAvE'
+        nested_genre = self.tm.classifications.by_id(genre_id)
+        genre_ids = [genre.id for genre in nested_genre.segment.genres]
+        self.assertIn(genre_id, genre_ids)
+
+        fake_response = self.tm.classifications.by_id('asdf')
+        self.assertIsNone(fake_response.segment)
+
+    def test_segment_by_id(self):
+        seg_id = 'KZFzniwnSyZfZ7v7nJ'
+        seg_name = 'Music'
+        seg = self.tm.segment_by_id(seg_id)
+        print(seg)
+        self.assertEqual(seg_id, seg.id)
+        self.assertEqual(seg_name, seg.name)
+
+        seg_x = self.tm.segment_by_id(seg_id)
+        self.assertEqual(seg_id, seg_x.id)
+        self.assertEqual(seg_name, seg_x.name)
+
+    def test_genre_by_id(self):
+        genre_id = 'KnvZfZ7vAvE'
+        genre_name = 'Jazz'
+        g = self.tm.genre_by_id(genre_id)
+        print(g)
+        self.assertEqual(genre_id, g.id)
+        self.assertEqual(genre_name, g.name)
+
+        g_x = self.tm.genre_by_id(genre_id)
+        self.assertEqual(genre_id, g_x.id)
+        self.assertEqual(genre_name, g_x.name)
+
+        g_z = self.tm.genre_by_id('asdf')
+        self.assertIsNone(g_z)
+
+    def test_subgenre_by_id(self):
+        subgenre_id = 'KZazBEonSMnZfZ7vkdl'
+        subgenre_name = 'Bebop'
+        sg = self.tm.subgenre_by_id(subgenre_id)
+        print(sg)
+        self.assertEqual(subgenre_id, sg.id)
+        self.assertEqual(subgenre_name, sg.name)
+
+        sg_x = self.tm.subgenre_by_id(subgenre_id)
+        self.assertEqual(subgenre_id, sg_x.id)
+        self.assertEqual(subgenre_name, sg_x.name)
+
+        sg_z = self.tm.subgenre_by_id('asdf')
+        self.assertIsNone(sg_z)
+
+
+class TestAttractionQuery(TestCase):
+    def setUp(self):
+        self.tm = get_client()
 
     def test_attraction_search(self):
         attr_name = "YANKEES"
@@ -132,111 +204,16 @@ class TestTicketpy(TestCase):
         self.assertEqual(attraction_id, attr.id)
         self.assertEqual(attraction_name, attr.name)
 
-    def test_classification_search(self):
-        classif = self.tm.classifications.find(keyword="DRAMA").limit()
-        segment_names = [cl.segment.name for cl in classif]
-        self.assertIn('Film', segment_names)
-        genre_names = []
-        for cl in classif:
-            genre_names += [g.name.upper() for g in cl.segment.genres]
-        self.assertIn("DRAMA", genre_names)
 
-        for cl in classif:
-            print(cl)
-
-    def test_classification_segment(self):
-        seg_id = 'KZFzniwnSyZfZ7v7nJ'
-        seg_name = 'Music'
-        seg = self.tm.classifications.by_id(seg_id)
-        print(seg)
-        self.assertEqual(seg_id, seg.id)
-        self.assertEqual(seg_name, seg.name)
-
-        seg_x = self.tm.segment_by_id(seg_id)
-        self.assertEqual(seg_id, seg_x.id)
-        self.assertEqual(seg_name, seg_x.name)
-
-        genre_id = 'KnvZfZ7vAvE'
-        genre_name = 'Jazz'
-        g = self.tm.classifications.by_id(genre_id)
-        print(g)
-        self.assertEqual(genre_id, g.id)
-        self.assertEqual(genre_name, g.name)
-
-        g_x = self.tm.genre_by_id(genre_id)
-        self.assertEqual(genre_id, g_x.id)
-        self.assertEqual(genre_name, g_x.name)
-
-        subgenre_id = 'KZazBEonSMnZfZ7vkdl'
-        subgenre_name = 'Bebop'
-        sg = self.tm.classifications.by_id(subgenre_id)
-        print(sg)
-        self.assertEqual(subgenre_id, sg.id)
-        self.assertEqual(subgenre_name, sg.name)
-
-        sg_x = self.tm.segment_by_id(subgenre_id)
-        self.assertEqual(subgenre_id, sg_x.id)
-        self.assertEqual(subgenre_name, sg_x.name)
-
-        fake_id = "afkjsdlfjkasdf"
-        fake_response = self.tm.classifications.by_id(fake_id)
-        self.assertIsNone(fake_response)
+class TestEventQuery(TestCase):
+    def setUp(self):
+        self.tm = get_client()
 
     def test_get_event_id(self):
         event_id = 'vvG1zZfbJQpVWp'
         e = self.tm.events.by_id(event_id)
         print(e)
         self.assertEqual(event_id, e.id)
-
-    def test_get_venue(self):
-        venue_id = 'KovZpaFEZe'
-        venue_name = 'The Tabernacle'
-        v = self.tm.venues.by_id(venue_id)
-        print(v)
-        self.assertEqual(venue_id, v.id)
-        self.assertEqual(venue_name, v.name)
-
-    def test_search_events(self):
-        venue_id = 'KovZpaFEZe'
-        venue_name = 'The Tabernacle'
-        event_list = self.tm.events.find(venue_id=venue_id, size=2).limit(4)
-        for e in event_list:
-            for v in e.venues:
-                self.assertEqual(venue_id, v.id)
-                self.assertEqual(venue_name, v.name)
-
-    def test_events_get(self):
-        genre_name = 'Hip-Hop'
-        venue_id = 'KovZpZAJledA'
-        venue_name = "Smith's Olde Bar"
-
-        elist = self.tm.events.find(
-            classification_name=genre_name,
-            venue_id=venue_id
-        ).limit(2)
-
-        for e in elist:
-            for v in e.venues:
-                self.assertEqual(venue_id, v.id)
-                self.assertEqual(venue_name, v.name)
-            genres = [ec.genre.name for ec in e.classifications]
-
-            matches = False
-            for g in genres:
-                if genre_name in g:
-                    matches = True
-            self.assertTrue(matches)
-
-    def test_single_page(self):
-        event_list = self.tm.events.find(state_code='GA', size=7).one()
-        self.assertEqual(7, len(event_list))
-        for e in event_list:
-            print(e.name)
-
-        resp = self.tm.venues.find(keyword='Tabernacle', size=5).one()
-        self.assertEqual(5, len(resp))
-        for v in resp:
-            print(v.name)
 
     def test_search_events_by_location(self):
         # Search for events within 1 mile of lat/lon
@@ -270,6 +247,53 @@ class TestTicketpy(TestCase):
         for v in all_nearby:
             self.assertEqual(city, v.city)
             self.assertEqual(city, v.location['city'])
+
+    def test_search_events(self):
+        venue_id = 'KovZpaFEZe'
+        venue_name = 'The Tabernacle'
+        event_list = self.tm.events.find(venue_id=venue_id, size=2).limit(4)
+        for e in event_list:
+            for v in e.venues:
+                self.assertEqual(venue_id, v.id)
+                self.assertEqual(venue_name, v.name)
+
+    def test_events_get(self):
+        genre_name = 'Hip-Hop'
+        venue_id = 'KovZpZAJledA'
+        venue_name = "Smith's Olde Bar"
+
+        elist = self.tm.events.find(
+            classification_name=genre_name,
+            venue_id=venue_id
+        ).limit(2)
+
+        for e in elist:
+            for v in e.venues:
+                self.assertEqual(venue_id, v.id)
+                self.assertEqual(venue_name, v.name)
+            genres = [ec.genre.name for ec in e.classifications]
+
+            matches = False
+            for g in genres:
+                if genre_name in g:
+                    matches = True
+            self.assertTrue(matches)
+
+
+class TestTicketpy(TestCase):
+    def setUp(self):
+        self.tm = get_client()
+
+    def test_single_page(self):
+        event_list = self.tm.events.find(state_code='GA', size=7).one()
+        self.assertEqual(7, len(event_list))
+        for e in event_list:
+            print(e.name)
+
+        resp = self.tm.venues.find(keyword='Tabernacle', size=5).one()
+        self.assertEqual(5, len(resp))
+        for v in resp:
+            print(v.name)
 
 
 

@@ -1,5 +1,7 @@
 """API client classes"""
 import logging
+from collections import namedtuple
+
 import requests
 from urllib import parse
 from ticketpy.query import AttractionQuery, ClassificationQuery, \
@@ -52,9 +54,9 @@ class ApiClient:
         self.venues = VenueQuery(api_client=self)
         self.attractions = AttractionQuery(api_client=self)
         self.classifications = ClassificationQuery(api_client=self)
-        self.segment_by_id = self.classifications.by_id
-        self.genre_by_id = self.classifications.by_id
-        self.subgenre_by_id = self.classifications.by_id
+        self.segment_by_id = self.classifications.segment_by_id
+        self.genre_by_id = self.classifications.genre_by_id
+        self.subgenre_by_id = self.classifications.subgenre_by_id
 
         log.debug("Root URL: {}".format(self.url))
 
@@ -114,27 +116,22 @@ class ApiClient:
     def __error(response):
         """HTTP status code 400, or something with 'errors' object"""
         rj = response.json()
-        errs = rj['errors']
-        new_errs = []
-        for err in errs:
-            new_errs.append({
-                'code': err['code'],
-                'detail': err['detail'],
-                'href': err['_links']['about']['href']
-            })
-        log.error('URL: {}'.format(response.url))
-        log.error(new_errs)
-        raise ApiException(response.status_code, new_errs, response.url)
+        error = namedtuple('error', ['code', 'detail', 'href'])
+        errors = [error(err['code'], err['detail'],
+                        err['_links']['about']['href'])
+                  for err in rj['errors']]
+        log.error('URL: {}\nErrors: {}'.format(response.url, errors))
+        raise ApiException(response.status_code, errors, response.url)
 
     @staticmethod
     def __fault(response):
         """HTTP status code 401, or something with 'faults' object"""
         rj = response.json()
-        f = rj['fault']
-        log.error('URL: {}'.format(response.url))
-        log.error(f['faultstring'])
-        raise ApiException(response.status_code, f['faultstring'],
-                           f['detail'], response.url)
+        fault_str = rj['fault']['faultstring']
+        detail = rj['fault']['detail']
+        log.error('URL: {}, Faultstr: {}'.format(response.url, fault_str))
+        raise ApiException(response.status_code, fault_str, detail,
+                           response.url)
 
     def __unknown_error(self, response):
         """Unexpected HTTP status code (not 200, 400, or 401)"""

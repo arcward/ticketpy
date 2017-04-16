@@ -275,8 +275,6 @@ class AttractionQuery(BaseQuery):
 
 class ClassificationQuery(BaseQuery):
     """Classification search/query class"""
-    #: Inherited method reassigned as classifications don't have IDs
-    query_subclass_id = BaseQuery.by_id
 
     def __init__(self, api_client):
         super().__init__(api_client, 'classifications', Classification)
@@ -301,33 +299,29 @@ class ClassificationQuery(BaseQuery):
         return self._get(keyword, classification_id, sort, include_test,
                          page, size, locale, source=source, **kwargs)
 
-    def by_id(self, entity_id):
-        """Returns a ``Segment``, ``Genre`` or ``SubGenre`` matching the 
-        given entity ID. (or ``None``)
-        
-        Aliased in ``ticketpy.client.ApiClient`` as 
-        methods ``segment_by_id()``, ``genre_by_id()`` and 
-        ``subgenre_by_id()`` although they're technically all 
-        the same method.
-        
-        :param entity_id: Segment, genre or subgenre ID
-        :return: ``Segment``, ``Genre`` or ``SubGenre``, depending which 
-            matches the ID.
-        """
-        cl = self.query_subclass_id(entity_id)
-        # No segment = no matches anywhere
-        if not cl.segment:
-            return None
-        elif cl.segment.id == entity_id:
-            return cl.segment
+    def segment_by_id(self, segment_id):
+        """Return a ``Segment`` matching this ID"""
+        return self.by_id(segment_id).segment
 
-        # Check deeper, return whatever object matches ``entity_id``
-        for genre in cl.segment.genres:
-            if genre.id == entity_id:
-                return genre
-            for subgenre in genre.subgenres:
-                if subgenre.id == entity_id:
-                    return subgenre
+    def genre_by_id(self, genre_id):
+        """Return a ``Genre`` matching this ID"""
+        genre = None
+        resp = self.by_id(genre_id)
+        if resp.segment:
+            for genre in resp.segment.genres:
+                if genre.id == genre_id:
+                    genre = genre
+        return genre
 
-        # Return ``None`` if one still wasn't found for some reason
-        return None
+    def subgenre_by_id(self, subgenre_id):
+        """Return a ``SubGenre`` matching this ID"""
+        subgenre = None
+        segment = self.by_id(subgenre_id).segment
+        if segment:
+            subgenres = [subg for genre in segment.genres for
+                         subg in genre.subgenres]
+            for subg in subgenres:
+                if subg.id == subgenre_id:
+                    subgenre = subg
+        return subgenre
+
