@@ -30,6 +30,7 @@ def haversine(latlon1, latlon2):
 
 
 def get_client():
+    """Returns ApiClient with api key from config.ini"""
     config = ConfigParser()
     config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
     api_key = config.get('ticketmaster', 'api_key')
@@ -46,7 +47,7 @@ class TestApiClient(TestCase):
                      "&marketId=10"
                      "&keyword=LCD%20Soundsystem")
         full_url = '{}?{}'.format(base_str, param_str)
-        parsed_link = self.api_client.parse_link(full_url)
+        parsed_link = self.api_client._parse_link(full_url)
         self.assertEqual(base_str, parsed_link.url)
 
         params = parsed_link.params
@@ -329,6 +330,7 @@ class TestPagedResponse(TestCase):
         iter_manual = []
 
         page_counter = 0
+        total_pages = None
         for pg in page_iter:
             print(pg)
             if page_counter == 0:

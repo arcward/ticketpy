@@ -147,14 +147,12 @@ class ApiClient:
         # API sometimes return incorrectly-formatted strings, need
         # to parse out parameters and pass them into a new request
         # rather than implicitly trusting the href in _links
-        #link_arr = link.split('?')
-        #link_url, link_params = link.split('?')
-        #params = self._link_params(link_params)
-        link = self.parse_link(link)
+        link = self._parse_link(link)
         resp = requests.get(link.url, link.params)
         return Page.from_json(self._handle_response(resp))
 
-    def parse_link(self, link):
+    def _parse_link(self, link):
+        """Parses link into base URL and dict of parameters"""
         parsed_link = namedtuple('link', ['url', 'params'])
         link_url, link_params = link.split('?')
         params = self._link_params(link_params)

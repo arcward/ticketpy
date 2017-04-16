@@ -115,44 +115,82 @@ class BaseQuery:
         return {k: v for (k, v) in kw_map.items() if v is not None}
 
 
-class VenueQuery(BaseQuery):
-    """Queries for venues"""
+class AttractionQuery(BaseQuery):
+    """Query class for Attractions"""
     def __init__(self, api_client):
-        super().__init__(api_client, 'venues', Venue)
+        self.api_client = api_client
+        super().__init__(api_client, 'attractions', Attraction)
 
-    def find(self, keyword=None, venue_id=None, sort=None, state_code=None,
-             country_code=None, source=None, include_test=None,
-             page=None, size=None, locale=None, **kwargs):
-        """Search for venues matching provided parameters
-        
-        :param keyword: Keyword to search on (such as part of the venue name)
-        :param venue_id: Venue ID 
-        :param sort: Sort method for response (API default: 'name,asc')
-        :param state_code: Filter by state code (ex: 'GA' not 'Georgia')
-        :param country_code: Filter by country code
-        :param source: Filter entities by source (['ticketmaster', 'universe', 
-            'frontgate', 'tmr'])
-        :param include_test: ['yes', 'no', 'only'], whether to include 
-            entities flagged as test in the response (default: 'no')
-        :param page: Page number (default: 0)
-        :param size: Page size of the response (default: 20)
-        :param locale: Locale (default: 'en')
-        :return: Venues found matching criteria 
-        :rtype: ``ticketpy.PagedResponse``
+    def find(self, sort=None, keyword=None, attraction_id=None,
+             source=None, include_test=None, page=None, size=None,
+             locale=None, **kwargs):
         """
-        return self._get(keyword, venue_id, sort, include_test, page,
-                         size, locale, state_code=state_code,
-                         country_code=country_code, source=source, **kwargs)
-
-    def by_name(self, venue_name, state_code=None, **kwargs):
-        """Search for a venue by name.
-
-        :param venue_name: Venue name to search
-        :param state_code: Two-letter state code to narrow results (ex 'GA')
-            (default: None)
-        :return: List of venues found matching search criteria
+        :param sort: Response sort type (API default: *name,asc*)
+        :param keyword: 
+        :param attraction_id: 
+        :param source: 
+        :param include_test: Include test attractions (['yes', 'no', 'only'])
+        :param page: 
+        :param size: 
+        :param locale: API default: *en*
+        :param kwargs: 
+        :return: 
         """
-        return self.find(keyword=venue_name, state_code=state_code, **kwargs)
+        return self._get(keyword, attraction_id, sort, include_test,
+                         page, size, locale, source=source, **kwargs)
+
+
+class ClassificationQuery(BaseQuery):
+    """Classification search/query class"""
+
+    def __init__(self, api_client):
+        super().__init__(api_client, 'classifications', Classification)
+
+    def find(self, sort=None, keyword=None, classification_id=None,
+             source=None, include_test=None, page=None, size=None,
+             locale=None, **kwargs):
+        """Search classifications
+
+        :param sort: Response sort type (API default: *name,asc*)
+        :param keyword: 
+        :param classification_id: 
+        :param source: 
+        :param include_test: Include test classifications 
+            (['yes', 'no', 'only'])
+        :param page: 
+        :param size: 
+        :param locale: API default: *en*
+        :param kwargs: 
+        :return: 
+        """
+        return self._get(keyword, classification_id, sort, include_test,
+                         page, size, locale, source=source, **kwargs)
+
+    def segment_by_id(self, segment_id):
+        """Return a ``Segment`` matching this ID"""
+        return self.by_id(segment_id).segment
+
+    def genre_by_id(self, genre_id):
+        """Return a ``Genre`` matching this ID"""
+        genre = None
+        resp = self.by_id(genre_id)
+        if resp.segment:
+            for genre in resp.segment.genres:
+                if genre.id == genre_id:
+                    genre = genre
+        return genre
+
+    def subgenre_by_id(self, subgenre_id):
+        """Return a ``SubGenre`` matching this ID"""
+        subgenre = None
+        segment = self.by_id(subgenre_id).segment
+        if segment:
+            subgenres = [subg for genre in segment.genres for
+                         subg in genre.subgenres]
+            for subg in subgenres:
+                if subg.id == subgenre_id:
+                    subgenre = subg
+        return subgenre
 
 
 class EventQuery(BaseQuery):
@@ -248,80 +286,41 @@ class EventQuery(BaseQuery):
                          sort=sort, **kwargs)
 
 
-class AttractionQuery(BaseQuery):
-    """Query class for Attractions"""
+class VenueQuery(BaseQuery):
+    """Queries for venues"""
     def __init__(self, api_client):
-        self.api_client = api_client
-        super().__init__(api_client, 'attractions', Attraction)
+        super().__init__(api_client, 'venues', Venue)
 
-    def find(self, sort=None, keyword=None, attraction_id=None,
-             source=None, include_test=None, page=None, size=None,
-             locale=None, **kwargs):
+    def find(self, keyword=None, venue_id=None, sort=None, state_code=None,
+             country_code=None, source=None, include_test=None,
+             page=None, size=None, locale=None, **kwargs):
+        """Search for venues matching provided parameters
+        
+        :param keyword: Keyword to search on (such as part of the venue name)
+        :param venue_id: Venue ID 
+        :param sort: Sort method for response (API default: 'name,asc')
+        :param state_code: Filter by state code (ex: 'GA' not 'Georgia')
+        :param country_code: Filter by country code
+        :param source: Filter entities by source (['ticketmaster', 'universe', 
+            'frontgate', 'tmr'])
+        :param include_test: ['yes', 'no', 'only'], whether to include 
+            entities flagged as test in the response (default: 'no')
+        :param page: Page number (default: 0)
+        :param size: Page size of the response (default: 20)
+        :param locale: Locale (default: 'en')
+        :return: Venues found matching criteria 
+        :rtype: ``ticketpy.PagedResponse``
         """
-        :param sort: Response sort type (API default: *name,asc*)
-        :param keyword: 
-        :param attraction_id: 
-        :param source: 
-        :param include_test: Include test attractions (['yes', 'no', 'only'])
-        :param page: 
-        :param size: 
-        :param locale: API default: *en*
-        :param kwargs: 
-        :return: 
+        return self._get(keyword, venue_id, sort, include_test, page,
+                         size, locale, state_code=state_code,
+                         country_code=country_code, source=source, **kwargs)
+
+    def by_name(self, venue_name, state_code=None, **kwargs):
+        """Search for a venue by name.
+
+        :param venue_name: Venue name to search
+        :param state_code: Two-letter state code to narrow results (ex 'GA')
+            (default: None)
+        :return: List of venues found matching search criteria
         """
-        return self._get(keyword, attraction_id, sort, include_test,
-                         page, size, locale, source=source, **kwargs)
-
-
-class ClassificationQuery(BaseQuery):
-    """Classification search/query class"""
-
-    def __init__(self, api_client):
-        super().__init__(api_client, 'classifications', Classification)
-
-    def find(self, sort=None, keyword=None, classification_id=None,
-             source=None, include_test=None, page=None, size=None,
-             locale=None, **kwargs):
-        """Search classifications
-
-        :param sort: Response sort type (API default: *name,asc*)
-        :param keyword: 
-        :param classification_id: 
-        :param source: 
-        :param include_test: Include test classifications 
-            (['yes', 'no', 'only'])
-        :param page: 
-        :param size: 
-        :param locale: API default: *en*
-        :param kwargs: 
-        :return: 
-        """
-        return self._get(keyword, classification_id, sort, include_test,
-                         page, size, locale, source=source, **kwargs)
-
-    def segment_by_id(self, segment_id):
-        """Return a ``Segment`` matching this ID"""
-        return self.by_id(segment_id).segment
-
-    def genre_by_id(self, genre_id):
-        """Return a ``Genre`` matching this ID"""
-        genre = None
-        resp = self.by_id(genre_id)
-        if resp.segment:
-            for genre in resp.segment.genres:
-                if genre.id == genre_id:
-                    genre = genre
-        return genre
-
-    def subgenre_by_id(self, subgenre_id):
-        """Return a ``SubGenre`` matching this ID"""
-        subgenre = None
-        segment = self.by_id(subgenre_id).segment
-        if segment:
-            subgenres = [subg for genre in segment.genres for
-                         subg in genre.subgenres]
-            for subg in subgenres:
-                if subg.id == subgenre_id:
-                    subgenre = subg
-        return subgenre
-
+        return self.find(keyword=venue_name, state_code=state_code, **kwargs)
