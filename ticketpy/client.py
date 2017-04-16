@@ -84,6 +84,7 @@ class ApiClient:
         rj = response.json()
         if response.status_code == 401:
             f = rj['fault']
+            log.error(f['faultstring'])
             raise ApiException(response.status_code, f['faultstring'],
                                f['detail'], response.url)
         elif response.status_code == 400:
@@ -145,11 +146,6 @@ class ApiClient:
 class ApiException(Exception):
     """Exception thrown for API-related error messages"""
     def __init__(self, *args):
-        """
-        :param url: Original (full) request url
-        :param params: Request/search parameters
-        :param response: Request response
-        """
         super().__init__(*args)
 
 
