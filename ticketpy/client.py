@@ -89,34 +89,62 @@ class ApiClient:
         resp = requests.get(urls[method], params=kwargs)
         return PagedResponse(self, self._handle_response(resp))
 
-    @staticmethod
-    def _handle_response(response):
+    def _handle_response(self, response):
         """Raises ``ApiException`` if needed, or returns response JSON obj
         
         Status codes
          * 401 = Invalid API key or rate limit quota violation
          * 400 = Invalid URL parameter
         """
-        rj = response.json()
-        if response.status_code == 401:
-            f = rj['fault']
-            log.error('URL: {}'.format(response.url))
-            log.error(f['faultstring'])
-            raise ApiException(response.status_code, f['faultstring'],
-                               f['detail'], response.url)
+        if response.status_code == 200:
+            return self.__success(response)
+        elif response.status_code == 401:
+            self.__fault(response)
         elif response.status_code == 400:
-            errs = rj['errors']
-            new_errs = []
-            for err in errs:
-                new_errs.append({
-                     'code': err['code'],
-                     'detail': err['detail'],
-                     'href': err['_links']['about']['href']
-                })
-            log.error('URL: {}'.format(response.url))
-            log.error(new_errs)
-            raise ApiException(response.status_code, new_errs, response.url)
-        return rj
+            self.__error(response)
+        else:
+            self.__unknown_error(response)
+
+    @staticmethod
+    def __success(response):
+        """Successful response, just return JSON"""
+        return response.json()
+
+    @staticmethod
+    def __error(response):
+        """HTTP status code 400, or something with 'errors' object"""
+        rj = response.json()
+        errs = rj['errors']
+        new_errs = []
+        for err in errs:
+            new_errs.append({
+                'code': err['code'],
+                'detail': err['detail'],
+                'href': err['_links']['about']['href']
+            })
+        log.error('URL: {}'.format(response.url))
+        log.error(new_errs)
+        raise ApiException(response.status_code, new_errs, response.url)
+
+    @staticmethod
+    def __fault(response):
+        """HTTP status code 401, or something with 'faults' object"""
+        rj = response.json()
+        f = rj['fault']
+        log.error('URL: {}'.format(response.url))
+        log.error(f['faultstring'])
+        raise ApiException(response.status_code, f['faultstring'],
+                           f['detail'], response.url)
+
+    def __unknown_error(self, response):
+        """Unexpected HTTP status code (not 200, 400, or 401)"""
+        rj = response.json()
+        if 'fault' in rj:
+            self.__fault(response)
+        elif 'errors' in rj:
+            self.__error(response)
+        else:
+            raise ApiException(response.status_code, response.text)
 
     def get_url(self, link):
         """Gets a specific href from '_links' object in a response"""
