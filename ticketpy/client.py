@@ -1,8 +1,7 @@
 """API client classes"""
 import logging
-from collections import namedtuple
-
 import requests
+from collections import namedtuple
 from urllib import parse
 from ticketpy.query import AttractionQuery, ClassificationQuery, \
     EventQuery, VenueQuery

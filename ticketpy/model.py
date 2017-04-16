@@ -25,6 +25,179 @@ def _assign_links(obj, json_obj, base_url=None):
         obj.links = obj_links
 
 
+class Page(list):
+    """API response page"""
+    def __init__(self, number=None, size=None, total_elements=None,
+                 total_pages=None):
+        super().__init__([])
+        self.number = number
+        self.size = size
+        self.total_elements = total_elements
+        self.total_pages = total_pages
+
+    @staticmethod
+    def from_json(json_obj):
+        """Instantiate and return a Page(list)"""
+        pg = Page()
+        _assign_links(pg, json_obj, ticketpy.ApiClient.root_url)
+        pg.number = json_obj['page']['number']
+        pg.size = json_obj['page']['size']
+        pg.total_pages = json_obj['page']['totalPages']
+        pg.total_elements = json_obj['page']['totalElements']
+
+        embedded = json_obj.get('_embedded')
+        if not embedded:
+            return pg
+
+        object_models = {
+            'events': Event,
+            'venues': Venue,
+            'attractions': Attraction,
+            'classifications': Classification
+        }
+        for k, v in embedded.items():
+            if k in object_models:
+                obj_type = object_models[k]
+                pg += [obj_type.from_json(obj) for obj in v]
+
+        return pg
+
+    def __str__(self):
+        return ("Page {number}/{total_pages}, Size: {size}, "
+                "Total elements: {total_elements}").format(**self.__dict__)
+
+    def __repr__(self):
+        return str(self)
+
+
+class Event:
+    """Ticketmaster event
+
+    The JSON returned from the Discovery API (at least, as far as 
+    what's being used here) looks like:
+
+    .. code-block:: json
+
+        {
+            "name": "Event name",
+            "dates": {
+                "start": {
+                    "localDate": "2019-04-01",
+                    "localTime": "2019-04-01T23:00:00Z"
+                },
+                "status": {
+                    "code": "onsale"
+                }
+            },
+            "classifications": [
+                {
+                    "genre": {
+                        "name": "Rock"
+                    }
+                },
+                {
+                    "genre": {
+                        "name": "Funk"
+                    }
+                }
+            ],
+            "priceRanges": [
+                {
+                    "min": 10,
+                    "max": 25
+                }
+            ],
+            "_embedded": {
+                "venues": [
+                    {
+                        "name": "The Tabernacle"
+                    }
+                ]
+            }
+        }
+    """
+
+    def __init__(self, event_id=None, name=None, start_date=None,
+                 start_time=None, status=None, price_ranges=None,
+                 venues=None, utc_datetime=None, classifications=None,
+                 links=None):
+        self.id = event_id
+        self.name = name
+        #: **Local** start date (*YYYY-MM-DD*)
+        self.local_start_date = start_date
+        #: **Local** start time (*HH:MM:SS*)
+        self.local_start_time = start_time
+        #: Sale status (such as *Cancelled, Offsale...*)
+        self.status = status
+        self.classifications = classifications
+        self.price_ranges = price_ranges
+        self.venues = venues
+        self.links = links
+        self.__utc_datetime = None
+        if utc_datetime is not None:
+            self.utc_datetime = utc_datetime
+
+    @property
+    def utc_datetime(self):
+        """Start date/time in UTC (*YYYY-MM-DDTHH:MM:SSZ*)"""
+        return self.__utc_datetime
+
+    @utc_datetime.setter
+    def utc_datetime(self, utc_datetime):
+        if not utc_datetime:
+            self.__utc_datetime = None
+        else:
+            ts_format = "%Y-%m-%dT%H:%M:%SZ"
+            self.__utc_datetime = datetime.strptime(utc_datetime, ts_format)
+
+    @staticmethod
+    def from_json(json_event):
+        """Creates an ``Event`` from API's JSON response"""
+        e = Event()
+        e.id = json_event['id']
+        e.name = json_event.get('name')
+
+        dates = json_event.get('dates')
+        start_dates = dates.get('start', {})
+        e.local_start_date = start_dates.get('localDate')
+        e.local_start_time = start_dates.get('localTime')
+        e.utc_datetime = start_dates.get('dateTime')
+
+        status = dates.get('status', {})
+        e.status = status.get('code')
+
+        if 'classifications' in json_event:
+            e.classifications = [EventClassification.from_json(cl)
+                                 for cl in json_event['classifications']]
+
+        price_ranges = []
+        if 'priceRanges' in json_event:
+            for pr in json_event['priceRanges']:
+                price_ranges.append({'min': pr['min'], 'max': pr['max']})
+        e.price_ranges = price_ranges
+
+        venues = []
+        if 'venues' in json_event.get('_embedded', {}):
+            for v in json_event['_embedded']['venues']:
+                venues.append(Venue.from_json(v))
+        e.venues = venues
+        _assign_links(e, json_event)
+        return e
+
+    def __str__(self):
+        tmpl = ("Event:            {name}\n"
+                "Venues:           {venues}\n"
+                "Start date:       {local_start_date}\n"
+                "Start time:       {local_start_time}\n"
+                "Price ranges:     {price_ranges}\n"
+                "Status:           {status}\n"
+                "Classifications:  {classifications!s}\n")
+        return tmpl.format(**self.__dict__)
+
+    def __repr__(self):
+        return str(self)
+
+
 class Venue:
     """A Ticketmaster venue
     
@@ -152,133 +325,6 @@ class Venue:
         return str(self)
 
 
-class Event:
-    """Ticketmaster event
-    
-    The JSON returned from the Discovery API (at least, as far as 
-    what's being used here) looks like:
-    
-    .. code-block:: json
-    
-        {
-            "name": "Event name",
-            "dates": {
-                "start": {
-                    "localDate": "2019-04-01",
-                    "localTime": "2019-04-01T23:00:00Z"
-                },
-                "status": {
-                    "code": "onsale"
-                }
-            },
-            "classifications": [
-                {
-                    "genre": {
-                        "name": "Rock"
-                    }
-                },
-                {
-                    "genre": {
-                        "name": "Funk"
-                    }
-                }
-            ],
-            "priceRanges": [
-                {
-                    "min": 10,
-                    "max": 25
-                }
-            ],
-            "_embedded": {
-                "venues": [
-                    {
-                        "name": "The Tabernacle"
-                    }
-                ]
-            }
-        }
-    """
-    def __init__(self, event_id=None, name=None, start_date=None,
-                 start_time=None, status=None, price_ranges=None,
-                 venues=None, utc_datetime=None, classifications=None,
-                 links=None):
-        self.id = event_id
-        self.name = name
-        #: **Local** start date (*YYYY-MM-DD*)
-        self.local_start_date = start_date
-        #: **Local** start time (*HH:MM:SS*)
-        self.local_start_time = start_time
-        #: Sale status (such as *Cancelled, Offsale...*)
-        self.status = status
-        self.classifications = classifications
-        self.price_ranges = price_ranges
-        self.venues = venues
-        self.links = links
-        self.__utc_datetime = None
-        if utc_datetime is not None:
-            self.utc_datetime = utc_datetime
-
-    @property
-    def utc_datetime(self):
-        """Start date/time in UTC (*YYYY-MM-DDTHH:MM:SSZ*)"""
-        return self.__utc_datetime
-
-    @utc_datetime.setter
-    def utc_datetime(self, utc_datetime):
-        if not utc_datetime:
-            self.__utc_datetime = None
-        else:
-            ts_format = "%Y-%m-%dT%H:%M:%SZ"
-            self.__utc_datetime = datetime.strptime(utc_datetime, ts_format)
-
-    @staticmethod
-    def from_json(json_event):
-        """Creates an ``Event`` from API's JSON response"""
-        e = Event()
-        e.id = json_event['id']
-        e.name = json_event.get('name')
-
-        dates = json_event.get('dates')
-        start_dates = dates.get('start', {})
-        e.local_start_date = start_dates.get('localDate')
-        e.local_start_time = start_dates.get('localTime')
-        e.utc_datetime = start_dates.get('dateTime')
-
-        status = dates.get('status', {})
-        e.status = status.get('code')
-
-        if 'classifications' in json_event:
-            e.classifications = [EventClassification.from_json(cl)
-                                 for cl in json_event['classifications']]
-
-        price_ranges = []
-        if 'priceRanges' in json_event:
-            for pr in json_event['priceRanges']:
-                price_ranges.append({'min': pr['min'], 'max': pr['max']})
-        e.price_ranges = price_ranges
-
-        venues = []
-        if 'venues' in json_event.get('_embedded', {}):
-            for v in json_event['_embedded']['venues']:
-                venues.append(Venue.from_json(v))
-        e.venues = venues
-        _assign_links(e, json_event)
-        return e
-
-    def __str__(self):
-        tmpl = ("Event:            {name}\n"
-                "Venues:           {venues}\n"
-                "Start date:       {local_start_date}\n"
-                "Start time:       {local_start_time}\n"
-                "Price ranges:     {price_ranges}\n"
-                "Status:           {status}\n"
-                "Classifications:  {classifications!s}\n")
-        return tmpl.format(**self.__dict__)
-
-    def __repr__(self):
-        return str(self)
-
-
 class Attraction:
     """Attraction"""
     def __init__(self, attraction_id=None, attraction_name=None, url=None,
@@ -312,6 +358,40 @@ class Attraction:
 
     def __repr__(self):
         return str(self)
+
+
+class Classification:
+    """Classification object (segment/genre/sub-genre)
+    
+    For the structure returned by ``EventSearch``, see ``EventClassification``
+    """
+    def __init__(self, segment=None, classification_type=None, subtype=None,
+                 primary=None, links=None):
+        self.segment = segment
+        self.type = classification_type
+        self.subtype = subtype
+        self.primary = primary
+        self.links = links
+
+    @staticmethod
+    def from_json(json_obj):
+        """Create/return ``Classification`` object from JSON"""
+        cl = Classification()
+        cl.primary = json_obj.get('primary')
+
+        if 'segment' in json_obj:
+            cl.segment = Segment.from_json(json_obj['segment'])
+
+        if 'type' in json_obj:
+            cl_t = json_obj['type']
+            cl.type = ClassificationType(cl_t['id'], cl_t['name'])
+
+        if 'subType' in json_obj:
+            cl_st = json_obj['subType']
+            cl.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
+
+        _assign_links(cl, json_obj)
+        return cl
 
 
 class EventClassification:
@@ -366,42 +446,7 @@ class EventClassification:
         return str(self)
 
 
-class Classification:
-    """Classification object (segment/genre/sub-genre)
-    
-    For the structure returned by ``EventSearch``, see ``EventClassification``
-    """
-    def __init__(self, segment=None, classification_type=None, subtype=None,
-                 primary=None, links=None):
-        self.segment = segment
-        self.type = classification_type
-        self.subtype = subtype
-        self.primary = primary
-        self.links = links
-
-    @staticmethod
-    def from_json(json_obj):
-        """Create/return ``Classification`` object from JSON"""
-        cl = Classification()
-        cl.primary = json_obj.get('primary')
-
-        if 'segment' in json_obj:
-            cl.segment = Segment.from_json(json_obj['segment'])
-
-        if 'type' in json_obj:
-            cl_t = json_obj['type']
-            cl.type = ClassificationType(cl_t['id'], cl_t['name'])
-
-        if 'subType' in json_obj:
-            cl_st = json_obj['subType']
-            cl.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
-
-        _assign_links(cl, json_obj)
-        return cl
-
-
 class ClassificationType:
-    """Type of ``Classification``"""
     def __init__(self, type_id=None, type_name=None, subtypes=None):
         self.id = type_id
         self.name = type_name
@@ -415,7 +460,6 @@ class ClassificationType:
 
 
 class ClassificationSubType:
-    """Subtype of ``ClassificationType``"""
     def __init__(self, type_id=None, type_name=None):
         self.id = type_id
         self.name = type_name
@@ -428,7 +472,6 @@ class ClassificationSubType:
 
 
 class Segment:
-    """Segment, under ``Classification``"""
     def __init__(self, segment_id=None, segment_name=None, genres=None,
                  links=None):
         self.id = segment_id
@@ -458,7 +501,6 @@ class Segment:
 
 
 class Genre:
-    """Genre type"""
     def __init__(self, genre_id=None, genre_name=None, subgenres=None,
                  links=None):
         self.id = genre_id
@@ -487,7 +529,6 @@ class Genre:
 
 
 class SubGenre:
-    """SubGenre type under ``Genre``"""
     def __init__(self, subgenre_id=None, subgenre_name=None, links=None):
         self.id = subgenre_id
         self.name = subgenre_name
@@ -508,46 +549,3 @@ class SubGenre:
         return str(self)
 
 
-class Page(list):
-    """API response page"""
-    def __init__(self, number=None, size=None, total_elements=None,
-                 total_pages=None):
-        super().__init__([])
-        self.number = number
-        self.size = size
-        self.total_elements = total_elements
-        self.total_pages = total_pages
-
-    @staticmethod
-    def from_json(json_obj):
-        """Instantiate and return a Page(list)"""
-        pg = Page()
-        _assign_links(pg, json_obj, ticketpy.ApiClient.root_url)
-        pg.number = json_obj['page']['number']
-        pg.size = json_obj['page']['size']
-        pg.total_pages = json_obj['page']['totalPages']
-        pg.total_elements = json_obj['page']['totalElements']
-
-        embedded = json_obj.get('_embedded')
-        if not embedded:
-            return pg
-
-        object_models = {
-            'events': Event,
-            'venues': Venue,
-            'attractions': Attraction,
-            'classifications': Classification
-        }
-        for k, v in embedded.items():
-            if k in object_models:
-                obj_type = object_models[k]
-                pg += [obj_type.from_json(obj) for obj in v]
-
-        return pg
-
-    def __str__(self):
-        return ("Page {number}/{total_pages}, Size: {size}, "
-                "Total elements: {total_elements}").format(**self.__dict__)
-
-    def __repr__(self):
-        return str(self)
