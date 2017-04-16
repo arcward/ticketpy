@@ -7,9 +7,9 @@ from ticketpy.query import AttractionQuery, ClassificationQuery, \
 from ticketpy.model import Page
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 sh = logging.StreamHandler()
-sh.setLevel(logging.DEBUG)
+sh.setLevel(logging.INFO)
 sf = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 sh.setFormatter(sf)
 log.addHandler(sh)
@@ -91,7 +91,12 @@ class ApiClient:
 
     @staticmethod
     def _handle_response(response):
-        """Raises ``ApiException`` if needed, or returns response JSON obj"""
+        """Raises ``ApiException`` if needed, or returns response JSON obj
+        
+        Status codes
+         * 401 = Invalid API key or rate limit quota violation
+         * 400 = Invalid URL parameter
+        """
         rj = response.json()
         if response.status_code == 401:
             f = rj['fault']
@@ -165,7 +170,6 @@ class ApiException(Exception):
 
 class PagedResponse:
     """Iterates through API response pages"""
-
     def __init__(self, api_client, response):
         self.api_client = api_client
         self.page = None
