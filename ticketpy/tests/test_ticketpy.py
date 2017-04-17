@@ -150,10 +150,14 @@ class TestClassificationQuery(TestCase):
             print(cl)
 
     def test_classification_by_id(self):
-        genre_id = 'KnvZfZ7vAvE'
-        nested_genre = self.tm.classifications.by_id(genre_id)
-        genre_ids = [genre.id for genre in nested_genre.segment.genres]
-        self.assertIn(genre_id, genre_ids)
+        subgenre_id = 'KZazBEonSMnZfZ7vkdl'
+        subgenre_name = 'Bebop'
+        classification = self.tm.classifications.by_id(subgenre_id)
+
+        subgenre_ids = []
+        for genre in classification.segment.genres:
+            subgenre_ids += [sg.id for sg in genre.subgenres]
+        self.assertIn(subgenre_id, subgenre_ids)
 
         fake_response = self.tm.classifications.by_id('asdf')
         self.assertIsNone(fake_response.segment)

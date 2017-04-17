@@ -53,37 +53,45 @@ May 21st, 2017:
 
 Output::
 
-    Event:        Atlanta Funk Fest 2017 3 Day Ticket
-    Venue(s):     'Wolf Creek Amphitheater' at 3025 Merk Road in Atlanta GA
-    Start date:   2017-05-19
-    Start time:   19:00:00
-    Price ranges: 128.01-424.0
-    Status:       onsale
-    Genres:       R&B
+    Event:            Atlanta Funk Fest 2017 Fri/sun Combo Ticket
+    Venues:           [Wolf Creek Amphitheater at 3025 Merk Road in Atlanta GA]
+    Start date:       2017-05-19
+    Start time:       19:00:00
+    Price ranges:     [{'min': 88.0, 'max': 275.0}]
+    Status:           onsale
+    Classifications:  [Segment: Music / Genre: R&B / Subgenre: R&B / Type: Undefined / Subtype: Undefined]
 
-    Event:        Atlanta Funk Fest 2017
-    Venue(s):     'Wolf Creek Amphitheater' at 3025 Merk Road in Atlanta GA
-    Start date:   2017-05-19
-    Start time:   19:00:00
-    Price ranges: 63.0-158.0
-    Status:       onsale
-    Genres:       R&B
+    Event:            Atlanta Funk Fest 2017
+    Venues:           [Wolf Creek Amphitheater at 3025 Merk Road in Atlanta GA]
+    Start date:       2017-05-19
+    Start time:       19:00:00
+    Price ranges:     [{'min': 63.0, 'max': 158.0}]
+    Status:           onsale
+    Classifications:  [Segment: Music / Genre: R&B / Subgenre: R&B / Type: Undefined / Subtype: Undefined]
 
-    Event:        Atlanta Funk Fest 2017
-    Venue(s):     'Wolf Creek Amphitheater' at 3025 Merk Road in Atlanta GA
-    Start date:   2017-05-20
-    Start time:   17:00:00
-    Price ranges: 63.0-158.0
-    Status:       onsale
-    Genres:       Hip-Hop/Rap
+    Event:            Atlanta Funk Fest 2017 3 Day Ticket
+    Venues:           [Wolf Creek Amphitheater at 3025 Merk Road in Atlanta GA]
+    Start date:       2017-05-19
+    Start time:       19:00:00
+    Price ranges:     [{'min': 128.01, 'max': 424.0}]
+    Status:           onsale
+    Classifications:  [Segment: Music / Genre: R&B / Subgenre: R&B / Type: Undefined / Subtype: Undefined]
 
-    Event:        NF
-    Venue(s):     'Center Stage Theater' at 1374 W Peachtree St. NW in Atlanta GA
-    Start date:   2017-05-20
-    Start time:   20:00:00
-    Price ranges: 22.0-83.0
-    Status:       onsale
-    Genres:       Hip-Hop/Rap
+    Event:            Atlanta Funk Fest 2017
+    Venues:           [Wolf Creek Amphitheater at 3025 Merk Road in Atlanta GA]
+    Start date:       2017-05-20
+    Start time:       17:00:00
+    Price ranges:     [{'min': 63.0, 'max': 158.0}]
+    Status:           onsale
+    Classifications:  [Segment: Music / Genre: Hip-Hop/Rap / Subgenre: Urban / Type: Undefined / Subtype: Undefined]
+
+    Event:            NF
+    Venues:           [Center Stage Theater at 1374 W Peachtree St. NW in Atlanta GA]
+    Start date:       2017-05-20
+    Start time:       20:00:00
+    Price ranges:     [{'min': 22.0, 'max': 83.0}]
+    Status:           onsale
+    Classifications:  [Segment: Music / Genre: Hip-Hop/Rap / Subgenre: Urban / Type: Undefined / Subtype: Undefined]
 
 Calling ``ApiClient.find()`` returns a ``ticketpy.PagedResponse``
 object, which iterates through API response pages (as ``ticketpy.Page``).
@@ -186,49 +194,38 @@ Output::
 
 Classifications
 ^^^^^^^^^^^^^^^
-Searching for classifications works similarly to the above:
+Classifications don't have IDs, so querying with ``classifications.by_id()``
+will return a ``Classification`` object containing a segment, genre,
+or subgenre with a matching ID. This can be helpful if you need to figure
+out the parent genre/segment for a subgenre. For example:
 
 .. code-block:: python
 
     import ticketpy
 
     tm_client = ticketpy.ApiClient("your_api_key")
-    classifications = tm_client.classifications.find(keyword="Drama").one()
-
-    for cl in classifications:
-        print("Segment: {}".format(cl.segment.name))
-        for genre in cl.segment.genres:
-            print("--Genre: {}".format(genre.name))
+    classification = tm_client.classifications.by_id('KZazBEonSMnZfZ7vkdl')
+    print(classification.segment)
+    for genre in classification.segment.genres:
+        print('-{}'.format(genre))
+        for subgenre in genre.subgenres:
+            print('--{}'.format(subgenre))
 
 Output::
 
-    Segment: Film
-    --Genre: Drama
-    Segment: Arts & Theatre
-    --Genre: Theatre
+    Music
+    -Jazz
+    --Bebop
 
-Querying details for classifications by ID will return either a ``Segment``,
-``Genre``, or ``SubGenre``, whichever matches the given ID.
-
-For example,
+To query for a specific segment, genre or subgenre by ID, use
+``segment_by_id()``, ``genre_by_id()`` or ``subgenre_by_id()``.
+Each will return *only* their respective object upon finding a
+match (or *None*). For example, this would just print '*Jazz*'
+without having to look throughout a ``Classification`` object:
 
 .. code-block:: python
 
-    import ticketpy
+    genre = tm_client.genre_by_id('KnvZfZ7vAvE')
+    print(genre)
 
-    tm_client = ticketpy.ApiClient("your_api_key")
-    x = tm_client.classifications.by_id('KZFzniwnSyZfZ7v7nJ')
-    y = tm_client.classifications.by_id('KnvZfZ7vAvE')
-    z = tm_client.classifications.by_id('KZazBEonSMnZfZ7vkdl')
-
-    s = "Name: {} / Type: {}"
-    print(s.format(x.name, type(x)))
-    print(s.format(y.name, type(y)))
-    print(s.format(z.name, type(z)))
-
-Output::
-
-    Name: Music / Type: <class 'ticketpy.model.Segment'>
-    Name: Jazz / Type: <class 'ticketpy.model.Genre'>
-    Name: Bebop / Type: <class 'ticketpy.model.SubGenre'>
 

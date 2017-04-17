@@ -1,28 +1,80 @@
 """Models for API objects"""
+from collections import namedtuple
 from datetime import datetime
 import re
 import ticketpy
 
 
-def _assign_links(obj, json_obj, base_url=None):
-    """Assigns ``links`` attribute to an object from JSON"""
-    # Normal link strucutre is {link_name: {'href': url}},
-    # but some responses also have lists of other models.
-    # API occasionally returns bad URLs (with {&sort} and similar)
-    json_links = json_obj.get('_links')
-    if not json_links:
-        obj.links = {}
-    else:
-        obj_links = {}
-        for k, v in json_links.items():
-            if 'href' in v:
-                href = re.sub("({.+})", "", v['href'])
-                if base_url:
-                    href = "{}{}".format(base_url, href)
-                obj_links[k] = href
-            else:
-                obj_links[k] = v
-        obj.links = obj_links
+Status = namedtuple('Status', ['code'])
+Embedded = namedtuple('Embedded', ['events', 'venues', 'attractions'])
+Promoter = namedtuple('Promoter', ['id', 'name', 'description'])
+Price = namedtuple('Price', ['type', 'currency', 'min', 'max'])
+Place = namedtuple('Place', ['area', 'address', 'city', 'state',
+                             'country', 'postal_code', 'location',
+                             'name'])
+
+Area = namedtuple('Area', ['name'])
+Address = namedtuple('Address', ['line_1', 'line_2', 'line_3'])
+City = namedtuple('City', ['name'])
+State = namedtuple('State', ['state_code', 'name'])
+Country = namedtuple('Country', ['country_code', 'name'])
+DMA = namedtuple('DMA', ['id'])
+Location = namedtuple('Location', ['latitude', 'longitude'])
+Market = namedtuple('Market', ['id'])
+BoxOfficeInfo = namedtuple('BoxOfficeInfo', ['phone_number_detail',
+                                             'open_hours_detail',
+                                             'accepted_payment_detail',
+                                             'will_call_detail'])
+GeneralInfo = namedtuple('GeneralInfo', ['general_rule', 'child_rule'])
+Image = namedtuple('Image', ['url', 'ratio', 'width', 'height', 'fallback',
+                             'attribution'])
+Start = namedtuple('Start', ['local_date', 'local_time', 'date_time',
+                                     'date_tbd', 'date_tba', 'time_tba',
+                                     'no_specific_time'])
+End = namedtuple('End', ['local_time', 'date_time', 'approximate'])
+Access = namedtuple('Access', ['start_date_time', 'start_approximate',
+                               'end_date_time', 'end_approximate'])
+Sales = namedtuple('Sales', ['public', 'presales'])
+PublicSale = namedtuple('PublicSales', ['start_date_time', 'end_date_time',
+                                         'start_tbd'])
+Presale = namedtuple('Presale', ['name', 'description', 'url',
+                                 'start_date_time', 'end_date_time'])
+
+
+attr_map = {
+    'localDate': 'local_date',
+    'localTime': 'local_time',
+    'dateTime': 'date_time',
+    'dateTBD': 'date_tbd',
+    'startTBD': 'start_tbd',
+    'dateTBA': 'date_tba',
+    'timeTBA': 'time_tba',
+    'noSpecificTime': 'no_specific_time',
+    'startDateTime': 'start_date_time',
+    'startApproximate': 'start_approximate',
+    'endDateTime': 'end_date_time',
+    'endApproximate': 'end_approximate',
+    'postalCode': 'postal_code',
+    'stateCode': 'state_code',
+    'countryCode': 'country_code',
+    'line1': 'line_1',
+    'line2': 'line_2',
+    'line3': 'line_3',
+    'additionalInfo': 'additional_info',
+    'pleaseNote': 'please_note',
+    'priceRanges': 'price_ranges',
+    'parkingDetail': 'parking_detail',
+    'accessibleSeatingDetail': 'accessible_seating_detail',
+    'boxOfficeInfo': 'box_office_info',
+    'generalInfo': 'general_info',
+    'subType': 'subtype',
+    'phoneNumberDetail': 'phone_number_detail',
+    'openHoursDetail': 'open_hours_detail',
+    'acceptedPaymentDetail': 'accepted_payment_detail',
+    'willCallDetail': 'will_call_detail',
+    'generalRule': 'general_rule',
+    'childRule': 'child_rule'
+}
 
 
 class Page(list):
@@ -39,7 +91,7 @@ class Page(list):
     def from_json(json_obj):
         """Instantiate and return a Page(list)"""
         pg = Page()
-        _assign_links(pg, json_obj, ticketpy.ApiClient.root_url)
+        _Util.assign_links(pg, json_obj, ticketpy.ApiClient.root_url)
         pg.number = json_obj['page']['number']
         pg.size = json_obj['page']['size']
         pg.total_pages = json_obj['page']['totalPages']
@@ -68,6 +120,131 @@ class Page(list):
 
     def __repr__(self):
         return str(self)
+
+
+class Dates:
+    def __init__(self, start=None, end=None, access=None, timezone=None,
+                 status=None):
+        self.start = start
+        self.end = end
+        self.access = access
+        self.timezone = timezone
+        self.status = status
+
+    @staticmethod
+    def __start(start):
+        kwargs = Dates.__namedtuple_kwargs(start, Start)
+        dt = kwargs.get('date_time')
+        if dt:
+            kwargs['date_time'] = Dates.__format_utc_timestamp(dt)
+        return Start(**kwargs)
+
+    @staticmethod
+    def __access(access):
+        kwargs = Dates.__namedtuple_kwargs(access, Access)
+        start_dt = kwargs.get('start_date_time')
+        if start_dt:
+            kwargs['start_date_time'] = Dates.__format_utc_timestamp(start_dt)
+
+        end_dt = kwargs.get('end_date_time')
+        if end_dt:
+            kwargs['end_date_time'] = Dates.__format_utc_timestamp(end_dt)
+        return Access(**kwargs)
+
+    @staticmethod
+    def from_json(json_obj):
+        dates = Dates()
+        dates.timezone = json_obj.get('timezone')
+        dates.start = _Util.namedtuple(Start, json_obj.get('start'))
+        dates.end = _Util.namedtuple(End, json_obj.get('end'))
+        dates.access = _Util.namedtuple(Access, json_obj.get('access'))
+        dates.status = _Util.namedtuple(Status, json_obj.get('status'))
+        return dates
+
+
+class _Util:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def assign_links(obj, json_obj, base_url=None):
+        """Assigns ``links`` attribute to an object from JSON"""
+        # Normal link strucutre is {link_name: {'href': url}},
+        # but some responses also have lists of other models.
+        # API occasionally returns bad URLs (with {&sort} and similar)
+        json_links = json_obj.get('_links')
+        if not json_links:
+            obj.links = {}
+        else:
+            obj_links = {}
+            for k, v in json_links.items():
+                if 'href' in v:
+                    href = re.sub("({.+})", "", v['href'])
+                    if base_url:
+                        href = "{}{}".format(base_url, href)
+                    obj_links[k] = href
+                else:
+                    obj_links[k] = v
+            obj.links = obj_links
+
+    @staticmethod
+    def namedtuple(namedtuple_model, json_obj=None):
+        kwargs = {k: None for k in namedtuple_model._fields}
+        if not json_obj:
+            return None
+        _Util.update_kwargs(json_obj)
+        kwargs.update(json_obj)
+        return namedtuple_model(**kwargs)
+
+    @staticmethod
+    def update_kwargs(kwargs):
+        kws = {}
+        for k, v in dict(kwargs).items():
+            if k in attr_map:
+                kws[attr_map[k]] = v
+                del kwargs[k]
+
+        dt_updates = {}
+        for k, v in kws.items():
+            if 'date_time' in k or 'dateTime' in k:
+                dt_updates[k] = _Util.format_utc_timestamp(v)
+
+        kwargs.update(kws)
+        kwargs.update(dt_updates)
+
+    @staticmethod
+    def sales(json_obj):
+        pub_sales = _Util.namedtuple(PublicSale, json_obj.get('public'))
+        presales = [_Util.namedtuple(Presale, ps) for ps in
+                    json_obj.get('presales', [])]
+        return Sales(pub_sales, presales)
+
+    @staticmethod
+    def format_utc_timestamp(timestamp):
+        return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ")
+
+    @staticmethod
+    def place(json_obj):
+        kws = {k: None for k in Place._fields}
+        kws.update({
+            'name': json_obj.get('name'),
+            'postal_code': json_obj.get('postalCode'),
+            'area': _Util.namedtuple(Area, json_obj.get('area')),
+            'address': _Util.address(json_obj.get('address')),
+            'city': _Util.namedtuple(City, json_obj.get('city')),
+            'state': _Util.state(json_obj.get('state')),
+            'country': _Util.state(json_obj.get('country')),
+            'location': _Util.namedtuple(json_obj.get('location'))
+        })
+        return Place(**kws)
+
+    @staticmethod
+    def state(json_obj):
+        return _Util.namedtuple(State, json_obj)
+
+    @staticmethod
+    def address(json_obj):
+        return _Util.namedtuple(Address, json_obj)
 
 
 class Event:
@@ -116,73 +293,68 @@ class Event:
             }
         }
     """
-
     def __init__(self, event_id=None, name=None, start_date=None,
                  start_time=None, status=None, price_ranges=None,
                  venues=None, utc_datetime=None, classifications=None,
-                 links=None):
+                 links=None, distance=None, units=None, locale=None,
+                 description=None, additional_info=None, url=None,
+                 images=None, sales=None, info=None, please_note=None,
+                 place=None, test=None, promoter=None):
         self.id = event_id
         self.name = name
-        #: **Local** start date (*YYYY-MM-DD*)
-        self.local_start_date = start_date
-        #: **Local** start time (*HH:MM:SS*)
-        self.local_start_time = start_time
-        #: Sale status (such as *Cancelled, Offsale...*)
-        self.status = status
         self.classifications = classifications
         self.price_ranges = price_ranges
         self.venues = venues
         self.links = links
-        self.__utc_datetime = None
-        if utc_datetime is not None:
-            self.utc_datetime = utc_datetime
 
-    @property
-    def utc_datetime(self):
-        """Start date/time in UTC (*YYYY-MM-DDTHH:MM:SSZ*)"""
-        return self.__utc_datetime
-
-    @utc_datetime.setter
-    def utc_datetime(self, utc_datetime):
-        if not utc_datetime:
-            self.__utc_datetime = None
-        else:
-            ts_format = "%Y-%m-%dT%H:%M:%SZ"
-            self.__utc_datetime = datetime.strptime(utc_datetime, ts_format)
+        self.distance = distance
+        self.units = units
+        self.locale = locale
+        self.description = description
+        self.additional_info = additional_info
+        self.url = url
+        self.images = images
+        self.sales = sales
+        self.info = info
+        self.please_note = please_note
+        self.place = place
+        self.test = test
+        self.promoter = promoter
 
     @staticmethod
     def from_json(json_event):
         """Creates an ``Event`` from API's JSON response"""
-        e = Event()
-        e.id = json_event['id']
-        e.name = json_event.get('name')
+        args = ['name', 'distance', 'units', 'locale', 'description',
+                'url', 'test', 'info']
+        kwargs = {k: json_event.get(k) for k in args}
+        kwargs.update({
+            'event_id': json_event.get('id'),
+            'promoter': _Util.namedtuple(Promoter, json_event.get('promoter')),
+            'sales': _Util.sales(json_event.get('sales')),
+            'dates': Dates.from_json(json_event.get('dates'))
+        })
+        kwargs['event_id'] = json_event.get('id')
+        ev = Event(**kwargs)
 
-        dates = json_event.get('dates')
-        start_dates = dates.get('start', {})
-        e.local_start_date = start_dates.get('localDate')
-        e.local_start_time = start_dates.get('localTime')
-        e.utc_datetime = start_dates.get('dateTime')
+        images = json_event.get('images')
+        if images:
+            ev.images = [_Util.namedtuple(Image, i) for i in images]
 
-        status = dates.get('status', {})
-        e.status = status.get('code')
+        price_ranges = json_event.get('priceRanges')
+        if price_ranges:
+            ev.price_ranges = [_Util.namedtuple(Price, p) for p in price_ranges]
 
-        if 'classifications' in json_event:
-            e.classifications = [EventClassification.from_json(cl)
-                                 for cl in json_event['classifications']]
+        classifications = json_event.get('classifications')
+        if classifications:
+            ev.classifications = [EventClassification.from_json(cl)
+                                  for cl in classifications]
 
-        price_ranges = []
-        if 'priceRanges' in json_event:
-            for pr in json_event['priceRanges']:
-                price_ranges.append({'min': pr['min'], 'max': pr['max']})
-        e.price_ranges = price_ranges
+        venues = json_event.get('_embedded', {}).get('venues')
+        if venues:
+            ev.venues = [Venue.from_json(v) for v in venues]
 
-        venues = []
-        if 'venues' in json_event.get('_embedded', {}):
-            for v in json_event['_embedded']['venues']:
-                venues.append(Venue.from_json(v))
-        e.venues = venues
-        _assign_links(e, json_event)
-        return e
+        _Util.assign_links(ev, json_event)
+        return ev
 
     def __str__(self):
         tmpl = ("Event:            {name}\n"
@@ -244,22 +416,22 @@ class Venue:
 
     
     """
-    def __init__(self, name=None, address=None, city=None, state_code=None,
-                 postal_code=None, latitude=None, longitude=None,
+    def __init__(self, name=None, address=None, city=None, state=None,
+                 postal_code=None,
                  markets=None, url=None, box_office_info=None,
                  dmas=None, general_info=None, venue_id=None,
                  social=None, timezone=None, images=None,
                  parking_detail=None, accessible_seating_detail=None,
-                 links=None):
+                 links=None, type=None, distance=None, units=None,
+                 locale=None, description=None, additional_info=None,
+                 country=None, currency=None, test=None, location=None):
         self.name = name
         self.id = venue_id
         self.address = address
         self.postal_code = postal_code
         self.city = city
         #: State code (ex: 'GA' not 'Georgia')
-        self.state_code = state_code
-        self.latitude = latitude
-        self.longitude = longitude
+        self.state = state
         self.timezone = timezone
         self.url = url
         self.box_office_info = box_office_info
@@ -272,54 +444,59 @@ class Venue:
         self.accessible_seating_detail = accessible_seating_detail
         self.links = links
 
-    @property
-    def location(self):
-        """Location-based data (full address, lat/lon, timezone"""
-        return {
-            'address': self.address,
-            'postal_code': self.postal_code,
-            'city': self.city,
-            'state_code': self.state_code,
-            'timezone': self.timezone,
-            'latitude': self.latitude,
-            'longitude': self.longitude
-        }
+        self.type = type
+        self.distance = distance
+        self.units = units
+        self.locale = locale
+        self.description = description
+        self.additional_info = additional_info
+        self.country = country
+        self.currency = currency
+        self.test = test
+        self.location = location
 
     @staticmethod
     def from_json(json_venue):
         """Returns a ``Venue`` object from JSON"""
-        v = Venue()
-        v.id = json_venue['id']
-        v.name = json_venue['name']
-        v.url = json_venue.get('url')
-        v.postal_code = json_venue.get('postalCode')
-        v.general_info = json_venue.get('generalInfo')
-        v.box_office_info = json_venue.get('boxOfficeInfo')
-        v.dmas = json_venue.get('dmas')
-        v.social = json_venue.get('social')
-        v.timezone = json_venue.get('timezone')
-        v.images = json_venue.get('images')
-        v.parking_detail = json_venue.get('parkingDetail')
-        v.accessible_seating_detail = json_venue.get('accessibleSeatingDetail')
+        args = ['name', 'url', 'type', 'distance', 'units', 'locale',
+                'description', 'additionalInfo', 'postalCode', 'timezone',
+                'currency', 'parkingDetail', 'test', 'social']
+        kwargs = {k: json_venue.get(k) for k in args}
+        kwargs.update({
+            'venue_id': json_venue.get('id'),
+            'city': _Util.namedtuple(City, json_venue.get('city')),
+            'state': _Util.namedtuple(State, json_venue.get('state')),
+            'country': _Util.namedtuple(Country, json_venue.get('country')),
+            'address': _Util.namedtuple(Address, json_venue.get('address')),
+            'location': _Util.namedtuple(Location, json_venue.get('location')),
+            'generalInfo': _Util.namedtuple(GeneralInfo,
+                                            json_venue.get('generalInfo')),
+            'boxOfficeInfo': _Util.namedtuple(BoxOfficeInfo,
+                                              json_venue.get('boxOfficeInfo')),
+            'accessibleSeatingDetail':
+                json_venue.get('accessibleSeatingDetail')
+        })
+        _Util.update_kwargs(kwargs)
+        v = Venue(**kwargs)
 
-        if 'markets' in json_venue:
-            v.markets = [m['id'] for m in json_venue['markets']]
-        if 'city' in json_venue:
-            v.city = json_venue['city']['name']
-        if 'address' in json_venue:
-            v.address = json_venue['address']['line1']
-        if 'location' in json_venue:
-            v.latitude = json_venue['location']['latitude']
-            v.longitude = json_venue['location']['longitude']
-        if 'state' in json_venue:
-            v.state_code = json_venue['state']['stateCode']
+        images = json_venue.get('images')
+        if images:
+            v.images = [_Util.namedtuple(Image, i) for i in images]
 
-        _assign_links(v, json_venue)
+        markets = json_venue.get('markets')
+        if markets:
+            v.markets = [_Util.namedtuple(Market, m) for m in markets]
+
+        dmas = json_venue.get('dmas')
+        if dmas:
+            v.dmas = [_Util.namedtuple(DMA, d) for d in dmas]
+
+        _Util.assign_links(v, json_venue)
         return v
 
     def __str__(self):
         return ("{name} at {address} in "
-                "{city} {state_code}").format(**self.__dict__)
+                "{city} {state}").format(**self.__dict__)
 
     def __repr__(self):
         return str(self)
@@ -345,12 +522,16 @@ class Attraction:
         att.name = json_obj.get('name')
         att.url = json_obj.get('url')
         att.test = json_obj.get('test')
-        att.images = json_obj.get('images')
+
+        images = json_obj.get('images')
+        if images:
+            att.images = [_Util.namedtuple(Image, i) for i in images]
+
         classifications = json_obj.get('classifications')
         att.classifications = [Classification.from_json(cl)
                                for cl in classifications]
 
-        _assign_links(att, json_obj)
+        _Util.assign_links(att, json_obj)
         return att
 
     def __str__(self):
@@ -379,18 +560,19 @@ class Classification:
         cl = Classification()
         cl.primary = json_obj.get('primary')
 
-        if 'segment' in json_obj:
-            cl.segment = Segment.from_json(json_obj['segment'])
+        segment = json_obj.get('segment')
+        if segment:
+            cl.segment = Segment.from_json(segment)
 
-        if 'type' in json_obj:
-            cl_t = json_obj['type']
+        cl_t = json_obj.get('type')
+        if cl_t:
             cl.type = ClassificationType(cl_t['id'], cl_t['name'])
 
-        if 'subType' in json_obj:
-            cl_st = json_obj['subType']
-            cl.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
+        subtype = json_obj.get('subType')
+        if subtype:
+            cl.subtype = ClassificationSubType(subtype['id'], subtype['name'])
 
-        _assign_links(cl, json_obj)
+        _Util.assign_links(cl, json_obj)
         return cl
 
 
@@ -435,7 +617,7 @@ class EventClassification:
         if cl_st:
             ec.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
 
-        _assign_links(ec, json_obj)
+        _Util.assign_links(ec, json_obj)
         return ec
 
     def __str__(self):
@@ -490,7 +672,7 @@ class Segment:
             genres = json_obj['_embedded']['genres']
             seg.genres = [Genre.from_json(g) for g in genres]
 
-        _assign_links(seg, json_obj)
+        _Util.assign_links(seg, json_obj)
         return seg
 
     def __str__(self):
@@ -518,7 +700,7 @@ class Genre:
             subgenres = embedded['subgenres']
             g.subgenres = [SubGenre.from_json(sg) for sg in subgenres]
 
-        _assign_links(g, json_obj)
+        _Util.assign_links(g, json_obj)
         return g
 
     def __str__(self):
@@ -539,7 +721,7 @@ class SubGenre:
         sg = SubGenre()
         sg.id = json_obj['id']
         sg.name = json_obj['name']
-        _assign_links(sg, json_obj)
+        _Util.assign_links(sg, json_obj)
         return sg
 
     def __str__(self):
