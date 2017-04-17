@@ -49,7 +49,7 @@ May 21st, 2017:
 
     for page in pages:
         for event in page:
-            print(event)
+            print(event.name)
 
 Output::
 

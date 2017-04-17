@@ -227,7 +227,7 @@ a flat/joined list of items in each <code class="docutils literal"><span class="
 <p>Base query/parent class for specific serach types.</p>
 <dl class="attribute">
 <dt id="ticketpy.query.BaseQuery.attr_map">
-<code class="descname">attr_map</code><em class="property"> = {'include_test': 'includeTest', 'size': 'size', 'segment_name': 'segmentName', 'onsale_start_date_time': 'onsaleStartDateTime', 'classification_id': 'classificationId', 'id': 'id', 'page': 'page', 'include_tba': 'includeTBA', 'country_code': 'countryCode', 'keyword': 'keyword', 'classification_name': 'classificationName', 'promoter_id': 'promoterId', 'locale': 'locale', 'start_date_time': 'startDateTime', 'client_visibility': 'clientVisibility', 'dma_id': 'dmaId', 'state_code': 'stateCode', 'segment_id': 'segmentId', 'onsale_end_date_time': 'onsaleEndDateTime', 'attraction_id': 'attractionId', 'sort': 'sort', 'market_id': 'marketId', 'radius': 'radius', 'include_tbd': 'includeTBD', 'venue_id': 'venueId', 'latlong': 'latlong', 'end_date_time': 'endDateTime'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attr_map</code><em class="property"> = {'state_code': 'stateCode', 'keyword': 'keyword', 'classification_id': 'classificationId', 'onsale_end_date_time': 'onsaleEndDateTime', 'include_tbd': 'includeTBD', 'venue_id': 'venueId', 'country_code': 'countryCode', 'start_date_time': 'startDateTime', 'onsale_start_date_time': 'onsaleStartDateTime', 'market_id': 'marketId', 'segment_id': 'segmentId', 'dma_id': 'dmaId', 'page': 'page', 'sort': 'sort', 'client_visibility': 'clientVisibility', 'classification_name': 'classificationName', 'latlong': 'latlong', 'radius': 'radius', 'id': 'id', 'size': 'size', 'end_date_time': 'endDateTime', 'locale': 'locale', 'attraction_id': 'attractionId', 'include_test': 'includeTest', 'include_tba': 'includeTBA', 'promoter_id': 'promoterId', 'segment_name': 'segmentName'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps parameter names to parameters expected by the API
 (ex: <em>market_id</em> maps to <em>marketId</em>)</p>
 </dd></dl>
@@ -488,7 +488,7 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 
 <dl class="class">
 <dt id="ticketpy.model.Attraction">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Attraction</code><span class="sig-paren">(</span><em>attraction_id=None</em>, <em>attraction_name=None</em>, <em>url=None</em>, <em>classifications=None</em>, <em>images=None</em>, <em>test=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Attraction" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Attraction</code><span class="sig-paren">(</span><em>attraction_id=None</em>, <em>attraction_name=None</em>, <em>classifications=None</em>, <em>images=None</em>, <em>links=None</em>, <em>test=None</em>, <em>url=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Attraction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="staticmethod">
 <dt id="ticketpy.model.Attraction.from_json">
@@ -512,7 +512,7 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 
 <dl class="class">
 <dt id="ticketpy.model.Classification">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Classification</code><span class="sig-paren">(</span><em>segment=None</em>, <em>classification_type=None</em>, <em>subtype=None</em>, <em>primary=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Classification" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Classification</code><span class="sig-paren">(</span><em>classification_type=None</em>, <em>links=None</em>, <em>primary=None</em>, <em>subtype=None</em>, <em>segment=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Classification" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Classification object (segment/genre/sub-genre)</p>
 <p>For the structure returned by <code class="docutils literal"><span class="pre">EventSearch</span></code>, see <code class="docutils literal"><span class="pre">EventClassification</span></code></p>
@@ -556,7 +556,7 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 
 <dl class="class">
 <dt id="ticketpy.model.Dates">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Dates</code><span class="sig-paren">(</span><em>start=None</em>, <em>end=None</em>, <em>access=None</em>, <em>timezone=None</em>, <em>status=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Dates" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Dates</code><span class="sig-paren">(</span><em>access=None</em>, <em>start=None</em>, <em>end=None</em>, <em>timezone=None</em>, <em>status=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Dates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="staticmethod">
 <dt id="ticketpy.model.Dates.from_json">
@@ -567,7 +567,7 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 
 <dl class="class">
 <dt id="ticketpy.model.Event">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Event</code><span class="sig-paren">(</span><em>event_id=None</em>, <em>name=None</em>, <em>price_ranges=None</em>, <em>venues=None</em>, <em>classifications=None</em>, <em>place=None</em>, <em>links=None</em>, <em>distance=None</em>, <em>units=None</em>, <em>locale=None</em>, <em>description=None</em>, <em>additional_info=None</em>, <em>url=None</em>, <em>images=None</em>, <em>sales=None</em>, <em>info=None</em>, <em>please_note=None</em>, <em>test=None</em>, <em>promoter=None</em>, <em>dates=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Event" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Event</code><span class="sig-paren">(</span><em>additional_info=None</em>, <em>classifications=None</em>, <em>dates=None</em>, <em>description=None</em>, <em>distance=None</em>, <em>event_id=None</em>, <em>images=None</em>, <em>info=None</em>, <em>links=None</em>, <em>locale=None</em>, <em>name=None</em>, <em>test=None</em>, <em>place=None</em>, <em>please_note=None</em>, <em>price_ranges=None</em>, <em>promoter=None</em>, <em>sales=None</em>, <em>units=None</em>, <em>url=None</em>, <em>venues=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Event" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Ticketmaster event</p>
 <p>The JSON returned from the Discovery API (at least, as far as 
@@ -621,7 +621,7 @@ what&#8217;s being used here) looks like:</p>
 
 <dl class="class">
 <dt id="ticketpy.model.EventClassification">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">EventClassification</code><span class="sig-paren">(</span><em>genre=None</em>, <em>subgenre=None</em>, <em>segment=None</em>, <em>classification_type=None</em>, <em>classification_subtype=None</em>, <em>primary=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.EventClassification" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">EventClassification</code><span class="sig-paren">(</span><em>classification_subtype=None</em>, <em>classification_type=None</em>, <em>genre=None</em>, <em>links=None</em>, <em>segment=None</em>, <em>subgenre=None</em>, <em>primary=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.EventClassification" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Classification as it&#8217;s represented in event search results
 See <code class="docutils literal"><span class="pre">Classification()</span></code> for results from classification searches</p>
@@ -712,14 +712,14 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 <dl class="staticmethod">
 <dt id="ticketpy.model.Page.from_json">
 <em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Page.from_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Instantiate and return a Page(list)</p>
+<dd><p>Instantiate and return a <code class="docutils literal"><span class="pre">Page(list)</span></code> object</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="ticketpy.model.Place">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Place</code><span class="sig-paren">(</span><em>name=None</em>, <em>area=None</em>, <em>address=None</em>, <em>city=None</em>, <em>state=None</em>, <em>country=None</em>, <em>postal_code=None</em>, <em>location=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Place" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Place</code><span class="sig-paren">(</span><em>address=None</em>, <em>area=None</em>, <em>city=None</em>, <em>country=None</em>, <em>location=None</em>, <em>name=None</em>, <em>postal_code=None</em>, <em>state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Place" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="staticmethod">
 <dt id="ticketpy.model.Place.from_json">
@@ -782,7 +782,7 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 
 <dl class="class">
 <dt id="ticketpy.model.Venue">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Venue</code><span class="sig-paren">(</span><em>name=None</em>, <em>address=None</em>, <em>city=None</em>, <em>state=None</em>, <em>markets=None</em>, <em>url=None</em>, <em>box_office_info=None</em>, <em>dmas=None</em>, <em>general_info=None</em>, <em>venue_id=None</em>, <em>social=None</em>, <em>timezone=None</em>, <em>images=None</em>, <em>postal_code=None</em>, <em>parking_detail=None</em>, <em>accessible_seating_detail=None</em>, <em>links=None</em>, <em>type=None</em>, <em>distance=None</em>, <em>units=None</em>, <em>locale=None</em>, <em>description=None</em>, <em>additional_info=None</em>, <em>country=None</em>, <em>currency=None</em>, <em>test=None</em>, <em>location=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Venue" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Venue</code><span class="sig-paren">(</span><em>accessible_seating_detail=None</em>, <em>additional_info=None</em>, <em>address=None</em>, <em>box_office_info=None</em>, <em>city=None</em>, <em>country=None</em>, <em>currency=None</em>, <em>description=None</em>, <em>distance=None</em>, <em>dmas=None</em>, <em>general_info=None</em>, <em>images=None</em>, <em>links=None</em>, <em>locale=None</em>, <em>location=None</em>, <em>markets=None</em>, <em>name=None</em>, <em>parking_detail=None</em>, <em>postal_code=None</em>, <em>social=None</em>, <em>state=None</em>, <em>test=None</em>, <em>timezone=None</em>, <em>type=None</em>, <em>units=None</em>, <em>url=None</em>, <em>venue_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Venue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>A Ticketmaster venue</p>
 <p>The JSON returned from the Discovery API looks something like this 
@@ -828,12 +828,6 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 <dt id="ticketpy.model.Venue.from_json">
 <em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_venue</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Venue.from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Venue</span></code> object from JSON</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.model.Venue.state">
-<code class="descname">state</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.model.Venue.state" title="Permalink to this definition">¶</a></dt>
-<dd><p>State code (ex: &#8216;GA&#8217; not &#8216;Georgia&#8217;)</p>
 </dd></dl>
 
 </dd></dl>
