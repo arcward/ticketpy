@@ -227,7 +227,7 @@ a flat/joined list of items in each <code class="docutils literal"><span class="
 <p>Base query/parent class for specific serach types.</p>
 <dl class="attribute">
 <dt id="ticketpy.query.BaseQuery.attr_map">
-<code class="descname">attr_map</code><em class="property"> = {'state_code': 'stateCode', 'keyword': 'keyword', 'classification_id': 'classificationId', 'onsale_end_date_time': 'onsaleEndDateTime', 'include_tbd': 'includeTBD', 'venue_id': 'venueId', 'country_code': 'countryCode', 'start_date_time': 'startDateTime', 'onsale_start_date_time': 'onsaleStartDateTime', 'market_id': 'marketId', 'segment_id': 'segmentId', 'dma_id': 'dmaId', 'page': 'page', 'sort': 'sort', 'client_visibility': 'clientVisibility', 'classification_name': 'classificationName', 'latlong': 'latlong', 'radius': 'radius', 'id': 'id', 'size': 'size', 'end_date_time': 'endDateTime', 'locale': 'locale', 'attraction_id': 'attractionId', 'include_test': 'includeTest', 'include_tba': 'includeTBA', 'promoter_id': 'promoterId', 'segment_name': 'segmentName'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attr_map</code><em class="property"> = {'promoter_id': 'promoterId', 'attraction_id': 'attractionId', 'venue_id': 'venueId', 'country_code': 'countryCode', 'segment_name': 'segmentName', 'include_test': 'includeTest', 'keyword': 'keyword', 'client_visibility': 'clientVisibility', 'classification_id': 'classificationId', 'radius': 'radius', 'classification_name': 'classificationName', 'include_tba': 'includeTBA', 'dma_id': 'dmaId', 'end_date_time': 'endDateTime', 'onsale_start_date_time': 'onsaleStartDateTime', 'latlong': 'latlong', 'locale': 'locale', 'sort': 'sort', 'id': 'id', 'include_tbd': 'includeTBD', 'page': 'page', 'onsale_end_date_time': 'onsaleEndDateTime', 'state_code': 'stateCode', 'size': 'size', 'segment_id': 'segmentId', 'market_id': 'marketId', 'start_date_time': 'startDateTime'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps parameter names to parameters expected by the API
 (ex: <em>market_id</em> maps to <em>marketId</em>)</p>
 </dd></dl>
@@ -525,8 +525,8 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 </dd></dl>
 
 <dl class="class">
-<dt id="ticketpy.model.ClassificationSubType">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">ClassificationSubType</code><span class="sig-paren">(</span><em>type_id=None</em>, <em>type_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.ClassificationSubType" title="Permalink to this definition">¶</a></dt>
+<dt id="ticketpy.model.ClassificationSubtype">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">ClassificationSubtype</code><span class="sig-paren">(</span><em>type_id=None</em>, <em>type_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.ClassificationSubtype" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 </dd></dl>
 
@@ -567,7 +567,7 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 
 <dl class="class">
 <dt id="ticketpy.model.Event">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Event</code><span class="sig-paren">(</span><em>additional_info=None</em>, <em>classifications=None</em>, <em>dates=None</em>, <em>description=None</em>, <em>distance=None</em>, <em>event_id=None</em>, <em>images=None</em>, <em>info=None</em>, <em>links=None</em>, <em>locale=None</em>, <em>name=None</em>, <em>test=None</em>, <em>place=None</em>, <em>please_note=None</em>, <em>price_ranges=None</em>, <em>promoter=None</em>, <em>sales=None</em>, <em>units=None</em>, <em>url=None</em>, <em>venues=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Event" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Event</code><span class="sig-paren">(</span><em>additional_info=None</em>, <em>attractions=None</em>, <em>classifications=None</em>, <em>dates=None</em>, <em>description=None</em>, <em>distance=None</em>, <em>event_id=None</em>, <em>images=None</em>, <em>info=None</em>, <em>links=None</em>, <em>locale=None</em>, <em>name=None</em>, <em>test=None</em>, <em>place=None</em>, <em>please_note=None</em>, <em>price_ranges=None</em>, <em>promoter=None</em>, <em>sales=None</em>, <em>units=None</em>, <em>url=None</em>, <em>venues=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Event" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Ticketmaster event</p>
 <p>The JSON returned from the Discovery API (at least, as far as 
@@ -730,7 +730,7 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 
 <dl class="class">
 <dt id="ticketpy.model.Sales">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Sales</code><span class="sig-paren">(</span><em>public=None</em>, <em>presale=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Sales" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Sales</code><span class="sig-paren">(</span><em>public=None</em>, <em>presales=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Sales" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="staticmethod">
 <dt id="ticketpy.model.Sales.from_json">

@@ -218,7 +218,7 @@ class Event:
 
         attractions = embedded.get('attractions')
         if attractions:
-            ev.attractionsf = [Attraction.from_json(a) for a in attractions]
+            ev.attractions = [Attraction.from_json(a) for a in attractions]
 
         _Util.assign_links(ev, json_event)
         return ev
@@ -306,7 +306,7 @@ class Classification:
 
         subtype = json_obj.get('subType')
         if subtype:
-            cl.subtype = ClassificationSubType(subtype['id'], subtype['name'])
+            cl.subtype = ClassificationSubtype(subtype['id'], subtype['name'])
 
         _Util.assign_links(cl, json_obj)
         return cl
@@ -513,9 +513,9 @@ class Sales:
     __Presale = namedtuple('Presale', ['name', 'description', 'url',
                                        'start_date_time', 'end_date_time'])
 
-    def __init__(self, public=None, presale=None):
+    def __init__(self, public=None, presales=None):
         self.public = public
-        self.presale = presale
+        self.presales = presales
 
     @staticmethod
     def from_json(json_obj):
@@ -571,7 +571,7 @@ class EventClassification:
 
         cl_st = json_obj.get('subType')
         if cl_st:
-            ec.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
+            ec.subtype = ClassificationSubtype(cl_st['id'], cl_st['name'])
 
         _Util.assign_links(ec, json_obj)
         return ec
@@ -597,7 +597,7 @@ class ClassificationType:
         return str(self)
 
 
-class ClassificationSubType:
+class ClassificationSubtype:
     def __init__(self, type_id=None, type_name=None):
         self.id = type_id
         self.name = type_name
