@@ -14,7 +14,7 @@ Location = namedtuple('Location', 'latitude longitude')
 Area = namedtuple('Area', 'name')
 Image = namedtuple('Image', 'url ratio width height fallback attribution')
 
-# Maps API parameters to keyword arguments
+#: Maps API parameters to keyword arguments
 attr_map = {
     'localDate': 'local_date',
     'localTime': 'local_time',
@@ -559,7 +559,7 @@ class EventClassification:
 
         subgenre = json_obj.get('subGenre')
         if subgenre:
-            ec.subgenre = SubGenre.from_json(subgenre)
+            ec.subgenre = Subgenre.from_json(subgenre)
 
         cl_t = json_obj.get('type')
         if cl_t:
@@ -650,7 +650,7 @@ class Genre:
         if '_embedded' in json_obj:
             embedded = json_obj['_embedded']
             subgenres = embedded['subgenres']
-            g.subgenres = [SubGenre.from_json(sg) for sg in subgenres]
+            g.subgenres = [Subgenre.from_json(sg) for sg in subgenres]
 
         _Util.assign_links(g, json_obj)
         return g
@@ -662,7 +662,7 @@ class Genre:
         return str(self)
 
 
-class SubGenre:
+class Subgenre:
     def __init__(self, subgenre_id=None, subgenre_name=None, links=None):
         self.id = subgenre_id
         self.name = subgenre_name
@@ -670,7 +670,7 @@ class SubGenre:
 
     @staticmethod
     def from_json(json_obj):
-        sg = SubGenre()
+        sg = Subgenre()
         sg.id = json_obj['id']
         sg.name = json_obj['name']
         _Util.assign_links(sg, json_obj)

@@ -1,6 +1,6 @@
 """Classes to handle API queries/searches"""
 from ticketpy.model import Venue, Event, Attraction, Classification, Genre, \
-    SubGenre, Segment
+    Subgenre, Segment
 
 
 class BaseQuery:
@@ -185,7 +185,7 @@ class GenreQuery(BaseQuery):
 
 class SubGenreQuery(BaseQuery):
     resource = 'classifications/subgenres'
-    model = SubGenre
+    model = Subgenre
 
     def __init__(self, api_client):
         super().__init__(api_client)

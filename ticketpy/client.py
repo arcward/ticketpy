@@ -99,19 +99,14 @@ class ApiClient:
         return PagedResponse(self, self._handle_response(resp))
 
     def _handle_response(self, response):
-        """Raises ``ApiException`` if needed, or returns response JSON obj
-        
-        Status codes
-         * 401 = Invalid API key or rate limit quota violation
-         * 400 = Invalid URL parameter
-        """
+        """Returns JSON, or raises ``ApiException``"""
         if response.status_code != 200:
             raise ApiException(response)
-
         self.__rate_limit(response)
         return response.json()
 
     def __rate_limit(self, response):
+        """Sets ``self.rate_limit`` from API response headers"""
         self.rate_limit = ApiClient.__RateLimit(
             response.headers.get('Rate-Limit'),
             response.headers.get('Rate-Limit-Available'),
@@ -129,6 +124,7 @@ class ApiClient:
         return Page.from_json(self._handle_response(resp))
 
     def _get_id(self, resource, entity_id):
+        """Detail request for a resource based on its ID"""
         id_url = "{}/{}/{}".format(self.url, resource, entity_id)
         r = requests.get(id_url, params=self.api_key)
         return self._handle_response(r)
@@ -263,7 +259,6 @@ class PagedResponse:
         
         :return: Flat list of results
         """
-        # TODO Rename this since all() is a built-in function...
         return [i for item_list in self for i in item_list]
 
     def __iter__(self):
