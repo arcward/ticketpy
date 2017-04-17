@@ -5,15 +5,14 @@ import re
 import ticketpy
 
 
-# API response objects that are in >1 object model
-Address = namedtuple('Address', ['line_1', 'line_2', 'line_3'])
-City = namedtuple('City', ['name'])
-State = namedtuple('State', ['state_code', 'name'])
-Country = namedtuple('Country', ['country_code', 'name'])
-Location = namedtuple('Location', ['latitude', 'longitude'])
-Area = namedtuple('Area', ['name'])
-Image = namedtuple('Image', ['url', 'ratio', 'width', 'height', 'fallback',
-                             'attribution'])
+# API response objects found in >1 object model
+Address = namedtuple('Address', 'line_1 line_2 line_3')
+City = namedtuple('City', 'name')
+State = namedtuple('State', 'state_code name')
+Country = namedtuple('Country', 'country_code name')
+Location = namedtuple('Location', 'latitude longitude')
+Area = namedtuple('Area', 'name')
+Image = namedtuple('Image', 'url ratio width height fallback attribution')
 
 # Maps API parameters to keyword arguments
 attr_map = {
@@ -143,8 +142,8 @@ class Event:
             }
         }
     """
-    __Price = namedtuple('Price', ['type', 'currency', 'min', 'max'])
-    __Promoter = namedtuple('Promoter', ['id', 'name', 'description'])
+    __Price = namedtuple('Price', 'type currency min max')
+    __Promoter = namedtuple('Promoter', 'id name description')
 
     def __init__(self, additional_info=None, attractions=None,
                  classifications=None, dates=None, description=None,
@@ -358,13 +357,12 @@ class Venue:
 
 
     """
-    __DMA = namedtuple('DMA', ['id'])
-    __BoxOfficeInfo = namedtuple('BoxOfficeInfo', ['phone_number_detail',
-                                                   'open_hours_detail',
-                                                   'accepted_payment_detail',
-                                                   'will_call_detail'])
-    __Market = namedtuple('Market', ['id'])
-    __GeneralInfo = namedtuple('GeneralInfo', ['general_rule', 'child_rule'])
+    __DMA = namedtuple('DMA', 'id')
+    __BoxOfficeInfo = namedtuple('BoxOfficeInfo',
+                                 ('phone_number_detail open_hours_detail '
+                                  'accepted_payment_detail will_call_detail'))
+    __Market = namedtuple('Market', 'id')
+    __GeneralInfo = namedtuple('GeneralInfo', 'general_rule child_rule')
 
     def __init__(self, accessible_seating_detail=None, additional_info=None,
                  address=None, box_office_info=None, city=None, country=None,
@@ -478,14 +476,13 @@ class Place:
 
 
 class Dates:
-    __Start = namedtuple('Start', ['local_date', 'local_time', 'date_time',
-                                   'date_tbd', 'date_tba', 'time_tba',
-                                   'no_specific_time'])
-    __End = namedtuple('End', ['local_time', 'local_date', 'date_time',
-                               'approximate', 'no_specific_time'])
-    __Access = namedtuple('Access', ['start_date_time', 'start_approximate',
-                                     'end_date_time', 'end_approximate'])
-    __Status = namedtuple('Status', ['code'])
+    __Start = namedtuple('Start', 'local_date local_time date_time date_tbd '
+                                  'date_tba time_tba no_specific_time')
+    __End = namedtuple('End', 'local_time local_date date_time '
+                              'approximate no_specific_time')
+    __Access = namedtuple('Access', 'start_date_time start_approximate '
+                                    'end_date_time end_approximate')
+    __Status = namedtuple('Status', 'code')
 
     def __init__(self, access=None, start=None, end=None, timezone=None,
                  status=None):
@@ -507,11 +504,10 @@ class Dates:
 
 
 class Sales:
-    __PublicSale = namedtuple('PublicSales', ['start_date_time',
-                                              'end_date_time',
-                                              'start_tbd'])
-    __Presale = namedtuple('Presale', ['name', 'description', 'url',
-                                       'start_date_time', 'end_date_time'])
+    __PublicSale = namedtuple('PublicSales',
+                              'start_date_time end_date_time start_tbd')
+    __Presale = namedtuple('Presale',
+                           'name description url start_date_time end_date_time')
 
     def __init__(self, public=None, presales=None):
         self.public = public

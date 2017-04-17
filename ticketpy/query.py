@@ -1,10 +1,12 @@
 """Classes to handle API queries/searches"""
-import requests
-from ticketpy.model import Venue, Event, Attraction, Classification
+from ticketpy.model import Venue, Event, Attraction, Classification, Genre, \
+    SubGenre, Segment
 
 
 class BaseQuery:
     """Base query/parent class for specific serach types."""
+    resource = None
+    model = None
     #: Maps parameter names to parameters expected by the API
     #: (ex: *market_id* maps to *marketId*)
     attr_map = {
@@ -37,21 +39,15 @@ class BaseQuery:
         'radius': 'radius'
     }
 
-    def __init__(self, api_client, method, model):
+    def __init__(self, api_client):
         """
         :param api_client: Instance of ``ticketpy.client.ApiClient``
-        :param method: API method (ex: *events*, *venues*...)
-        :param model: Model from ``ticketpy.model``. Either 
-            ``Event``, ``Venue``, ``Attraction`` or ``Classification``
         """
         self.api_client = api_client
-        self.method = method
-        self.model = model
 
     def __get(self, **kwargs):
         """Sends final request to ``ApiClient``"""
-        response = self.api_client.search(self.method, **kwargs)
-        return response
+        return self.api_client._search(self.resource, **kwargs)
 
     def _get(self, keyword=None, entity_id=None, sort=None, include_test=None,
              page=None, size=None, locale=None, **kwargs):
@@ -87,10 +83,8 @@ class BaseQuery:
 
     def by_id(self, entity_id):
         """Get a specific object by its ID"""
-        get_tmpl = "{}/{}/{}"
-        get_url = get_tmpl.format(self.api_client.url, self.method, entity_id)
-        r = requests.get(get_url, params=self.api_client.api_key).json()
-        return self.model.from_json(r)
+        resp = self.api_client._get_id(self.resource, entity_id)
+        return self.model.from_json(resp)
 
     def _search_params(self, **kwargs):
         """Returns API-friendly search parameters from kwargs
@@ -112,12 +106,18 @@ class BaseQuery:
 
         return {k: v for (k, v) in kw_map.items() if v is not None}
 
+    @staticmethod
+    def from_json(json_obj):
+        return json_obj
+
 
 class AttractionQuery(BaseQuery):
     """Query class for Attractions"""
+    resource = 'attractions'
+    model = Attraction
+
     def __init__(self, api_client):
-        self.api_client = api_client
-        super().__init__(api_client, 'attractions', Attraction)
+        super().__init__(api_client)
 
     def find(self, sort=None, keyword=None, attraction_id=None,
              source=None, include_test=None, page=None, size=None,
@@ -140,9 +140,11 @@ class AttractionQuery(BaseQuery):
 
 class ClassificationQuery(BaseQuery):
     """Classification search/query class"""
+    resource = 'classifications'
+    model = Classification
 
     def __init__(self, api_client):
-        super().__init__(api_client, 'classifications', Classification)
+        super().__init__(api_client)
 
     def find(self, sort=None, keyword=None, classification_id=None,
              source=None, include_test=None, page=None, size=None,
@@ -164,37 +166,38 @@ class ClassificationQuery(BaseQuery):
         return self._get(keyword, classification_id, sort, include_test,
                          page, size, locale, source=source, **kwargs)
 
-    def segment_by_id(self, segment_id):
-        """Return a ``Segment`` matching this ID"""
-        return self.by_id(segment_id).segment
 
-    def genre_by_id(self, genre_id):
-        """Return a ``Genre`` matching this ID"""
-        genre = None
-        resp = self.by_id(genre_id)
-        if resp.segment:
-            for genre in resp.segment.genres:
-                if genre.id == genre_id:
-                    genre = genre
-        return genre
+class SegmentQuery(BaseQuery):
+    resource = 'classifications/segments'
+    model = Segment
 
-    def subgenre_by_id(self, subgenre_id):
-        """Return a ``SubGenre`` matching this ID"""
-        subgenre = None
-        segment = self.by_id(subgenre_id).segment
-        if segment:
-            subgenres = [subg for genre in segment.genres for
-                         subg in genre.subgenres]
-            for subg in subgenres:
-                if subg.id == subgenre_id:
-                    subgenre = subg
-        return subgenre
+    def __init__(self, api_client):
+        super().__init__(api_client)
+
+
+class GenreQuery(BaseQuery):
+    resource = 'classifications/genres'
+    model = Genre
+
+    def __init__(self, api_client):
+        super().__init__(api_client)
+
+
+class SubGenreQuery(BaseQuery):
+    resource = 'classifications/subgenres'
+    model = SubGenre
+
+    def __init__(self, api_client):
+        super().__init__(api_client)
 
 
 class EventQuery(BaseQuery):
     """Abstraction to search API for events"""
+    resource = 'events'
+    model = Event
+
     def __init__(self, api_client):
-        super().__init__(api_client, 'events', Event)
+        super().__init__(api_client)
 
     def find(self, sort='date,asc', latlong=None, radius=None, unit=None,
              start_date_time=None, end_date_time=None,
@@ -208,10 +211,10 @@ class EventQuery(BaseQuery):
              page=None, size=None, locale=None, **kwargs):
         """Search for events matching given criteria.
 
-        :param sort: Sorting order of search result 
+        :param sort: Sorting order of _search result 
             (default: *'relevance,desc'*)
         :param latlong: Latitude/longitude filter
-        :param radius: Radius of area to search
+        :param radius: Radius of area to _search
         :param unit: Unit of radius, 'miles' or 'km' (default: miles)
         :param start_date_time: Filter by start date/time.
             Timestamp format: *YYYY-MM-DDTHH:MM:SSZ*
@@ -237,7 +240,7 @@ class EventQuery(BaseQuery):
             defined (['yes', 'no', 'only'])
         :param client_visibility: 
         :param keyword: 
-        :param event_id: Event ID to search 
+        :param event_id: Event ID to _search 
         :param source: Filter entities by source name: ['ticketmaster', 
             'universe', 'frontgate', 'tmr']
         :param include_test: 'yes' to include test entities in the 
@@ -286,8 +289,11 @@ class EventQuery(BaseQuery):
 
 class VenueQuery(BaseQuery):
     """Queries for venues"""
+    resource = 'venues'
+    model = Venue
+
     def __init__(self, api_client):
-        super().__init__(api_client, 'venues', Venue)
+        super().__init__(api_client)
 
     def find(self, keyword=None, venue_id=None, sort=None, state_code=None,
              country_code=None, source=None, include_test=None,

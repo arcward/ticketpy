@@ -4,7 +4,7 @@ import requests
 from collections import namedtuple
 from urllib import parse
 from ticketpy.query import AttractionQuery, ClassificationQuery, \
-    EventQuery, VenueQuery
+    EventQuery, VenueQuery, SegmentQuery, GenreQuery, SubGenreQuery
 from ticketpy.model import Page
 
 log = logging.getLogger(__name__)
@@ -45,21 +45,29 @@ class ApiClient:
     """
     root_url = 'https://app.ticketmaster.com'
     url = 'https://app.ticketmaster.com/discovery/v2'
+    __RateLimit = namedtuple('RateLimit', 'limit available over reset')
+    # Alias query classes here so they show in Sphinx docs
+    events = EventQuery
+    venues = VenueQuery
+    attractions = AttractionQuery
+    classifications = ClassificationQuery
+    segments = SegmentQuery
+    genres = GenreQuery
+    subgenres = SubGenreQuery
 
     def __init__(self, api_key):
         self.__api_key = None
         self.api_key = api_key
-        self.events = EventQuery(api_client=self)
-        self.venues = VenueQuery(api_client=self)
-        self.attractions = AttractionQuery(api_client=self)
-        self.classifications = ClassificationQuery(api_client=self)
-        self.segment_by_id = self.classifications.segment_by_id
-        self.genre_by_id = self.classifications.genre_by_id
-        self.subgenre_by_id = self.classifications.subgenre_by_id
+        self.rate_limit = None
+        self.events = self.events(api_client=self)
+        self.venues = self.venues(api_client=self)
+        self.attractions = self.attractions(api_client=self)
+        self.classifications = self.classifications(api_client=self)
+        self.segments = self.segments(api_client=self)
+        self.genres = self.genres(api_client=self)
+        self.subgenres = self.subgenres(api_client=self)
 
-        log.debug("Root URL: {}".format(self.url))
-
-    def search(self, method, **kwargs):
+    def _search(self, method, **kwargs):
         """Generic API request
         
         :param method: Search type (*events*, *venues*...)
@@ -97,52 +105,21 @@ class ApiClient:
          * 401 = Invalid API key or rate limit quota violation
          * 400 = Invalid URL parameter
         """
-        if response.status_code == 200:
-            return self.__success(response)
-        elif response.status_code == 401:
-            self.__fault(response)
-        elif response.status_code == 400:
-            self.__error(response)
-        else:
-            self.__unknown_error(response)
+        if response.status_code != 200:
+            raise ApiException(response)
 
-    @staticmethod
-    def __success(response):
-        """Successful response, just return JSON"""
+        self.__rate_limit(response)
         return response.json()
 
-    @staticmethod
-    def __error(response):
-        """HTTP status code 400, or something with 'errors' object"""
-        rj = response.json()
-        error = namedtuple('error', ['code', 'detail', 'href'])
-        errors = [error(err['code'], err['detail'],
-                        err['_links']['about']['href'])
-                  for err in rj['errors']]
-        log.error('URL: {}\nErrors: {}'.format(response.url, errors))
-        raise ApiException(response.status_code, errors, response.url)
+    def __rate_limit(self, response):
+        self.rate_limit = ApiClient.__RateLimit(
+            response.headers.get('Rate-Limit'),
+            response.headers.get('Rate-Limit-Available'),
+            response.headers.get('Rate-Limit-Over'),
+            response.headers.get('Rate-Limit-Reset')
+        )
 
-    @staticmethod
-    def __fault(response):
-        """HTTP status code 401, or something with 'faults' object"""
-        rj = response.json()
-        fault_str = rj['fault']['faultstring']
-        detail = rj['fault']['detail']
-        log.error('URL: {}, Faultstr: {}'.format(response.url, fault_str))
-        raise ApiException(response.status_code, fault_str, detail,
-                           response.url)
-
-    def __unknown_error(self, response):
-        """Unexpected HTTP status code (not 200, 400, or 401)"""
-        rj = response.json()
-        if 'fault' in rj:
-            self.__fault(response)
-        elif 'errors' in rj:
-            self.__error(response)
-        else:
-            raise ApiException(response.status_code, response.text)
-
-    def get_url(self, link):
+    def _get_url(self, link):
         """Gets a specific href from '_links' object in a response"""
         # API sometimes return incorrectly-formatted strings, need
         # to parse out parameters and pass them into a new request
@@ -151,9 +128,14 @@ class ApiClient:
         resp = requests.get(link.url, link.params)
         return Page.from_json(self._handle_response(resp))
 
+    def _get_id(self, resource, entity_id):
+        id_url = "{}/{}/{}".format(self.url, resource, entity_id)
+        r = requests.get(id_url, params=self.api_key)
+        return self._handle_response(r)
+
     def _parse_link(self, link):
         """Parses link into base URL and dict of parameters"""
-        parsed_link = namedtuple('link', ['url', 'params'])
+        parsed_link = namedtuple('link', 'url params')
         link_url, link_params = link.split('?')
         params = self._link_params(link_params)
         return parsed_link(link_url, params)
@@ -194,8 +176,52 @@ class ApiClient:
 
 class ApiException(Exception):
     """Exception thrown for API-related error messages"""
-    def __init__(self, *args):
-        super().__init__(*args)
+    _ApiFault = namedtuple('ApiFault', 'faultstring detail')
+    _ApiError = namedtuple('ApiError', 'code detail href')
+    _error_codes = [400, 404]  #: 400=Bad API call
+    _fault_codes = [401]  #: 401=Unauthorized (bad API key)
+
+    def __init__(self, response):
+        self.url = response.url
+        self.status_code = response.status_code
+        self.detail = None
+
+        if response.status_code in self._error_codes:
+            self.detail = ApiException.__error(response)
+        elif response.status_code in self._fault_codes:
+            self.detail = ApiException.__fault(response)
+        else:
+            self.detail = ApiException.__unknown(response)
+
+        super().__init__(self.status_code, self.detail, self.url)
+
+    @staticmethod
+    def __fault(response):
+        """Handle API faults (such as unauthorized/bad API key)"""
+        rj = response.json()
+        r_fault = rj['fault']
+        return ApiException._ApiFault(r_fault['faultstring'], r_fault['detail'])
+
+    @staticmethod
+    def __error(response):
+        """Handle API errors (such as bad query parameters/obj not found)"""
+        rj = response.json()
+        return [
+            ApiException._ApiError(err['code'], err['detail'],
+                                   err['_links']['about']['href'])
+            for err in rj['errors']
+        ]
+
+    @staticmethod
+    def __unknown(response):
+        """Handle unexpected status codes, inspect JSON structure"""
+        rj = response.json()
+        if 'fault' in rj:
+            return ApiException.__fault(response)
+        elif 'errors' in rj:
+            return ApiException.__error(response)
+        else:
+            return None
 
 
 class PagedResponse:
@@ -245,7 +271,7 @@ class PagedResponse:
         next_url = self.page.links.get('next')
         while next_url:
             log.debug("Requesting page: {}".format(next_url))
-            pg = self.api_client.get_url(next_url)
+            pg = self.api_client._get_url(next_url)
             next_url = pg.links.get('next')
             yield pg
         return

@@ -130,7 +130,7 @@ page.
 
 Venues
 ^^^^^^
-To search for all venues based on the string "*Tabernacle*":
+To _search for all venues based on the string "*Tabernacle*":
 
 .. code-block:: python
 

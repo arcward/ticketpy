@@ -1,9 +1,22 @@
+from collections import namedtuple
 from unittest import TestCase
 from configparser import ConfigParser
 import os
 import ticketpy
 from ticketpy.client import ApiException
 from math import radians, cos, sin, asin, sqrt
+
+# Test objects
+TestObject = namedtuple('TestObject', 'id name')
+# Venues
+v_tabernacle = TestObject('KovZpaFEZe', 'The Tabernacle')
+v_smiths = TestObject('KovZpZAJledA', "Smith's Olde Bar")
+# Segment / genre / subgenre
+seg_music = TestObject('KZFzniwnSyZfZ7v7nJ', 'Music')
+g_jazz = TestObject('KnvZfZ7vAvE', 'Jazz')
+sg_bebop = TestObject('KZazBEonSMnZfZ7vkdl', 'Bebop')
+# Attraction
+a_yankees = TestObject('K8vZ9171okV', 'New York Yankees')
 
 
 def haversine(latlon1, latlon2):
@@ -72,8 +85,10 @@ class TestApiClient(TestCase):
         self.assertEqual(expected_url, events_url)
 
     def test_bad_key(self):
-        bad_client = ticketpy.ApiClient('asdf')
-        self.assertRaises(ApiException, bad_client.venues.find, keyword="a")
+        bk = "sadfasdfsadf"
+        bad_client = ticketpy.ApiClient(bk)
+        self.assertRaises(ApiException, bad_client.venues.find, keyword=bk)
+        self.assertRaises(ApiException, bad_client.segments.by_id, bk)
 
     def test__bad_request(self):
         # Radius should be a whole number, so 1.5 should raise ApiException
@@ -107,30 +122,25 @@ class TestApiClient(TestCase):
 class TestVenueQuery(TestCase):
     def setUp(self):
         self.tm = get_client()
-        self.venues = {
-            'smithes': 'KovZpZAJledA',
-            'tabernacle': 'KovZpaFEZe'
-        }
+        self.kw = "TABERNACLE"
 
     def test_find(self):
-        venue_list = self.tm.venues.find(keyword="TABERNACLE").limit(2)
+        venue_list = self.tm.venues.find(keyword=self.kw).limit(2)
         for v in venue_list:
-            self.assertIn("TABERNACLE", v.name.upper())
+            self.assertIn(self.kw, v.name.upper())
 
     def test_by_name(self):
         # Make sure this returns only venues matching search terms...
-        venue_name = "TABERNACLE"
         state = "GA"
-        venue_list = self.tm.venues.by_name(venue_name, state).limit(2)
+        venue_list = self.tm.venues.by_name(self.kw, state).limit(2)
         for venue in venue_list:
-            self.assertIn(venue_name, venue.name.upper())
+            self.assertIn(self.kw, venue.name.upper())
 
     def test_get_venue(self):
-        venue_name = 'The Tabernacle'
-        v = self.tm.venues.by_id(self.venues['tabernacle'])
+        v = self.tm.venues.by_id(v_tabernacle.id)
         print(v)
-        self.assertEqual(self.venues['tabernacle'], v.id)
-        self.assertEqual(venue_name, v.name)
+        self.assertEqual(v_tabernacle.id, v.id)
+        self.assertEqual(v_tabernacle.name, v.name)
 
 
 class TestClassificationQuery(TestCase):
@@ -138,70 +148,60 @@ class TestClassificationQuery(TestCase):
         self.tm = get_client()
 
     def test_classification_search(self):
-        classif = self.tm.classifications.find(keyword="DRAMA").limit()
+        child = "DRAMA"
+        parent = "Film"
+
+        classif = self.tm.classifications.find(keyword=child).limit()
         segment_names = [cl.segment.name for cl in classif]
-        self.assertIn('Film', segment_names)
+        self.assertIn(parent, segment_names)
+
         genre_names = []
         for cl in classif:
             genre_names += [g.name.upper() for g in cl.segment.genres]
-        self.assertIn("DRAMA", genre_names)
+        self.assertIn(child, genre_names)
 
         for cl in classif:
             print(cl)
 
     def test_classification_by_id(self):
-        subgenre_id = 'KZazBEonSMnZfZ7vkdl'
-        classification = self.tm.classifications.by_id(subgenre_id)
+        classification = self.tm.classifications.by_id(sg_bebop.id)
 
         subgenre_ids = []
         for genre in classification.segment.genres:
             subgenre_ids += [sg.id for sg in genre.subgenres]
-        self.assertIn(subgenre_id, subgenre_ids)
-
-        fake_response = self.tm.classifications.by_id('asdf')
-        self.assertIsNone(fake_response.segment)
+        self.assertIn(sg_bebop.id, subgenre_ids)
 
     def test_segment_by_id(self):
-        seg_id = 'KZFzniwnSyZfZ7v7nJ'
-        seg_name = 'Music'
-        seg = self.tm.segment_by_id(seg_id)
-        print(seg)
-        self.assertEqual(seg_id, seg.id)
-        self.assertEqual(seg_name, seg.name)
+        seg = self.tm.segments.by_id(seg_music.id)
+        self.assertEqual(seg_music.id, seg.id)
+        self.assertEqual(seg_music.name, seg.name)
 
-        seg_x = self.tm.segment_by_id(seg_id)
-        self.assertEqual(seg_id, seg_x.id)
-        self.assertEqual(seg_name, seg_x.name)
+        seg_x = self.tm.segments.by_id(seg_music.id)
+        self.assertEqual(seg_music.id, seg_x.id)
+        self.assertEqual(seg_music.name, seg_x.name)
 
     def test_genre_by_id(self):
-        genre_id = 'KnvZfZ7vAvE'
-        genre_name = 'Jazz'
-        g = self.tm.genre_by_id(genre_id)
+        g = self.tm.genres.by_id(g_jazz.id)
         print(g)
-        self.assertEqual(genre_id, g.id)
-        self.assertEqual(genre_name, g.name)
+        self.assertEqual(g_jazz.id, g.id)
+        self.assertEqual(g_jazz.name, g.name)
 
-        g_x = self.tm.genre_by_id(genre_id)
-        self.assertEqual(genre_id, g_x.id)
-        self.assertEqual(genre_name, g_x.name)
-
-        g_z = self.tm.genre_by_id('asdf')
-        self.assertIsNone(g_z)
+        g_x = self.tm.genres.by_id(g_jazz.id)
+        self.assertEqual(g_jazz.id, g_x.id)
+        self.assertEqual(g_jazz.name, g_x.name)
 
     def test_subgenre_by_id(self):
-        subgenre_id = 'KZazBEonSMnZfZ7vkdl'
-        subgenre_name = 'Bebop'
-        sg = self.tm.subgenre_by_id(subgenre_id)
+        sg = self.tm.subgenres.by_id(sg_bebop.id)
         print(sg)
-        self.assertEqual(subgenre_id, sg.id)
-        self.assertEqual(subgenre_name, sg.name)
+        self.assertEqual(sg_bebop.id, sg.id)
+        self.assertEqual(sg_bebop.name, sg.name)
 
-        sg_x = self.tm.subgenre_by_id(subgenre_id)
-        self.assertEqual(subgenre_id, sg_x.id)
-        self.assertEqual(subgenre_name, sg_x.name)
+        sg_x = self.tm.subgenres.by_id(sg_bebop.id)
+        self.assertEqual(sg_bebop.id, sg_x.id)
+        self.assertEqual(sg_bebop.name, sg_x.name)
 
-        sg_z = self.tm.subgenre_by_id('asdf')
-        self.assertIsNone(sg_z)
+    def test_raises_404(self):
+        self.assertRaises(ApiException, self.tm.segments.by_id, 'asdfasdf')
 
 
 class TestAttractionQuery(TestCase):
@@ -220,12 +220,10 @@ class TestAttractionQuery(TestCase):
         self.assertTrue(matched)
 
     def test_attraction_by_id(self):
-        attraction_id = 'K8vZ9171okV'
-        attraction_name = 'New York Yankees'
-        attr = self.tm.attractions.by_id(attraction_id)
+        attr = self.tm.attractions.by_id(a_yankees.id)
         print(attr)
-        self.assertEqual(attraction_id, attr.id)
-        self.assertEqual(attraction_name, attr.name)
+        self.assertEqual(a_yankees.id, attr.id)
+        self.assertEqual(a_yankees.name, attr.name)
 
 
 class TestEventQuery(TestCase):
@@ -271,29 +269,25 @@ class TestEventQuery(TestCase):
             self.assertEqual(city, v.city.name)
 
     def test_search_events(self):
-        venue_id = 'KovZpaFEZe'
-        venue_name = 'The Tabernacle'
-        event_list = self.tm.events.find(venue_id=venue_id, size=2,
+        event_list = self.tm.events.find(venue_id=v_tabernacle.id, size=2,
                                          include_tba=True).limit(4)
         for e in event_list:
             for v in e.venues:
-                self.assertEqual(venue_id, v.id)
-                self.assertEqual(venue_name, v.name)
+                self.assertEqual(v_tabernacle.id, v.id)
+                self.assertEqual(v_tabernacle.name, v.name)
 
     def test_events_get(self):
         genre_name = 'Hip-Hop'
-        venue_id = 'KovZpZAJledA'
-        venue_name = "Smith's Olde Bar"
 
         elist = self.tm.events.find(
             classification_name=genre_name,
-            venue_id=venue_id
+            venue_id=v_smiths.id
         ).limit(2)
 
         for e in elist:
             for v in e.venues:
-                self.assertEqual(venue_id, v.id)
-                self.assertEqual(venue_name, v.name)
+                self.assertEqual(v_smiths.id, v.id)
+                self.assertEqual(v_smiths.name, v.name)
             genres = [ec.genre.name for ec in e.classifications]
 
             matches = False

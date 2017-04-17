@@ -86,10 +86,28 @@ Get the first page result for venues matching keyword &#8216;<em>Tabernacle</em>
 <code class="descname">api_key</code><a class="headerlink" href="#ticketpy.client.ApiClient.api_key" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="ticketpy.client.ApiClient.get_url">
-<code class="descname">get_url</code><span class="sig-paren">(</span><em>link</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiClient.get_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a specific href from &#8216;_links&#8217; object in a response</p>
+<dl class="attribute">
+<dt id="ticketpy.client.ApiClient.attractions">
+<code class="descname">attractions</code><a class="headerlink" href="#ticketpy.client.ApiClient.attractions" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">AttractionQuery</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.client.ApiClient.classifications">
+<code class="descname">classifications</code><a class="headerlink" href="#ticketpy.client.ApiClient.classifications" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">ClassificationQuery</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.client.ApiClient.events">
+<code class="descname">events</code><a class="headerlink" href="#ticketpy.client.ApiClient.events" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">EventQuery</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.client.ApiClient.genres">
+<code class="descname">genres</code><a class="headerlink" href="#ticketpy.client.ApiClient.genres" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">GenreQuery</span></code></p>
 </dd></dl>
 
 <dl class="attribute">
@@ -97,26 +115,16 @@ Get the first page result for venues matching keyword &#8216;<em>Tabernacle</em>
 <code class="descname">root_url</code><em class="property"> = 'https://app.ticketmaster.com'</em><a class="headerlink" href="#ticketpy.client.ApiClient.root_url" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="ticketpy.client.ApiClient.search">
-<code class="descname">search</code><span class="sig-paren">(</span><em>method</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiClient.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generic API request</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>method</strong> &#8211; Search type (<em>events</em>, <em>venues</em>...)</li>
-<li><strong>kwargs</strong> &#8211; Search parameters (<em>venueId</em>, <em>eventId</em>, 
-<em>latlong</em>, etc...)</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">PagedResponse</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="attribute">
+<dt id="ticketpy.client.ApiClient.segments">
+<code class="descname">segments</code><a class="headerlink" href="#ticketpy.client.ApiClient.segments" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">SegmentQuery</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.client.ApiClient.subgenres">
+<code class="descname">subgenres</code><a class="headerlink" href="#ticketpy.client.ApiClient.subgenres" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">SubGenreQuery</span></code></p>
 </dd></dl>
 
 <dl class="attribute">
@@ -124,11 +132,17 @@ Get the first page result for venues matching keyword &#8216;<em>Tabernacle</em>
 <code class="descname">url</code><em class="property"> = 'https://app.ticketmaster.com/discovery/v2'</em><a class="headerlink" href="#ticketpy.client.ApiClient.url" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="attribute">
+<dt id="ticketpy.client.ApiClient.venues">
+<code class="descname">venues</code><a class="headerlink" href="#ticketpy.client.ApiClient.venues" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">VenueQuery</span></code></p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="exception">
 <dt id="ticketpy.client.ApiException">
-<em class="property">exception </em><code class="descclassname">ticketpy.client.</code><code class="descname">ApiException</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiException" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">ticketpy.client.</code><code class="descname">ApiException</code><span class="sig-paren">(</span><em>response</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.client.ApiException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
 <p>Exception thrown for API-related error messages</p>
 </dd></dl>
@@ -218,16 +232,27 @@ a flat/joined list of items in each <code class="docutils literal"><span class="
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ticketpy.query.AttractionQuery.model">
+<code class="descname">model</code><a class="headerlink" href="#ticketpy.query.AttractionQuery.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Attraction</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.query.AttractionQuery.resource">
+<code class="descname">resource</code><em class="property"> = 'attractions'</em><a class="headerlink" href="#ticketpy.query.AttractionQuery.resource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="ticketpy.query.BaseQuery">
-<em class="property">class </em><code class="descclassname">ticketpy.query.</code><code class="descname">BaseQuery</code><span class="sig-paren">(</span><em>api_client</em>, <em>method</em>, <em>model</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.BaseQuery" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.query.</code><code class="descname">BaseQuery</code><span class="sig-paren">(</span><em>api_client</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.BaseQuery" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Base query/parent class for specific serach types.</p>
 <dl class="attribute">
 <dt id="ticketpy.query.BaseQuery.attr_map">
-<code class="descname">attr_map</code><em class="property"> = {'promoter_id': 'promoterId', 'attraction_id': 'attractionId', 'venue_id': 'venueId', 'country_code': 'countryCode', 'segment_name': 'segmentName', 'include_test': 'includeTest', 'keyword': 'keyword', 'client_visibility': 'clientVisibility', 'classification_id': 'classificationId', 'radius': 'radius', 'classification_name': 'classificationName', 'include_tba': 'includeTBA', 'dma_id': 'dmaId', 'end_date_time': 'endDateTime', 'onsale_start_date_time': 'onsaleStartDateTime', 'latlong': 'latlong', 'locale': 'locale', 'sort': 'sort', 'id': 'id', 'include_tbd': 'includeTBD', 'page': 'page', 'onsale_end_date_time': 'onsaleEndDateTime', 'state_code': 'stateCode', 'size': 'size', 'segment_id': 'segmentId', 'market_id': 'marketId', 'start_date_time': 'startDateTime'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attr_map</code><em class="property"> = {'client_visibility': 'clientVisibility', 'dma_id': 'dmaId', 'classification_name': 'classificationName', 'include_tbd': 'includeTBD', 'promoter_id': 'promoterId', 'keyword': 'keyword', 'segment_name': 'segmentName', 'attraction_id': 'attractionId', 'onsale_end_date_time': 'onsaleEndDateTime', 'page': 'page', 'size': 'size', 'sort': 'sort', 'id': 'id', 'classification_id': 'classificationId', 'locale': 'locale', 'end_date_time': 'endDateTime', 'latlong': 'latlong', 'venue_id': 'venueId', 'radius': 'radius', 'state_code': 'stateCode', 'include_tba': 'includeTBA', 'segment_id': 'segmentId', 'start_date_time': 'startDateTime', 'country_code': 'countryCode', 'include_test': 'includeTest', 'market_id': 'marketId', 'onsale_start_date_time': 'onsaleStartDateTime'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps parameter names to parameters expected by the API
 (ex: <em>market_id</em> maps to <em>marketId</em>)</p>
 </dd></dl>
@@ -237,6 +262,21 @@ a flat/joined list of items in each <code class="docutils literal"><span class="
 <code class="descname">by_id</code><span class="sig-paren">(</span><em>entity_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.BaseQuery.by_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a specific object by its ID</p>
 </dd></dl>
+
+<dl class="staticmethod">
+<dt id="ticketpy.query.BaseQuery.from_json">
+<em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.BaseQuery.from_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.query.BaseQuery.model">
+<code class="descname">model</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.query.BaseQuery.model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.query.BaseQuery.resource">
+<code class="descname">resource</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.query.BaseQuery.resource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -274,23 +314,16 @@ a flat/joined list of items in each <code class="docutils literal"><span class="
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="ticketpy.query.ClassificationQuery.genre_by_id">
-<code class="descname">genre_by_id</code><span class="sig-paren">(</span><em>genre_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery.genre_by_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a <code class="docutils literal"><span class="pre">Genre</span></code> matching this ID</p>
+<dl class="attribute">
+<dt id="ticketpy.query.ClassificationQuery.model">
+<code class="descname">model</code><a class="headerlink" href="#ticketpy.query.ClassificationQuery.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Classification</span></code></p>
 </dd></dl>
 
-<dl class="method">
-<dt id="ticketpy.query.ClassificationQuery.segment_by_id">
-<code class="descname">segment_by_id</code><span class="sig-paren">(</span><em>segment_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery.segment_by_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a <code class="docutils literal"><span class="pre">Segment</span></code> matching this ID</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ticketpy.query.ClassificationQuery.subgenre_by_id">
-<code class="descname">subgenre_by_id</code><span class="sig-paren">(</span><em>subgenre_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.ClassificationQuery.subgenre_by_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a <code class="docutils literal"><span class="pre">SubGenre</span></code> matching this ID</p>
-</dd></dl>
+<dl class="attribute">
+<dt id="ticketpy.query.ClassificationQuery.resource">
+<code class="descname">resource</code><em class="property"> = 'classifications'</em><a class="headerlink" href="#ticketpy.query.ClassificationQuery.resource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -333,10 +366,10 @@ you may get wonky results (<em>date, asc</em> returns far-away events)</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sort</strong> &#8211; Sorting order of search result 
+<li><strong>sort</strong> &#8211; Sorting order of _search result 
 (default: <em>&#8216;relevance,desc&#8217;</em>)</li>
 <li><strong>latlong</strong> &#8211; Latitude/longitude filter</li>
-<li><strong>radius</strong> &#8211; Radius of area to search</li>
+<li><strong>radius</strong> &#8211; Radius of area to _search</li>
 <li><strong>unit</strong> &#8211; Unit of radius, &#8216;miles&#8217; or &#8216;km&#8217; (default: miles)</li>
 <li><strong>start_date_time</strong> &#8211; Filter by start date/time.
 Timestamp format: <em>YYYY-MM-DDTHH:MM:SSZ</em></li>
@@ -362,7 +395,7 @@ date ([&#8216;yes&#8217;, &#8216;no&#8217;, &#8216;only&#8217;])</li>
 defined ([&#8216;yes&#8217;, &#8216;no&#8217;, &#8216;only&#8217;])</li>
 <li><strong>client_visibility</strong> &#8211; </li>
 <li><strong>keyword</strong> &#8211; </li>
-<li><strong>event_id</strong> &#8211; Event ID to search</li>
+<li><strong>event_id</strong> &#8211; Event ID to _search</li>
 <li><strong>source</strong> &#8211; Filter entities by source name: [&#8216;ticketmaster&#8217;, 
 &#8216;universe&#8217;, &#8216;frontgate&#8217;, &#8216;tmr&#8217;]</li>
 <li><strong>include_test</strong> &#8211; &#8216;yes&#8217; to include test entities in the 
@@ -380,6 +413,68 @@ entities. ([&#8216;yes&#8217;, &#8216;no&#8217;, &#8216;only&#8217;])</li>
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.query.EventQuery.model">
+<code class="descname">model</code><a class="headerlink" href="#ticketpy.query.EventQuery.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Event</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.query.EventQuery.resource">
+<code class="descname">resource</code><em class="property"> = 'events'</em><a class="headerlink" href="#ticketpy.query.EventQuery.resource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.query.GenreQuery">
+<em class="property">class </em><code class="descclassname">ticketpy.query.</code><code class="descname">GenreQuery</code><span class="sig-paren">(</span><em>api_client</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.GenreQuery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ticketpy.query.BaseQuery" title="ticketpy.query.BaseQuery"><code class="xref py py-class docutils literal"><span class="pre">ticketpy.query.BaseQuery</span></code></a></p>
+<dl class="attribute">
+<dt id="ticketpy.query.GenreQuery.model">
+<code class="descname">model</code><a class="headerlink" href="#ticketpy.query.GenreQuery.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Genre</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.query.GenreQuery.resource">
+<code class="descname">resource</code><em class="property"> = 'classifications/genres'</em><a class="headerlink" href="#ticketpy.query.GenreQuery.resource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.query.SegmentQuery">
+<em class="property">class </em><code class="descclassname">ticketpy.query.</code><code class="descname">SegmentQuery</code><span class="sig-paren">(</span><em>api_client</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.SegmentQuery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ticketpy.query.BaseQuery" title="ticketpy.query.BaseQuery"><code class="xref py py-class docutils literal"><span class="pre">ticketpy.query.BaseQuery</span></code></a></p>
+<dl class="attribute">
+<dt id="ticketpy.query.SegmentQuery.model">
+<code class="descname">model</code><a class="headerlink" href="#ticketpy.query.SegmentQuery.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Segment</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.query.SegmentQuery.resource">
+<code class="descname">resource</code><em class="property"> = 'classifications/segments'</em><a class="headerlink" href="#ticketpy.query.SegmentQuery.resource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.query.SubGenreQuery">
+<em class="property">class </em><code class="descclassname">ticketpy.query.</code><code class="descname">SubGenreQuery</code><span class="sig-paren">(</span><em>api_client</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.query.SubGenreQuery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ticketpy.query.BaseQuery" title="ticketpy.query.BaseQuery"><code class="xref py py-class docutils literal"><span class="pre">ticketpy.query.BaseQuery</span></code></a></p>
+<dl class="attribute">
+<dt id="ticketpy.query.SubGenreQuery.model">
+<code class="descname">model</code><a class="headerlink" href="#ticketpy.query.SubGenreQuery.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">SubGenre</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.query.SubGenreQuery.resource">
+<code class="descname">resource</code><em class="property"> = 'classifications/subgenres'</em><a class="headerlink" href="#ticketpy.query.SubGenreQuery.resource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -443,6 +538,17 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.query.VenueQuery.model">
+<code class="descname">model</code><a class="headerlink" href="#ticketpy.query.VenueQuery.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Venue</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.query.VenueQuery.resource">
+<code class="descname">resource</code><em class="property"> = 'venues'</em><a class="headerlink" href="#ticketpy.query.VenueQuery.resource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
