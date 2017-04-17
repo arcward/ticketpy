@@ -105,10 +105,8 @@ class BaseQuery:
         kw_map = {}
         for k, v in kwargs.items():
             # If arg is API-friendly (ex: stateCode='GA')
-            if k in self.attr_map.keys():
+            if k in self.attr_map:
                 kw_map[self.attr_map[k]] = v
-            elif k in self.attr_map.values():
-                kw_map[k] = v
             else:
                 kw_map[k] = v
 

@@ -73,6 +73,7 @@ class Page(list):
         pg.total_elements = json_obj['page']['totalElements']
 
         embedded = json_obj.get('_embedded')
+        # No objects in response for some reason
         if not embedded:
             return pg
 
@@ -145,12 +146,14 @@ class Event:
     __Price = namedtuple('Price', ['type', 'currency', 'min', 'max'])
     __Promoter = namedtuple('Promoter', ['id', 'name', 'description'])
 
-    def __init__(self, additional_info=None, classifications=None, dates=None,
-                 description=None, distance=None, event_id=None, images=None,
-                 info=None, links=None, locale=None, name=None, test=None,
-                 place=None, please_note=None, price_ranges=None, promoter=None,
-                 sales=None, units=None, url=None, venues=None):
+    def __init__(self, additional_info=None, attractions=None,
+                 classifications=None, dates=None, description=None,
+                 distance=None, event_id=None, images=None, info=None,
+                 links=None, locale=None, name=None, test=None, place=None,
+                 please_note=None, price_ranges=None, promoter=None, sales=None,
+                 units=None, url=None, venues=None):
         self.additional_info = additional_info
+        self.attractions = attractions
         self.classifications = classifications
         self.dates = dates
         self.description = description
@@ -208,9 +211,14 @@ class Event:
             ev.classifications = [EventClassification.from_json(cl)
                                   for cl in classifications]
 
-        venues = json_event.get('_embedded', {}).get('venues')
+        embedded = json_event.get('_embedded', {})
+        venues = embedded.get('venues')
         if venues:
             ev.venues = [Venue.from_json(v) for v in venues]
+
+        attractions = embedded.get('attractions')
+        if attractions:
+            ev.attractionsf = [Attraction.from_json(a) for a in attractions]
 
         _Util.assign_links(ev, json_event)
         return ev
@@ -254,8 +262,9 @@ class Attraction:
             att.images = [_Util.namedtuple(Image, i) for i in images]
 
         classifications = json_obj.get('classifications')
-        att.classifications = [Classification.from_json(cl)
-                               for cl in classifications]
+        if classifications:
+            att.classifications = [Classification.from_json(cl) for
+                                   cl in classifications]
 
         _Util.assign_links(att, json_obj)
         return att
@@ -679,9 +688,7 @@ class SubGenre:
 
 
 class _Util:
-    def __init__(self):
-        pass
-
+    """Utility class for generating namedtuples/modifying data"""
     @staticmethod
     def assign_links(obj, json_obj, base_url=None):
         """Assigns ``links`` attribute to an object from JSON"""
