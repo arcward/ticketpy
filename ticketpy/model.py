@@ -64,7 +64,7 @@ class Page(list):
 
     @staticmethod
     def from_json(json_obj):
-        """Instantiate and return a Page(list)"""
+        """Instantiate and return a ``Page(list)`` object"""
         pg = Page()
         _Util.assign_links(pg, json_obj, ticketpy.ApiClient.root_url)
         pg.number = json_obj['page']['number']
@@ -86,7 +86,6 @@ class Page(list):
             if k in object_models:
                 obj_type = object_models[k]
                 pg += [obj_type.from_json(obj) for obj in v]
-
         return pg
 
     def __str__(self):
@@ -146,32 +145,31 @@ class Event:
     __Price = namedtuple('Price', ['type', 'currency', 'min', 'max'])
     __Promoter = namedtuple('Promoter', ['id', 'name', 'description'])
 
-    def __init__(self, event_id=None, name=None, price_ranges=None,
-                 venues=None, classifications=None, place=None,
-                 links=None, distance=None, units=None, locale=None,
-                 description=None, additional_info=None, url=None,
-                 images=None, sales=None, info=None, please_note=None,
-                 test=None, promoter=None, dates=None):
-        self.id = event_id
-        self.name = name
-        self.classifications = classifications
-        self.price_ranges = price_ranges
-        self.venues = venues
-        self.links = links
-        self.dates = dates
-        self.distance = distance
-        self.units = units
-        self.locale = locale
-        self.description = description
+    def __init__(self, additional_info=None, classifications=None, dates=None,
+                 description=None, distance=None, event_id=None, images=None,
+                 info=None, links=None, locale=None, name=None, test=None,
+                 place=None, please_note=None, price_ranges=None, promoter=None,
+                 sales=None, units=None, url=None, venues=None):
         self.additional_info = additional_info
-        self.url = url
+        self.classifications = classifications
+        self.dates = dates
+        self.description = description
+        self.distance = distance
+        self.id = event_id
         self.images = images
-        self.sales = sales
         self.info = info
-        self.please_note = please_note
+        self.links = links
+        self.locale = locale
+        self.name = name
         self.place = place
-        self.test = test
+        self.please_note = please_note
+        self.price_ranges = price_ranges
         self.promoter = promoter
+        self.sales = sales
+        self.test = test
+        self.units = units
+        self.url = url
+        self.venues = venues
 
     @staticmethod
     def from_json(json_event):
@@ -231,15 +229,16 @@ class Event:
 class Attraction:
     """Attraction"""
 
-    def __init__(self, attraction_id=None, attraction_name=None, url=None,
-                 classifications=None, images=None, test=None, links=None):
+    def __init__(self, attraction_id=None, attraction_name=None,
+                 classifications=None, images=None, links=None, test=None,
+                 url=None):
         self.id = attraction_id
         self.name = attraction_name
-        self.url = url
         self.classifications = classifications
         self.images = images
-        self.test = test
         self.links = links
+        self.test = test
+        self.url = url
 
     @staticmethod
     def from_json(json_obj):
@@ -274,13 +273,13 @@ class Classification:
     For the structure returned by ``EventSearch``, see ``EventClassification``
     """
 
-    def __init__(self, segment=None, classification_type=None, subtype=None,
-                 primary=None, links=None):
-        self.segment = segment
+    def __init__(self, classification_type=None, links=None, primary=None,
+                 subtype=None, segment=None):
         self.type = classification_type
-        self.subtype = subtype
-        self.primary = primary
         self.links = links
+        self.primary = primary
+        self.segment = segment
+        self.subtype = subtype
 
     @staticmethod
     def from_json(json_obj):
@@ -358,43 +357,41 @@ class Venue:
     __Market = namedtuple('Market', ['id'])
     __GeneralInfo = namedtuple('GeneralInfo', ['general_rule', 'child_rule'])
 
-    def __init__(self, name=None, address=None, city=None, state=None,
-                 markets=None, url=None, box_office_info=None,
-                 dmas=None, general_info=None, venue_id=None,
-                 social=None, timezone=None, images=None, postal_code=None,
-                 parking_detail=None, accessible_seating_detail=None,
-                 links=None, type=None, distance=None, units=None,
-                 locale=None, description=None, additional_info=None,
-                 country=None, currency=None, test=None, location=None):
-        self.name = name
-        self.id = venue_id
-        self.address = address
-        self.postal_code = postal_code
-        self.city = city
-        #: State code (ex: 'GA' not 'Georgia')
-        self.state = state
-        self.timezone = timezone
-        self.url = url
-        self.box_office_info = box_office_info
-        self.dmas = dmas
-        self.markets = markets
-        self.general_info = general_info
-        self.social = social
-        self.images = images
-        self.parking_detail = parking_detail
-        self.accessible_seating_detail = accessible_seating_detail
-        self.links = links
+    def __init__(self, accessible_seating_detail=None, additional_info=None,
+                 address=None, box_office_info=None, city=None, country=None,
+                 currency=None, description=None, distance=None, dmas=None,
+                 general_info=None, images=None, links=None, locale=None,
+                 location=None, markets=None, name=None, parking_detail=None,
+                 postal_code=None, social=None, state=None, test=None,
+                 timezone=None, type=None, units=None, url=None, venue_id=None):
 
-        self.type = type
-        self.distance = distance
-        self.units = units
-        self.locale = locale
-        self.description = description
+        self.accessible_seating_detail = accessible_seating_detail
         self.additional_info = additional_info
+        self.address = address
+        self.box_office_info = box_office_info
+        self.city = city
         self.country = country
         self.currency = currency
-        self.test = test
+        self.description = description
+        self.distance = distance
+        self.dmas = dmas
+        self.general_info = general_info
+        self.id = venue_id
+        self.images = images
+        self.links = links
+        self.locale = locale
         self.location = location
+        self.markets = markets
+        self.name = name
+        self.parking_detail = parking_detail
+        self.postal_code = postal_code
+        self.social = social
+        self.state = state
+        self.test = test
+        self.type = type
+        self.timezone = timezone
+        self.units = units
+        self.url = url
 
     @staticmethod
     def from_json(json_venue):
@@ -444,16 +441,16 @@ class Venue:
 
 
 class Place:
-    def __init__(self, name=None, area=None, address=None, city=None,
-                 state=None, country=None, postal_code=None, location=None):
-        self.name = name
-        self.area = area
+    def __init__(self, address=None, area=None, city=None, country=None,
+                 location=None, name=None, postal_code=None, state=None):
         self.address = address
+        self.area = area
         self.city = city
-        self.state = state
         self.country = country
-        self.postal_code = postal_code
         self.location = location
+        self.name = name
+        self.postal_code = postal_code
+        self.state = state
 
     @staticmethod
     def from_json(json_obj):
@@ -481,7 +478,7 @@ class Dates:
                                      'end_date_time', 'end_approximate'])
     __Status = namedtuple('Status', ['code'])
 
-    def __init__(self, start=None, end=None, access=None, timezone=None,
+    def __init__(self, access=None, start=None, end=None, timezone=None,
                  status=None):
         self.start = start
         self.end = end
@@ -530,16 +527,16 @@ class EventClassification:
     """Classification as it's represented in event search results
     See ``Classification()`` for results from classification searches
     """
-    def __init__(self, genre=None, subgenre=None, segment=None,
-                 classification_type=None, classification_subtype=None,
-                 primary=None, links=None):
-        self.genre = genre
-        self.subgenre = subgenre
-        self.segment = segment
-        self.type = classification_type
+    def __init__(self, classification_subtype=None, classification_type=None,
+                 genre=None, links=None, segment=None, subgenre=None,
+                 primary=None):
         self.subtype = classification_subtype
-        self.primary = primary
+        self.type = classification_type
+        self.genre = genre
         self.links = links
+        self.primary = primary
+        self.segment = segment
+        self.subgenre = subgenre
 
     @staticmethod
     def from_json(json_obj):
@@ -708,6 +705,12 @@ class _Util:
 
     @staticmethod
     def namedtuple(namedtuple_model, json_obj=None):
+        """Initializes the provided ``namedtuple`` using ``json_obj``
+        
+        Creates dict with necessary keys (``NoneType`` values), then 
+        updates it with those found in ``json_obj`` after updating 
+        ``json_obj`` keys with those found in ``model.attr_map``
+        """
         kwargs = {k: None for k in namedtuple_model._fields}
         if not json_obj:
             return None
@@ -717,6 +720,7 @@ class _Util:
 
     @staticmethod
     def update_kwargs(kwargs):
+        """Updates parameter names in kwargs based on ``model.attr_map``"""
         kws = {}
         for k, v in dict(kwargs).items():
             if k in attr_map:
@@ -733,12 +737,5 @@ class _Util:
 
     @staticmethod
     def format_utc_timestamp(timestamp):
+        """Cast timestamp str to ``datetime``"""
         return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ")
-
-    @staticmethod
-    def state(json_obj):
-        return _Util.namedtuple(State, json_obj)
-
-    @staticmethod
-    def address(json_obj):
-        return _Util.namedtuple(Address, json_obj)
