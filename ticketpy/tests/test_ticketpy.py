@@ -151,7 +151,6 @@ class TestClassificationQuery(TestCase):
 
     def test_classification_by_id(self):
         subgenre_id = 'KZazBEonSMnZfZ7vkdl'
-        subgenre_name = 'Bebop'
         classification = self.tm.classifications.by_id(subgenre_id)
 
         subgenre_ids = []
@@ -262,15 +261,14 @@ class TestEventQuery(TestCase):
         for e in event_list:
             nearby = [v for v in e.venues if
                       haversine(latlon1,
-                                {'latitude': v.location['latitude'],
-                                 'longitude': v.location['longitude']}) <= 3]
+                                {'latitude': v.location.latitude,
+                                 'longitude': v.location.longitude}) <= 3]
             all_nearby += nearby
         # Ensure we aren't passing the test on an empty list
         self.assertGreater(len(all_nearby), 0)
         # Every city in the (populated) list should be Atlanta
         for v in all_nearby:
-            self.assertEqual(city, v.city)
-            self.assertEqual(city, v.location['city'])
+            self.assertEqual(city, v.city.name)
 
     def test_search_events(self):
         venue_id = 'KovZpaFEZe'

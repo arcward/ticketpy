@@ -227,7 +227,7 @@ a flat/joined list of items in each <code class="docutils literal"><span class="
 <p>Base query/parent class for specific serach types.</p>
 <dl class="attribute">
 <dt id="ticketpy.query.BaseQuery.attr_map">
-<code class="descname">attr_map</code><em class="property"> = {'sort': 'sort', 'include_tba': 'includeTBA', 'onsale_end_date_time': 'onsaleEndDateTime', 'include_tbd': 'includeTBD', 'page': 'page', 'radius': 'radius', 'market_id': 'marketId', 'id': 'id', 'size': 'size', 'classification_name': 'classificationName', 'keyword': 'keyword', 'venue_id': 'venueId', 'locale': 'locale', 'start_date_time': 'startDateTime', 'include_test': 'includeTest', 'segment_name': 'segmentName', 'promoter_id': 'promoterId', 'state_code': 'stateCode', 'client_visibility': 'clientVisibility', 'segment_id': 'segmentId', 'end_date_time': 'endDateTime', 'country_code': 'countryCode', 'classification_id': 'classificationId', 'onsale_start_date_time': 'onsaleStartDateTime', 'latlong': 'latlong', 'dma_id': 'dmaId', 'attraction_id': 'attractionId'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attr_map</code><em class="property"> = {'include_test': 'includeTest', 'size': 'size', 'segment_name': 'segmentName', 'onsale_start_date_time': 'onsaleStartDateTime', 'classification_id': 'classificationId', 'id': 'id', 'page': 'page', 'include_tba': 'includeTBA', 'country_code': 'countryCode', 'keyword': 'keyword', 'classification_name': 'classificationName', 'promoter_id': 'promoterId', 'locale': 'locale', 'start_date_time': 'startDateTime', 'client_visibility': 'clientVisibility', 'dma_id': 'dmaId', 'state_code': 'stateCode', 'segment_id': 'segmentId', 'onsale_end_date_time': 'onsaleEndDateTime', 'attraction_id': 'attractionId', 'sort': 'sort', 'market_id': 'marketId', 'radius': 'radius', 'include_tbd': 'includeTBD', 'venue_id': 'venueId', 'latlong': 'latlong', 'end_date_time': 'endDateTime'}</em><a class="headerlink" href="#ticketpy.query.BaseQuery.attr_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps parameter names to parameters expected by the API
 (ex: <em>market_id</em> maps to <em>marketId</em>)</p>
 </dd></dl>
@@ -451,6 +451,42 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 <span id="ticketpy-model-module"></span><h2>ticketpy.model module<a class="headerlink" href="#module-ticketpy.model" title="Permalink to this headline">¶</a></h2>
 <p>Models for API objects</p>
 <dl class="class">
+<dt id="ticketpy.model.Address">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Address</code><span class="sig-paren">(</span><em>line_1</em>, <em>line_2</em>, <em>line_3</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ticketpy.model.Address.line_1">
+<code class="descname">line_1</code><a class="headerlink" href="#ticketpy.model.Address.line_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.Address.line_2">
+<code class="descname">line_2</code><a class="headerlink" href="#ticketpy.model.Address.line_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.Address.line_3">
+<code class="descname">line_3</code><a class="headerlink" href="#ticketpy.model.Address.line_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.model.Area">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Area</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ticketpy.model.Area.name">
+<code class="descname">name</code><a class="headerlink" href="#ticketpy.model.Area.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ticketpy.model.Attraction">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Attraction</code><span class="sig-paren">(</span><em>attraction_id=None</em>, <em>attraction_name=None</em>, <em>url=None</em>, <em>classifications=None</em>, <em>images=None</em>, <em>test=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Attraction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
@@ -458,6 +494,18 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 <dt id="ticketpy.model.Attraction.from_json">
 <em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Attraction.from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert JSON object to <code class="docutils literal"><span class="pre">Attraction</span></code> object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.model.City">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">City</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.City" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ticketpy.model.City.name">
+<code class="descname">name</code><a class="headerlink" href="#ticketpy.model.City.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
 </dd></dl>
 
 </dd></dl>
@@ -489,8 +537,37 @@ entities flagged as test in the response (default: &#8216;no&#8217;)</li>
 </dd></dl>
 
 <dl class="class">
+<dt id="ticketpy.model.Country">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Country</code><span class="sig-paren">(</span><em>country_code</em>, <em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Country" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ticketpy.model.Country.country_code">
+<code class="descname">country_code</code><a class="headerlink" href="#ticketpy.model.Country.country_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.Country.name">
+<code class="descname">name</code><a class="headerlink" href="#ticketpy.model.Country.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.model.Dates">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Dates</code><span class="sig-paren">(</span><em>start=None</em>, <em>end=None</em>, <em>access=None</em>, <em>timezone=None</em>, <em>status=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Dates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="staticmethod">
+<dt id="ticketpy.model.Dates.from_json">
+<em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Dates.from_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ticketpy.model.Event">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Event</code><span class="sig-paren">(</span><em>event_id=None</em>, <em>name=None</em>, <em>start_date=None</em>, <em>start_time=None</em>, <em>status=None</em>, <em>price_ranges=None</em>, <em>venues=None</em>, <em>utc_datetime=None</em>, <em>classifications=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Event" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Event</code><span class="sig-paren">(</span><em>event_id=None</em>, <em>name=None</em>, <em>price_ranges=None</em>, <em>venues=None</em>, <em>classifications=None</em>, <em>place=None</em>, <em>links=None</em>, <em>distance=None</em>, <em>units=None</em>, <em>locale=None</em>, <em>description=None</em>, <em>additional_info=None</em>, <em>url=None</em>, <em>images=None</em>, <em>sales=None</em>, <em>info=None</em>, <em>please_note=None</em>, <em>test=None</em>, <em>promoter=None</em>, <em>dates=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Event" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Ticketmaster event</p>
 <p>The JSON returned from the Discovery API (at least, as far as 
@@ -540,30 +617,6 @@ what&#8217;s being used here) looks like:</p>
 <dd><p>Creates an <code class="docutils literal"><span class="pre">Event</span></code> from API&#8217;s JSON response</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="ticketpy.model.Event.local_start_date">
-<code class="descname">local_start_date</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.model.Event.local_start_date" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>Local</strong> start date (<em>YYYY-MM-DD</em>)</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.model.Event.local_start_time">
-<code class="descname">local_start_time</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.model.Event.local_start_time" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>Local</strong> start time (<em>HH:MM:SS</em>)</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.model.Event.status">
-<code class="descname">status</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.model.Event.status" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sale status (such as <em>Cancelled, Offsale...</em>)</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.model.Event.utc_datetime">
-<code class="descname">utc_datetime</code><a class="headerlink" href="#ticketpy.model.Event.utc_datetime" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start date/time in UTC (<em>YYYY-MM-DDTHH:MM:SSZ</em>)</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
@@ -592,6 +645,66 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 </dd></dl>
 
 <dl class="class">
+<dt id="ticketpy.model.Image">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Image</code><span class="sig-paren">(</span><em>url</em>, <em>ratio</em>, <em>width</em>, <em>height</em>, <em>fallback</em>, <em>attribution</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ticketpy.model.Image.attribution">
+<code class="descname">attribution</code><a class="headerlink" href="#ticketpy.model.Image.attribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.Image.fallback">
+<code class="descname">fallback</code><a class="headerlink" href="#ticketpy.model.Image.fallback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.Image.height">
+<code class="descname">height</code><a class="headerlink" href="#ticketpy.model.Image.height" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.Image.ratio">
+<code class="descname">ratio</code><a class="headerlink" href="#ticketpy.model.Image.ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.Image.url">
+<code class="descname">url</code><a class="headerlink" href="#ticketpy.model.Image.url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.Image.width">
+<code class="descname">width</code><a class="headerlink" href="#ticketpy.model.Image.width" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.model.Location">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Location</code><span class="sig-paren">(</span><em>latitude</em>, <em>longitude</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ticketpy.model.Location.latitude">
+<code class="descname">latitude</code><a class="headerlink" href="#ticketpy.model.Location.latitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.Location.longitude">
+<code class="descname">longitude</code><a class="headerlink" href="#ticketpy.model.Location.longitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ticketpy.model.Page">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Page</code><span class="sig-paren">(</span><em>number=None</em>, <em>size=None</em>, <em>total_elements=None</em>, <em>total_pages=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Page" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">list</span></code></p>
@@ -605,6 +718,28 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 </dd></dl>
 
 <dl class="class">
+<dt id="ticketpy.model.Place">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Place</code><span class="sig-paren">(</span><em>name=None</em>, <em>area=None</em>, <em>address=None</em>, <em>city=None</em>, <em>state=None</em>, <em>country=None</em>, <em>postal_code=None</em>, <em>location=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Place" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="staticmethod">
+<dt id="ticketpy.model.Place.from_json">
+<em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Place.from_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.model.Sales">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Sales</code><span class="sig-paren">(</span><em>public=None</em>, <em>presale=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Sales" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="staticmethod">
+<dt id="ticketpy.model.Sales.from_json">
+<em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Sales.from_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ticketpy.model.Segment">
 <em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Segment</code><span class="sig-paren">(</span><em>segment_id=None</em>, <em>segment_name=None</em>, <em>genres=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Segment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
@@ -612,6 +747,24 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 <dt id="ticketpy.model.Segment.from_json">
 <em class="property">static </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Segment.from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create and return a <code class="docutils literal"><span class="pre">Segment</span></code> from JSON</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ticketpy.model.State">
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">State</code><span class="sig-paren">(</span><em>state_code</em>, <em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.State" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ticketpy.model.State.name">
+<code class="descname">name</code><a class="headerlink" href="#ticketpy.model.State.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticketpy.model.State.state_code">
+<code class="descname">state_code</code><a class="headerlink" href="#ticketpy.model.State.state_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
 </dd></dl>
 
 </dd></dl>
@@ -629,7 +782,7 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 
 <dl class="class">
 <dt id="ticketpy.model.Venue">
-<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Venue</code><span class="sig-paren">(</span><em>name=None</em>, <em>address=None</em>, <em>city=None</em>, <em>state_code=None</em>, <em>postal_code=None</em>, <em>latitude=None</em>, <em>longitude=None</em>, <em>markets=None</em>, <em>url=None</em>, <em>box_office_info=None</em>, <em>dmas=None</em>, <em>general_info=None</em>, <em>venue_id=None</em>, <em>social=None</em>, <em>timezone=None</em>, <em>images=None</em>, <em>parking_detail=None</em>, <em>accessible_seating_detail=None</em>, <em>links=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Venue" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ticketpy.model.</code><code class="descname">Venue</code><span class="sig-paren">(</span><em>name=None</em>, <em>address=None</em>, <em>city=None</em>, <em>state=None</em>, <em>markets=None</em>, <em>url=None</em>, <em>box_office_info=None</em>, <em>dmas=None</em>, <em>general_info=None</em>, <em>venue_id=None</em>, <em>social=None</em>, <em>timezone=None</em>, <em>images=None</em>, <em>postal_code=None</em>, <em>parking_detail=None</em>, <em>accessible_seating_detail=None</em>, <em>links=None</em>, <em>type=None</em>, <em>distance=None</em>, <em>units=None</em>, <em>locale=None</em>, <em>description=None</em>, <em>additional_info=None</em>, <em>country=None</em>, <em>currency=None</em>, <em>test=None</em>, <em>location=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ticketpy.model.Venue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>A Ticketmaster venue</p>
 <p>The JSON returned from the Discovery API looks something like this 
@@ -678,14 +831,8 @@ See <code class="docutils literal"><span class="pre">Classification()</span></co
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ticketpy.model.Venue.location">
-<code class="descname">location</code><a class="headerlink" href="#ticketpy.model.Venue.location" title="Permalink to this definition">¶</a></dt>
-<dd><p>Location-based data (full address, lat/lon, timezone</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ticketpy.model.Venue.state_code">
-<code class="descname">state_code</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.model.Venue.state_code" title="Permalink to this definition">¶</a></dt>
+<dt id="ticketpy.model.Venue.state">
+<code class="descname">state</code><em class="property"> = None</em><a class="headerlink" href="#ticketpy.model.Venue.state" title="Permalink to this definition">¶</a></dt>
 <dd><p>State code (ex: &#8216;GA&#8217; not &#8216;Georgia&#8217;)</p>
 </dd></dl>
 
