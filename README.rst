@@ -31,6 +31,37 @@ Example searches
 
 Events
 ^^^^^^
+If you wanted to query for information on *Shaky Beats Music Festival*:
+
+.. code-block:: python
+
+    import ticketpy
+
+    tm_client = ticketpy.ApiClient('your_api_key')
+    events = tm_client.events.find(keyword="Shaky Beats").all()
+    tmpl = "{date}: {event_name} at {venues}: {attractions}\n"
+        for event in events:
+            print(tmpl.format(date=event.dates.start.local_date,
+                              event_name=event.name,
+                              venues=event.venues,
+                              attractions=event.attractions))
+
+Output::
+
+    2017-05-05: Shaky Beats Music Festival at [Centennial Park-Atlanta]:
+    [Unknown]
+
+    2017-05-05: Shaky Beats Music Festival at [Centennial Olympic Park]:
+    [Shaky Beats Music Festival, The Chainsmokers, Kaskade, Griz,
+    Flosstradamus, Zeds Dead, Galantis, RL Grime, Girl Talk, Gramatik,
+    Bonobo, Alison Wonderland, Flatbush Zombies, Getter, Little Dragon,
+    Claude VonStroke, Snails, Slander, Slushii, Lost Kings, Ephwurd,
+    Party Favor, Mija, Pouya, Rezz, Haywyre, Boombox Cartel, Joyryde, VANIC,
+    Mutemath, Ganja White Night, Loudpvck, Crywolf, Grandtheft, Ekali,
+    Bad Royale, Said the Sky, Mayhem, Echos, Young Bombs, Kaido, Cid,
+    Armnhmr, Wingtip, Modern Measure, Mantis, Illenium]
+
+
 To pull all Hip-Hop events in Georgia between May 19th, 2017 and
 May 21st, 2017:
 
@@ -49,84 +80,50 @@ May 21st, 2017:
 
     for page in pages:
         for event in page:
-            print(event.name)
+            print("{}: {}\n".format(event.name, event.attractions))
 
 Output::
 
-    Event:            Atlanta Funk Fest 2017 Fri/sun Combo Ticket
-    Venues:           [Wolf Creek Amphitheater at 3025 Merk Road in Atlanta GA]
-    Start date:       2017-05-19
-    Start time:       19:00:00
-    Price ranges:     [{'min': 88.0, 'max': 275.0}]
-    Status:           onsale
-    Classifications:  [Segment: Music / Genre: R&B / Subgenre: R&B / Type: Undefined / Subtype: Undefined]
+    Atlanta Funk Fest 2017 Fri/sun Combo Ticket: [Erykah Badu, Ro James,
+    Digable Planets, Kenny 'Babyface' Edmonds, Brandy, Joe]
 
-    Event:            Atlanta Funk Fest 2017
-    Venues:           [Wolf Creek Amphitheater at 3025 Merk Road in Atlanta GA]
-    Start date:       2017-05-19
-    Start time:       19:00:00
-    Price ranges:     [{'min': 63.0, 'max': 158.0}]
-    Status:           onsale
-    Classifications:  [Segment: Music / Genre: R&B / Subgenre: R&B / Type: Undefined / Subtype: Undefined]
+    Atlanta Funk Fest 2017: [Erykah Badu, Ro James, Digable Planets]
 
-    Event:            Atlanta Funk Fest 2017 3 Day Ticket
-    Venues:           [Wolf Creek Amphitheater at 3025 Merk Road in Atlanta GA]
-    Start date:       2017-05-19
-    Start time:       19:00:00
-    Price ranges:     [{'min': 128.01, 'max': 424.0}]
-    Status:           onsale
-    Classifications:  [Segment: Music / Genre: R&B / Subgenre: R&B / Type: Undefined / Subtype: Undefined]
+    Atlanta Funk Fest 2017 3 Day Ticket: [Erykah Badu, Ro James,
+    Digable Planets, Bell Biv Devoe, Guy, Teddy Riley, SWV, Mystikal,
+    En Vogue, Kenny 'Babyface' Edmonds, Brandy, Joe]
 
-    Event:            Atlanta Funk Fest 2017
-    Venues:           [Wolf Creek Amphitheater at 3025 Merk Road in Atlanta GA]
-    Start date:       2017-05-20
-    Start time:       17:00:00
-    Price ranges:     [{'min': 63.0, 'max': 158.0}]
-    Status:           onsale
-    Classifications:  [Segment: Music / Genre: Hip-Hop/Rap / Subgenre: Urban / Type: Undefined / Subtype: Undefined]
+    Atlanta Funk Fest 2017: [Bell Biv Devoe, Guy, Teddy Riley, SWV, Mystikal,
+    En Vogue]
 
-    Event:            NF
-    Venues:           [Center Stage Theater at 1374 W Peachtree St. NW in Atlanta GA]
-    Start date:       2017-05-20
-    Start time:       20:00:00
-    Price ranges:     [{'min': 22.0, 'max': 83.0}]
-    Status:           onsale
-    Classifications:  [Segment: Music / Genre: Hip-Hop/Rap / Subgenre: Urban / Type: Undefined / Subtype: Undefined]
 
 Calling ``ApiClient.find()`` returns a ``ticketpy.PagedResponse``
-object, which iterates through API response pages (as ``ticketpy.Page``).
+object. Iterating through a ``PagedResponse`` will make an API request for
+each subsequent page until there are no pages left, or you break the loop.
 
-By default, pages have 20 elements. If there are >20 total elements,
-calling ``PagedResponse.next()`` will request the next page from the API.
+To return a flat list of results from each page, use ``ApiClient.one()``,
+``ApiClient.limit()`` or ``ApiClient.all()``.
 
-You can simplify that/do away with the nested loop by using
-``PagedResponse.limit()``. By default, this requests a maximum of 5 pages,
-and returns the elements of each in a flat list.
+* ``ApiClient.one()`` returns objects from the first page result.
+* ``ApiClient.limit(max_pages)`` returns objects from the first *X* pages.
+* ``ApiClient.all()`` returns objects from every available page
+    (**Careful**: Generic searches return *a lot* of pages...)
 
-Use ``PagedResponse.one()`` to return just the list from the first page.
-
-For example, the previous example could also be written as:
+The previous example could also be written with ``limit()``:
 
 .. code-block:: python
 
-    import ticketpy
-
-    tm_client = ticketpy.ApiClient('your_api_key')
-
-    pages = tm_client.events.find(
-        classification_name='Hip-Hop',
-        state_code='GA',
-        start_date_time='2017-05-19T20:00:00Z',
-        end_date_time='2017-05-21T20:00:00Z'
-    ).limit()
-
-    for event in pages:
-        print(event)
+    events = tm_client.events.find(
+            classification_name='Hip-Hop',
+            state_code='GA',
+            start_date_time='2017-05-19T20:00:00Z',
+            end_date_time='2017-05-21T20:00:00Z'
+        ).limit()
+        for e in events:
+            print("{}: {}\n".format(e.name, e.attractions))
 
 The output here would be the same as there was <1 page available, however,
-this can save you some wasted API calls for large result sets. If you
-really want *every page*, though, use ``all()`` to request every available
-page.
+this can save you some wasted API calls for large result sets.
 
 Venues
 ^^^^^^
@@ -194,10 +191,14 @@ Output::
 
 Classifications
 ^^^^^^^^^^^^^^^
-Classifications don't have IDs, so querying with ``classifications.by_id()``
-will return a ``Classification`` object containing a segment, genre,
-or subgenre with a matching ID. This can be helpful if you need to figure
-out the parent genre/segment for a subgenre. For example:
+Classifications don't have IDs, so querying with
+``ApiClient.classifications.by_id()`` will return an entire
+``Classification`` object (containing whatever segment/genre/subgenre
+matches that ID), rather than a ``Segment``, ``Genre`` or ``Subgenre``.
+
+This can be helpful if you have an object ID and want to find out
+what it belongs to/any children it has. For example, to query a
+``Segment`` ID and print its genre/subgenre:
 
 .. code-block:: python
 
@@ -217,10 +218,10 @@ Output::
     -Jazz
     --Bebop
 
-To query for a specific segment, genre or subgenre by ID, use
+To query for a specific segment, genre or subgenre, use
 ``segment_by_id()``, ``genre_by_id()`` or ``subgenre_by_id()``.
 Each will return *only* their respective object upon finding a
-match (or *None*). For example, this would just print '*Jazz*'
+match. For example, this would just print '*Jazz*'
 without having to look throughout a ``Classification`` object:
 
 .. code-block:: python
@@ -228,4 +229,4 @@ without having to look throughout a ``Classification`` object:
     genre = tm_client.genre_by_id('KnvZfZ7vAvE')
     print(genre)
 
-
+An ``ApiException`` is raised if the ID doesn't belong to anything (404).

@@ -54,15 +54,6 @@ class TestApiClient(TestCase):
     def setUp(self):
         self.api_client = get_client()
 
-    def asdf(self):
-        tm_client = self.api_client
-        r = tm_client.events.find(keyword="Shaky Beats")
-        for event in r:
-            print(event.name)
-
-
-
-
     def test_parse_link(self):
         base_str = "https://app.ticketmaster.com/discovery/v2/events"
         param_str = ("sort=date,asc"
@@ -174,7 +165,6 @@ class TestClassificationQuery(TestCase):
 
     def test_classification_by_id(self):
         classification = self.tm.classifications.by_id(sg_bebop.id)
-
         subgenre_ids = []
         for genre in classification.segment.genres:
             subgenre_ids += [sg.id for sg in genre.subgenres]
@@ -309,6 +299,12 @@ class TestEventQuery(TestCase):
 class TestPagedResponse(TestCase):
     def setUp(self):
         self.tm = get_client()
+
+    def events(self):
+        events = self.tm.events.find(state_code='GA')
+        #eiter = iter(events)
+        q = next(events)
+        print(q)
 
     def test_one(self):
         # Generic search returns numerous pages, ensure only 1 is returned

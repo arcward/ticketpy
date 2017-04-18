@@ -47,7 +47,8 @@ attr_map = {
     'willCallDetail': 'will_call_detail',
     'generalRule': 'general_rule',
     'childRule': 'child_rule',
-    'noSpecificTime': 'no_specific_time'
+    'noSpecificTime': 'no_specific_time',
+    'spanMultipleDays': 'span_multiple_days'
 }
 
 
@@ -305,7 +306,7 @@ class Classification:
 
         subtype = json_obj.get('subType')
         if subtype:
-            cl.subtype = ClassificationSubtype(subtype['id'], subtype['name'])
+            cl.subtype = ClassificationSubType(subtype['id'], subtype['name'])
 
         _Util.assign_links(cl, json_obj)
         return cl
@@ -440,8 +441,7 @@ class Venue:
         return v
 
     def __str__(self):
-        return ("{name} at {address} in "
-                "{city} {state}").format(**self.__dict__)
+        return self.name if self.name is not None else 'Missing venue name'
 
     def __repr__(self):
         return str(self)
@@ -485,17 +485,20 @@ class Dates:
     __Status = namedtuple('Status', 'code')
 
     def __init__(self, access=None, start=None, end=None, timezone=None,
-                 status=None):
+                 status=None, span_multiple_days=None):
         self.start = start
         self.end = end
         self.access = access
         self.timezone = timezone
         self.status = status
+        # TODO span_multiple_days not shown in API docs
+        self.span_multiple_days = span_multiple_days
 
     @staticmethod
     def from_json(json_obj):
         dates = Dates()
         dates.timezone = json_obj.get('timezone')
+        dates.span_multiple_days = json_obj.get('spanMultipleDays')
         dates.start = _Util.namedtuple(Dates.__Start, json_obj.get('start'))
         dates.end = _Util.namedtuple(Dates.__End, json_obj.get('end'))
         dates.access = _Util.namedtuple(Dates.__Access, json_obj.get('access'))
@@ -567,7 +570,7 @@ class EventClassification:
 
         cl_st = json_obj.get('subType')
         if cl_st:
-            ec.subtype = ClassificationSubtype(cl_st['id'], cl_st['name'])
+            ec.subtype = ClassificationSubType(cl_st['id'], cl_st['name'])
 
         _Util.assign_links(ec, json_obj)
         return ec
@@ -593,7 +596,7 @@ class ClassificationType:
         return str(self)
 
 
-class ClassificationSubtype:
+class ClassificationSubType:
     def __init__(self, type_id=None, type_name=None):
         self.id = type_id
         self.name = type_name
