@@ -54,6 +54,15 @@ class TestApiClient(TestCase):
     def setUp(self):
         self.api_client = get_client()
 
+    def asdf(self):
+        tm_client = self.api_client
+        r = tm_client.events.find(keyword="Shaky Beats")
+        for event in r:
+            print(event.name)
+
+
+
+
     def test_parse_link(self):
         base_str = "https://app.ticketmaster.com/discovery/v2/events"
         param_str = ("sort=date,asc"
