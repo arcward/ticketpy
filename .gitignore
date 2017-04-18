@@ -6,4 +6,8 @@ ticketpy.egg-info
 *.pyc
 *.pickle
 ticketpy/__pycache__/
+<<<<<<< HEAD
 coverage/
+=======
+docs/_build/
+>>>>>>> doc_updates
