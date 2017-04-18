@@ -4,6 +4,65 @@ from datetime import datetime
 import re
 import ticketpy
 
+#: Maps API parameters to keyword arguments
+attr_map = {
+    "accepted_payment_detail": "acceptedPaymentDetail",
+    "accessible_seating_detail": "accessibleSeatingDetail",
+    "additional_info": "additionalInfo",
+    "attraction_id": "attractionId",
+    "box_office_info": "boxOfficeInfo",
+    "child_rule": "childRule",
+    "classification_id": "classificationId",
+    "classification_name": "classificationName",
+    "client_visibility": "clientVisibility",
+    "country_code": "countryCode",
+    "date_tba": "dateTBA",
+    "date_tbd": "dateTBD",
+    "date_time": "dateTime",
+    "dma_id": "dmaId",
+    "end_approximate": "endApproximate",
+    "end_date_time": "endDateTime",
+    "general_info": "generalInfo",
+    "general_rule": "generalRule",
+    "id": "id",
+    "include_tba": "includeTBA",
+    "include_tbd": "includeTBD",
+    "include_test": "includeTest",
+    "keyword": "keyword",
+    "latlong": "latlong",
+    "line_1": "line1",
+    "line_2": "line2",
+    "line_3": "line3",
+    "local_date": "localDate",
+    "local_time": "localTime",
+    "locale": "locale",
+    "market_id": "marketId",
+    "no_specific_time": "noSpecificTime",
+    "onsale_end_date_time": "onsaleEndDateTime",
+    "onsale_start_date_time": "onsaleStartDateTime",
+    "open_hours_detail": "openHoursDetail",
+    "page": "page",
+    "parking_detail": "parkingDetail",
+    "phone_number_detail": "phoneNumberDetail",
+    "please_note": "pleaseNote",
+    "postal_code": "postalCode",
+    "price_ranges": "priceRanges",
+    "promoter_id": "promoterId",
+    "radius": "radius",
+    "segment_id": "segmentId",
+    "segment_name": "segmentName",
+    "size": "size",
+    "sort": "sort",
+    "span_multiple_days": "spanMultipleDays",
+    "start_approximate": "startApproximate",
+    "start_date_time": "startDateTime",
+    "start_tbd": "startTBD",
+    "state_code": "stateCode",
+    "subtype": "subType",
+    "time_tba": "timeTBA",
+    "venue_id": "venueId",
+    "will_call_detail": "willCallDetail",
+}
 
 # API response objects found in >1 object model
 Address = namedtuple('Address', 'line_1 line_2 line_3')
@@ -13,43 +72,6 @@ Country = namedtuple('Country', 'country_code name')
 Location = namedtuple('Location', 'latitude longitude')
 Area = namedtuple('Area', 'name')
 Image = namedtuple('Image', 'url ratio width height fallback attribution')
-
-#: Maps API parameters to keyword arguments
-attr_map = {
-    'localDate': 'local_date',
-    'localTime': 'local_time',
-    'dateTime': 'date_time',
-    'dateTBD': 'date_tbd',
-    'startTBD': 'start_tbd',
-    'dateTBA': 'date_tba',
-    'timeTBA': 'time_tba',
-    'startDateTime': 'start_date_time',
-    'startApproximate': 'start_approximate',
-    'endDateTime': 'end_date_time',
-    'endApproximate': 'end_approximate',
-    'postalCode': 'postal_code',
-    'stateCode': 'state_code',
-    'countryCode': 'country_code',
-    'line1': 'line_1',
-    'line2': 'line_2',
-    'line3': 'line_3',
-    'additionalInfo': 'additional_info',
-    'pleaseNote': 'please_note',
-    'priceRanges': 'price_ranges',
-    'parkingDetail': 'parking_detail',
-    'accessibleSeatingDetail': 'accessible_seating_detail',
-    'boxOfficeInfo': 'box_office_info',
-    'generalInfo': 'general_info',
-    'subType': 'subtype',
-    'phoneNumberDetail': 'phone_number_detail',
-    'openHoursDetail': 'open_hours_detail',
-    'acceptedPaymentDetail': 'accepted_payment_detail',
-    'willCallDetail': 'will_call_detail',
-    'generalRule': 'general_rule',
-    'childRule': 'child_rule',
-    'noSpecificTime': 'no_specific_time',
-    'spanMultipleDays': 'span_multiple_days'
-}
 
 
 class Page(list):
@@ -98,51 +120,7 @@ class Page(list):
 
 
 class Event:
-    """Ticketmaster event
-
-    The JSON returned from the Discovery API (at least, as far as 
-    what's being used here) looks like:
-
-    .. code-block:: json
-
-        {
-            "name": "Event name",
-            "dates": {
-                "start": {
-                    "localDate": "2019-04-01",
-                    "localTime": "2019-04-01T23:00:00Z"
-                },
-                "status": {
-                    "code": "onsale"
-                }
-            },
-            "classifications": [
-                {
-                    "genre": {
-                        "name": "Rock"
-                    }
-                },
-                {
-                    "genre": {
-                        "name": "Funk"
-                    }
-                }
-            ],
-            "priceRanges": [
-                {
-                    "min": 10,
-                    "max": 25
-                }
-            ],
-            "_embedded": {
-                "venues": [
-                    {
-                        "name": "The Tabernacle"
-                    }
-                ]
-            }
-        }
-    """
+    """Ticketmaster event"""
     __Price = namedtuple('Price', 'type currency min max')
     __Promoter = namedtuple('Promoter', 'id name description')
 
@@ -150,8 +128,8 @@ class Event:
                  classifications=None, dates=None, description=None,
                  distance=None, event_id=None, images=None, info=None,
                  links=None, locale=None, name=None, test=None, place=None,
-                 please_note=None, price_ranges=None, promoter=None, sales=None,
-                 units=None, url=None, venues=None):
+                 please_note=None, price_ranges=None, promoter=None,
+                 sales=None, units=None, url=None, venues=None):
         self.additional_info = additional_info
         self.attractions = attractions
         self.classifications = classifications
@@ -313,55 +291,12 @@ class Classification:
 
 
 class Venue:
-    """A Ticketmaster venue
-
-    The JSON returned from the Discovery API looks something like this 
-    (*edited for brevity*):
-
-    .. code-block:: json
-
-        {
-            "id": "KovZpaFEZe",
-            "name": "The Tabernacle",
-            "url": "http://www.ticketmaster.com/venue/115031",
-            "timezone": "America/New_York",
-            "address": {
-                "line1": "152 Luckie Street"
-            },
-            "city": {
-                "name": "Atlanta"
-            },
-            "postalCode": "30303",
-            "state": {
-                "stateCode": "GA",
-                "name": "Georgia"
-            },
-            "country": {
-                "name": "United States Of America",
-                "countryCode": "US"
-            },
-            "location": {
-                "latitude": "33.758688",
-                "longitude": "-84.391449"
-            },
-            "social": {
-                "twitter": {
-                    "handle": "@TabernacleATL"
-                }
-            },
-            "markets": [
-                {
-                    "id": "10"
-                }
-            ]
-        }
-
-
-    """
+    """A Ticketmaster venue"""
     __DMA = namedtuple('DMA', 'id')
-    __BoxOfficeInfo = namedtuple('BoxOfficeInfo',
-                                 ('phone_number_detail open_hours_detail '
-                                  'accepted_payment_detail will_call_detail'))
+    __BoxOfficeInfo = namedtuple('BoxOfficeInfo', 'phone_number_detail '
+                                                  'open_hours_detail '
+                                                  'accepted_payment_detail '
+                                                  'will_call_detail')
     __Market = namedtuple('Market', 'id')
     __GeneralInfo = namedtuple('GeneralInfo', 'general_rule child_rule')
 
@@ -371,7 +306,8 @@ class Venue:
                  general_info=None, images=None, links=None, locale=None,
                  location=None, markets=None, name=None, parking_detail=None,
                  postal_code=None, social=None, state=None, test=None,
-                 timezone=None, type=None, units=None, url=None, venue_id=None):
+                 timezone=None, type=None, units=None, url=None,
+                 venue_id=None):
 
         self.accessible_seating_detail = accessible_seating_detail
         self.additional_info = additional_info
@@ -507,10 +443,10 @@ class Dates:
 
 
 class Sales:
-    __PublicSale = namedtuple('PublicSales',
-                              'start_date_time end_date_time start_tbd')
-    __Presale = namedtuple('Presale',
-                           'name description url start_date_time end_date_time')
+    __PublicSale = namedtuple('PublicSales', 'start_date_time end_date_time '
+                                             'start_tbd')
+    __Presale = namedtuple('Presale', 'name description url start_date_time '
+                                      'end_date_time')
 
     def __init__(self, public=None, presales=None):
         self.public = public
@@ -533,8 +469,7 @@ class Sales:
 
 class EventClassification:
     """Classification as it's represented in event search results
-    See ``Classification()`` for results from classification searches
-    """
+    See ``Classification()`` for results from classification searches"""
     def __init__(self, classification_subtype=None, classification_type=None,
                  genre=None, links=None, segment=None, subgenre=None,
                  primary=None):
@@ -694,20 +629,17 @@ class _Util:
         # Normal link strucutre is {link_name: {'href': url}},
         # but some responses also have lists of other models.
         # API occasionally returns bad URLs (with {&sort} and similar)
-        json_links = json_obj.get('_links')
-        if not json_links:
-            obj.links = {}
-        else:
-            obj_links = {}
-            for k, v in json_links.items():
-                if 'href' in v:
-                    href = re.sub("({.+})", "", v['href'])
-                    if base_url:
-                        href = "{}{}".format(base_url, href)
-                    obj_links[k] = href
-                else:
-                    obj_links[k] = v
-            obj.links = obj_links
+        json_links = json_obj.get('_links', {})
+        obj_links = {}
+        for k, v in json_links.items():
+            if 'href' in v:
+                href = re.sub("({.+})", "", v['href'])
+                if base_url:
+                    href = "{}{}".format(base_url, href)
+                obj_links[k] = href
+            else:
+                obj_links[k] = v
+        obj.links = obj_links
 
     @staticmethod
     def namedtuple(namedtuple_model, json_obj=None):
@@ -715,31 +647,25 @@ class _Util:
         
         Creates dict with necessary keys (``NoneType`` values), then 
         updates it with those found in ``json_obj`` after updating 
-        ``json_obj`` keys with those found in ``model.attr_map``
+        ``json_obj`` keys with those found in ``attr_map``
         """
-        kwargs = {k: None for k in namedtuple_model._fields}
         if not json_obj:
             return None
+        kwargs = {k: None for k in namedtuple_model._fields}
         _Util.update_kwargs(json_obj)
         kwargs.update(json_obj)
         return namedtuple_model(**kwargs)
 
     @staticmethod
     def update_kwargs(kwargs):
-        """Updates parameter names in kwargs based on ``model.attr_map``"""
-        kws = {}
-        for k, v in dict(kwargs).items():
-            if k in attr_map:
-                kws[attr_map[k]] = v
-                del kwargs[k]
+        """Updates parameter names in kwargs based on ``attr_map``"""
+        for k, v in attr_map.items():
+            if v in kwargs and v != k:
+                kwargs[k] = kwargs[v]
+                del kwargs[v]
 
-        dt_updates = {}
-        for k, v in kws.items():
-            if 'date_time' in k or 'dateTime' in k:
-                dt_updates[k] = _Util.format_utc_timestamp(v)
-
-        kwargs.update(kws)
-        kwargs.update(dt_updates)
+        if 'dateTime' in kwargs:
+            kwargs['dateTime'] = _Util.format_utc_timestamp(kwargs['dateTime'])
 
     @staticmethod
     def format_utc_timestamp(timestamp):

@@ -43,9 +43,9 @@ class ApiClient:
     Request URLs end up looking like:
     http://app.ticketmaster.com/discovery/v2/events.json?apikey={api_key}
     """
+    __RateLimit = namedtuple('RateLimit', 'limit available over reset')
     root_url = 'https://app.ticketmaster.com'
     url = 'https://app.ticketmaster.com/discovery/v2'
-    __RateLimit = namedtuple('RateLimit', 'limit available over reset')
     # Alias query classes here so they show in Sphinx docs
     events = EventQuery
     venues = VenueQuery
@@ -79,16 +79,18 @@ class ApiClient:
         # Clean up values that might be passed in multiple ways.
         # Ex: 'includeTBA' might be passed as bool(True) instead of 'yes'
         # and 'radius' might be passed as int(2) instead of '2'
-        kwargs = {k: v for (k, v) in kwargs.items() if v is not None}
-        updates = self.api_key
+        kwargs = {k: v for (k, v) in kwargs.items() if v}
+        kwargs.update(self.api_key)
 
-        for k, v in kwargs.items():
-            if k in ['includeTBA', 'includeTBD', 'includeTest']:
-                updates[k] = self.__yes_no_only(v)
-            elif k in ['size', 'radius', 'marketId']:
-                updates[k] = str(v)
-        kwargs.update(updates)
+        for param in ['includeTBA', 'includeTBD', 'includeTest']:
+            if param in kwargs:
+                kwargs[param] = self.__yes_no_only(kwargs[param])
+
+        for param in ['size', 'radius', 'marketId']:
+            if param in kwargs:
+                kwargs[param] = str(kwargs[param])
         log.debug(kwargs)
+
         urls = {
             'events': self.__method_url('events'),
             'venues': self.__method_url('venues'),
@@ -119,8 +121,8 @@ class ApiClient:
         # API sometimes return incorrectly-formatted strings, need
         # to parse out parameters and pass them into a new request
         # rather than implicitly trusting the href in _links
-        link = self._parse_link(link)
-        resp = requests.get(link.url, link.params)
+        url, params = self._parse_link(link)
+        resp = requests.get(url, params)
         return Page.from_json(self._handle_response(resp))
 
     def _get_id(self, resource, entity_id):
@@ -130,20 +132,16 @@ class ApiClient:
         return self._handle_response(r)
 
     def _parse_link(self, link):
-        """Parses link into base URL and dict of parameters"""
-        parsed_link = namedtuple('link', 'url params')
+        """Parse link, return base URL and dict of URL parameters"""
         link_url, link_params = link.split('?')
         params = self._link_params(link_params)
-        return parsed_link(link_url, params)
+        return link_url, params
 
     def _link_params(self, param_str):
-        """Parse URL parameters from href split on '?' character"""
-        search_params = {}
-        params = parse.parse_qs(param_str)
-        for k, v in params.items():
-            search_params[k] = v[0]
-        search_params.update(self.api_key)
-        return search_params
+        """Parse URL parameters to dict (from href split on '?' character)"""
+        params = {k: v[0] for (k, v) in parse.parse_qs(param_str).items()}
+        params.update(self.api_key)
+        return params
 
     @property
     def api_key(self):
@@ -195,18 +193,17 @@ class ApiException(Exception):
     def __fault(response):
         """Handle API faults (such as unauthorized/bad API key)"""
         rj = response.json()
-        r_fault = rj['fault']
-        return ApiException._ApiFault(r_fault['faultstring'], r_fault['detail'])
+        return ApiException._ApiFault(rj['fault']['faultstring'],
+                                      rj['fault']['detail'])
 
     @staticmethod
     def __error(response):
         """Handle API errors (such as bad query parameters/obj not found)"""
         rj = response.json()
-        return [
-            ApiException._ApiError(err['code'], err['detail'],
-                                   err['_links']['about']['href'])
-            for err in rj['errors']
-        ]
+        return [ApiException._ApiError(err['code'],
+                                       err['detail'],
+                                       err['_links']['about']['href'])
+                for err in rj['errors']]
 
     @staticmethod
     def __unknown(response):
@@ -239,11 +236,9 @@ class PagedResponse:
         :return: Flat list of results from pages
         """
         all_items = []
-        counter = 0
-        for pg in self:
-            if counter >= max_pages:
+        for idx, pg in enumerate(self):
+            if idx >= max_pages:
                 break
-            counter += 1
             all_items += pg
         return all_items
 

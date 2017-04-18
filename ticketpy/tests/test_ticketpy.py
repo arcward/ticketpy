@@ -60,10 +60,8 @@ class TestApiClient(TestCase):
                      "&marketId=10"
                      "&keyword=LCD%20Soundsystem")
         full_url = '{}?{}'.format(base_str, param_str)
-        parsed_link = self.api_client._parse_link(full_url)
-        self.assertEqual(base_str, parsed_link.url)
-
-        params = parsed_link.params
+        url, params = self.api_client._parse_link(full_url)
+        self.assertEqual(base_str, url)
         self.assertEqual('date,asc', params['sort'])
         self.assertEqual('10', params['marketId'])
         self.assertEqual('LCD Soundsystem', params['keyword'])
@@ -330,17 +328,10 @@ class TestPagedResponse(TestCase):
         page_iter = self.tm.venues.find(keyword="TABERNACLE", size=5)
         iter_all = [venue.id for venue in page_iter.all()]
         iter_manual = []
-
-        page_counter = 0
-        total_pages = None
-        for pg in page_iter:
+        for idx, pg in enumerate(page_iter):
             print(pg)
-            if page_counter == 0:
-                total_pages = pg.total_pages
-            page_counter += 1
+            self.assertEqual(idx, pg.number)
             iter_manual += [venue.id for venue in pg]
-
-        self.assertEqual(page_counter, total_pages)
         self.assertListEqual(iter_all, iter_manual)
 
 

@@ -1,43 +1,12 @@
 """Classes to handle API queries/searches"""
 from ticketpy.model import Venue, Event, Attraction, Classification, Genre, \
-    Subgenre, Segment
+    Subgenre, Segment, attr_map
 
 
 class BaseQuery:
     """Base query/parent class for specific serach types."""
     resource = None
     model = None
-    #: Maps parameter names to parameters expected by the API
-    #: (ex: *market_id* maps to *marketId*)
-    attr_map = {
-        'start_date_time': 'startDateTime',
-        'end_date_time': 'endDateTime',
-        'onsale_start_date_time': 'onsaleStartDateTime',
-        'onsale_end_date_time': 'onsaleEndDateTime',
-        'country_code': 'countryCode',
-        'state_code': 'stateCode',
-        'venue_id': 'venueId',
-        'attraction_id': 'attractionId',
-        'segment_id': 'segmentId',
-        'segment_name': 'segmentName',
-        'classification_name': 'classificationName',
-        'classification_id': 'classificationId',
-        'market_id': 'marketId',
-        'promoter_id': 'promoterId',
-        'dma_id': 'dmaId',
-        'include_tba': 'includeTBA',
-        'include_tbd': 'includeTBD',
-        'client_visibility': 'clientVisibility',
-        'include_test': 'includeTest',
-        'keyword': 'keyword',
-        'id': 'id',
-        'sort': 'sort',
-        'page': 'page',
-        'size': 'size',
-        'locale': 'locale',
-        'latlong': 'latlong',
-        'radius': 'radius'
-    }
 
     def __init__(self, api_client):
         """
@@ -68,7 +37,7 @@ class BaseQuery:
         # Combine universal parameters and supplied kwargs into single dict,
         # then map our parameter names to the ones expected by the API and
         # make the final request
-        search_args = dict(kwargs)
+        search_args = kwargs
         search_args.update({
             'keyword': keyword,
             'id': entity_id,
@@ -87,24 +56,13 @@ class BaseQuery:
         return self.model.from_json(resp)
 
     def _search_params(self, **kwargs):
-        """Returns API-friendly search parameters from kwargs
-        
-        Maps parameter names to ``self.attr_map`` and removes 
-        paramters == ``None``
-        
-        :param kwargs: Keyword arguments
-        :return: API-friendly parameters
-        """
-        # Update search parameters with kwargs
-        kw_map = {}
-        for k, v in kwargs.items():
-            # If arg is API-friendly (ex: stateCode='GA')
-            if k in self.attr_map:
-                kw_map[self.attr_map[k]] = v
-            else:
-                kw_map[k] = v
-
-        return {k: v for (k, v) in kw_map.items() if v is not None}
+        """Update keywords to be API-friendly"""
+        # Ex: If 'venue_id' is passed, change to 'venueId
+        for k, v in attr_map.items():
+            if k in kwargs and k != v:
+                kwargs[v] = kwargs[k]
+                del kwargs[k]
+        return {k: v for (k, v) in kwargs.items() if v is not None}
 
     @staticmethod
     def from_json(json_obj):
@@ -279,11 +237,9 @@ class EventQuery(BaseQuery):
             you may get wonky results (*date, asc* returns far-away events)
         :return: List of events within that area
         """
-        latitude = str(latitude)
-        longitude = str(longitude)
-        radius = str(radius)
-        latlong = "{lat},{long}".format(lat=latitude, long=longitude)
-        return self.find(latlong=latlong, radius=radius, unit=unit,
+        # Cast with str() in case an integer/float was passed
+        latlong = "{lat},{long}".format(lat=str(latitude), long=str(longitude))
+        return self.find(latlong=latlong, radius=str(radius), unit=unit,
                          sort=sort, **kwargs)
 
 

@@ -20,4 +20,4 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`_search`
+* :ref:`search`

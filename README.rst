@@ -114,13 +114,13 @@ The previous example could also be written with ``limit()``:
 .. code-block:: python
 
     events = tm_client.events.find(
-            classification_name='Hip-Hop',
-            state_code='GA',
-            start_date_time='2017-05-19T20:00:00Z',
-            end_date_time='2017-05-21T20:00:00Z'
-        ).limit()
-        for e in events:
-            print("{}: {}\n".format(e.name, e.attractions))
+        classification_name='Hip-Hop',
+        state_code='GA',
+        start_date_time='2017-05-19T20:00:00Z',
+        end_date_time='2017-05-21T20:00:00Z'
+    ).limit()
+    for e in events:
+        print("{}: {}\n".format(e.name, e.attractions))
 
 The output here would be the same as there was <1 page available, however,
 this can save you some wasted API calls for large result sets.
