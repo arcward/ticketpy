@@ -6,3 +6,4 @@ ticketpy.egg-info
 *.pyc
 *.pickle
 ticketpy/__pycache__/
+docs/_build/
