@@ -55,7 +55,8 @@ class BaseQuery:
         resp = self.api_client._get_id(self.resource, entity_id)
         return self.model.from_json(resp)
 
-    def _search_params(self, **kwargs):
+    @staticmethod
+    def _search_params(**kwargs):
         """Update keywords to be API-friendly"""
         # Ex: If 'venue_id' is passed, change to 'venueId
         for k, v in attr_map.items():

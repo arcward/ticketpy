@@ -298,12 +298,6 @@ class TestPagedResponse(TestCase):
     def setUp(self):
         self.tm = get_client()
 
-    def events(self):
-        events = self.tm.events.find(state_code='GA')
-        #eiter = iter(events)
-        q = next(events)
-        print(q)
-
     def test_one(self):
         # Generic search returns numerous pages, ensure only 1 is returned
         event_list = self.tm.events.find(state_code='GA', size=7).one()

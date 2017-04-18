@@ -77,12 +77,13 @@ Image = namedtuple('Image', 'url ratio width height fallback attribution')
 class Page(list):
     """API response page"""
     def __init__(self, number=None, size=None, total_elements=None,
-                 total_pages=None):
+                 total_pages=None, links=None):
         super().__init__([])
         self.number = number
         self.size = size
         self.total_elements = total_elements
         self.total_pages = total_pages
+        self.links = links
 
     @staticmethod
     def from_json(json_obj):
