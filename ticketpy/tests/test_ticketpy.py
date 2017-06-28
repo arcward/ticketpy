@@ -342,10 +342,3 @@ class TestPagedResponse(TestCase):
         self.assertListEqual(iter_all, iter_manual)
 
 
-
-
-
-
-
-
-

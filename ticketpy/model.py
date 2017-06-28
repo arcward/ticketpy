@@ -39,6 +39,7 @@ class Page(list):
     def from_json(json_obj):
         """Instantiate and return a Page(list)"""
         pg = Page()
+        pg.json = json_obj
         _assign_links(pg, json_obj, ticketpy.ApiClient.root_url)
         pg.number = json_obj['page']['number']
         pg.size = json_obj['page']['size']
@@ -154,6 +155,7 @@ class Event:
     def from_json(json_event):
         """Creates an ``Event`` from API's JSON response"""
         e = Event()
+        e.json = json_event
         e.id = json_event['id']
         e.name = json_event.get('name')
 
@@ -289,8 +291,9 @@ class Venue:
     def from_json(json_venue):
         """Returns a ``Venue`` object from JSON"""
         v = Venue()
-        v.id = json_venue['id']
-        v.name = json_venue['name']
+        v.json = json_venue
+        v.id = json_venue.get('id')
+        v.name = json_venue.get('name')
         v.url = json_venue.get('url')
         v.postal_code = json_venue.get('postalCode')
         v.general_info = json_venue.get('generalInfo')
@@ -303,16 +306,16 @@ class Venue:
         v.accessible_seating_detail = json_venue.get('accessibleSeatingDetail')
 
         if 'markets' in json_venue:
-            v.markets = [m['id'] for m in json_venue['markets']]
+            v.markets = [m.get('id') for m in json_venue['markets']]
         if 'city' in json_venue:
-            v.city = json_venue['city']['name']
+            v.city = json_venue['city'].get('name')
         if 'address' in json_venue:
-            v.address = json_venue['address']['line1']
+            v.address = json_venue['address'].get('line1')
         if 'location' in json_venue:
-            v.latitude = json_venue['location']['latitude']
-            v.longitude = json_venue['location']['longitude']
+            v.latitude = json_venue['location'].get('latitude')
+            v.longitude = json_venue['location'].get('longitude')
         if 'state' in json_venue:
-            v.state_code = json_venue['state']['stateCode']
+            v.state_code = json_venue['state'].get('stateCode')
 
         _assign_links(v, json_venue)
         return v
@@ -341,6 +344,7 @@ class Attraction:
     def from_json(json_obj):
         """Convert JSON object to ``Attraction`` object"""
         att = Attraction()
+        att.json = json_obj
         att.id = json_obj.get('id')
         att.name = json_obj.get('name')
         att.url = json_obj.get('url')
@@ -377,6 +381,7 @@ class Classification:
     def from_json(json_obj):
         """Create/return ``Classification`` object from JSON"""
         cl = Classification()
+        cl.json = json_obj
         cl.primary = json_obj.get('primary')
 
         if 'segment' in json_obj:
@@ -413,6 +418,7 @@ class EventClassification:
     def from_json(json_obj):
         """Create/return ``EventClassification`` object from JSON"""
         ec = EventClassification()
+        ec.json = json_obj
         ec.primary = json_obj.get('primary')
 
         segment = json_obj.get('segment')
@@ -483,8 +489,9 @@ class Segment:
     def from_json(json_obj):
         """Create and return a ``Segment`` from JSON"""
         seg = Segment()
+        seg.json = json_obj
         seg.id = json_obj['id']
-        seg.name = json_obj['name']
+        seg.name = json_obj.get('name')
 
         if '_embedded' in json_obj:
             genres = json_obj['_embedded']['genres']
@@ -511,6 +518,7 @@ class Genre:
     @staticmethod
     def from_json(json_obj):
         g = Genre()
+        g.json = json_obj
         g.id = json_obj.get('id')
         g.name = json_obj.get('name')
         if '_embedded' in json_obj:
@@ -537,6 +545,7 @@ class SubGenre:
     @staticmethod
     def from_json(json_obj):
         sg = SubGenre()
+        sg.json = json_obj
         sg.id = json_obj['id']
         sg.name = json_obj['name']
         _assign_links(sg, json_obj)
