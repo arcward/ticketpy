@@ -89,8 +89,9 @@ class BaseQuery:
         """Get a specific object by its ID"""
         get_tmpl = "{}/{}/{}"
         get_url = get_tmpl.format(self.api_client.url, self.method, entity_id)
-        r = requests.get(get_url, params=self.api_client.api_key).json()
-        return self.model.from_json(r)
+        r = requests.get(get_url, params=self.api_client.api_key)
+        r_json = self.api_client._handle_response(r)
+        return self.model.from_json(r_json)
 
     def _search_params(self, **kwargs):
         """Returns API-friendly search parameters from kwargs
@@ -185,8 +186,10 @@ class ClassificationQuery(BaseQuery):
         subgenre = None
         segment = self.by_id(subgenre_id).segment
         if segment:
-            subgenres = [subg for genre in segment.genres for
-                         subg in genre.subgenres]
+            subgenres = [
+                subg for genre in segment.genres
+                for subg in genre.subgenres
+            ]
             for subg in subgenres:
                 if subg.id == subgenre_id:
                     subgenre = subg
@@ -282,8 +285,13 @@ class EventQuery(BaseQuery):
         longitude = str(longitude)
         radius = str(radius)
         latlong = "{lat},{long}".format(lat=latitude, long=longitude)
-        return self.find(latlong=latlong, radius=radius, unit=unit,
-                         sort=sort, **kwargs)
+        return self.find(
+            latlong=latlong,
+            radius=radius,
+            unit=unit,
+            sort=sort,
+            **kwargs
+        )
 
 
 class VenueQuery(BaseQuery):

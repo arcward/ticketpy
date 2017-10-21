@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 from configparser import ConfigParser
 import os
 import ticketpy
@@ -126,11 +126,10 @@ class TestVenueQuery(TestCase):
             self.assertIn(venue_name, venue.name.upper())
 
     def test_get_venue(self):
-        venue_name = 'The Tabernacle'
+        venue_name = 'Tabernacle'
         v = self.tm.venues.by_id(self.venues['tabernacle'])
-        print(v)
         self.assertEqual(self.venues['tabernacle'], v.id)
-        self.assertEqual(venue_name, v.name)
+        self.assertIn(venue_name, v.name)
 
 
 class TestClassificationQuery(TestCase):
@@ -146,23 +145,19 @@ class TestClassificationQuery(TestCase):
             genre_names += [g.name.upper() for g in cl.segment.genres]
         self.assertIn("DRAMA", genre_names)
 
-        for cl in classif:
-            print(cl)
-
     def test_classification_by_id(self):
         genre_id = 'KnvZfZ7vAvE'
         nested_genre = self.tm.classifications.by_id(genre_id)
         genre_ids = [genre.id for genre in nested_genre.segment.genres]
         self.assertIn(genre_id, genre_ids)
 
-        fake_response = self.tm.classifications.by_id('asdf')
-        self.assertIsNone(fake_response.segment)
+    def test_classification_by_id_404(self):
+        self.assertRaises(ApiException, self.tm.classifications.by_id, 'asdf')
 
     def test_segment_by_id(self):
         seg_id = 'KZFzniwnSyZfZ7v7nJ'
         seg_name = 'Music'
         seg = self.tm.segment_by_id(seg_id)
-        print(seg)
         self.assertEqual(seg_id, seg.id)
         self.assertEqual(seg_name, seg.name)
 
@@ -174,7 +169,6 @@ class TestClassificationQuery(TestCase):
         genre_id = 'KnvZfZ7vAvE'
         genre_name = 'Jazz'
         g = self.tm.genre_by_id(genre_id)
-        print(g)
         self.assertEqual(genre_id, g.id)
         self.assertEqual(genre_name, g.name)
 
@@ -182,23 +176,15 @@ class TestClassificationQuery(TestCase):
         self.assertEqual(genre_id, g_x.id)
         self.assertEqual(genre_name, g_x.name)
 
-        g_z = self.tm.genre_by_id('asdf')
-        self.assertIsNone(g_z)
-
     def test_subgenre_by_id(self):
         subgenre_id = 'KZazBEonSMnZfZ7vkdl'
         subgenre_name = 'Bebop'
         sg = self.tm.subgenre_by_id(subgenre_id)
-        print(sg)
         self.assertEqual(subgenre_id, sg.id)
         self.assertEqual(subgenre_name, sg.name)
-
         sg_x = self.tm.subgenre_by_id(subgenre_id)
         self.assertEqual(subgenre_id, sg_x.id)
         self.assertEqual(subgenre_name, sg_x.name)
-
-        sg_z = self.tm.subgenre_by_id('asdf')
-        self.assertIsNone(sg_z)
 
 
 class TestAttractionQuery(TestCase):
@@ -220,7 +206,6 @@ class TestAttractionQuery(TestCase):
         attraction_id = 'K8vZ9171okV'
         attraction_name = 'New York Yankees'
         attr = self.tm.attractions.by_id(attraction_id)
-        print(attr)
         self.assertEqual(attraction_id, attr.id)
         self.assertEqual(attraction_name, attr.name)
 
@@ -229,11 +214,15 @@ class TestEventQuery(TestCase):
     def setUp(self):
         self.tm = get_client()
 
+    @skip("Skipping until test update")
     def test_get_event_id(self):
+        # TODO search events, then pull a specific ID to use here
         event_id = 'vvG1zZfbJQpVWp'
         e = self.tm.events.by_id(event_id)
-        print(str(e))
         self.assertEqual(event_id, e.id)
+
+    def test_get_event_id_404(self):
+        self.assertRaises(ApiException, self.tm.events.by_id, "asdf")
 
     def test_search_events_by_location(self):
         # Search for events within 1 mile of lat/lon
@@ -270,12 +259,14 @@ class TestEventQuery(TestCase):
 
     def test_search_events(self):
         venue_id = 'KovZpaFEZe'
-        venue_name = 'The Tabernacle'
+        venue_name = 'Tabernacle'
         event_list = self.tm.events.find(venue_id=venue_id, size=2).limit(4)
         for e in event_list:
             for v in e.venues:
-                self.assertEqual(venue_id, v.id)
-                self.assertEqual(venue_name, v.name)
+                with self.subTest(venue_id=venue_id):
+                    self.assertEqual(venue_id, v.id)
+                with self.subTest(venue_name=venue_name):
+                    self.assertIn(venue_name, v.name)
 
     def test_events_get(self):
         genre_name = 'Hip-Hop'
@@ -332,7 +323,6 @@ class TestPagedResponse(TestCase):
         page_counter = 0
         total_pages = None
         for pg in page_iter:
-            print(pg)
             if page_counter == 0:
                 total_pages = pg.total_pages
             page_counter += 1

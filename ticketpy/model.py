@@ -64,11 +64,11 @@ class Page(list):
         return pg
 
     def __str__(self):
-        return ("Page {number}/{total_pages}, Size: {size}, "
-                "Total elements: {total_elements}").format(**self.__dict__)
-
-    def __repr__(self):
-        return str(self)
+        return (
+            "Page {number}/{total_pages}, "
+            "Size: {size}, "
+            "Total elements: {total_elements}"
+        ).format(**self.__dict__)
 
 
 class Event:
@@ -156,10 +156,10 @@ class Event:
         """Creates an ``Event`` from API's JSON response"""
         e = Event()
         e.json = json_event
-        e.id = json_event['id']
+        e.id = json_event.get('id')
         e.name = json_event.get('name')
 
-        dates = json_event.get('dates')
+        dates = json_event.get('dates', {})
         start_dates = dates.get('start', {})
         e.local_start_date = start_dates.get('localDate')
         e.local_start_time = start_dates.get('localTime')
@@ -195,9 +195,6 @@ class Event:
                 "Status:           {status}\n"
                 "Classifications:  {classifications!s}\n")
         return tmpl.format(**self.__dict__)
-
-    def __repr__(self):
-        return str(self)
 
 
 class Venue:
@@ -306,7 +303,7 @@ class Venue:
         v.accessible_seating_detail = json_venue.get('accessibleSeatingDetail')
 
         if 'markets' in json_venue:
-            v.markets = [m.get('id') for m in json_venue['markets']]
+            v.markets = [m.get('id') for m in json_venue.get('markets')]
         if 'city' in json_venue:
             v.city = json_venue['city'].get('name')
         if 'address' in json_venue:
@@ -323,9 +320,6 @@ class Venue:
     def __str__(self):
         return ("{name} at {address} in "
                 "{city} {state_code}").format(**self.__dict__)
-
-    def __repr__(self):
-        return str(self)
 
 
 class Attraction:
@@ -351,17 +345,15 @@ class Attraction:
         att.test = json_obj.get('test')
         att.images = json_obj.get('images')
         classifications = json_obj.get('classifications')
-        att.classifications = [Classification.from_json(cl)
-                               for cl in classifications]
+        att.classifications = [
+            Classification.from_json(cl) for cl in classifications
+        ]
 
         _assign_links(att, json_obj)
         return att
 
     def __str__(self):
-        return self.name if self.name is not None else 'Unknown'
-
-    def __repr__(self):
-        return str(self)
+        return str(self.name) if self.name is not None else 'Unknown'
 
 
 class Classification:
@@ -398,9 +390,13 @@ class Classification:
         _assign_links(cl, json_obj)
         return cl
 
+    def __str__(self):
+        return str(self.type)
+
 
 class EventClassification:
     """Classification as it's represented in event search results
+
     See ``Classification()`` for results from classification searches
     """
     def __init__(self, genre=None, subgenre=None, segment=None,
@@ -445,11 +441,11 @@ class EventClassification:
         return ec
 
     def __str__(self):
-        return ("Segment: {segment} / Genre: {genre} / Subgenre: {subgenre} / "
-                "Type: {type} / Subtype: {subtype}").format(**self.__dict__)
-
-    def __repr__(self):
-        return str(self)
+        return ("Segment: {segment} / "
+                "Genre: {genre} / "
+                "Subgenre: {subgenre} / "
+                "Type: {type} / "
+                "Subtype: {subtype}").format(**self.__dict__)
 
 
 class ClassificationType:
@@ -461,9 +457,6 @@ class ClassificationType:
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
 
-    def __repr__(self):
-        return str(self)
-
 
 class ClassificationSubType:
     def __init__(self, type_id=None, type_name=None):
@@ -472,9 +465,6 @@ class ClassificationSubType:
 
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
-
-    def __repr__(self):
-        return str(self)
 
 
 class Segment:
@@ -503,9 +493,6 @@ class Segment:
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
 
-    def __repr__(self):
-        return str(self)
-
 
 class Genre:
     def __init__(self, genre_id=None, genre_name=None, subgenres=None,
@@ -532,9 +519,6 @@ class Genre:
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
 
-    def __repr__(self):
-        return str(self)
-
 
 class SubGenre:
     def __init__(self, subgenre_id=None, subgenre_name=None, links=None):
@@ -553,8 +537,3 @@ class SubGenre:
 
     def __str__(self):
         return self.name if self.name is not None else 'Unknown'
-
-    def __repr__(self):
-        return str(self)
-
-
