@@ -3,8 +3,12 @@ import logging
 import requests
 from collections import namedtuple
 from urllib import parse
-from ticketpy.query import AttractionQuery, ClassificationQuery, \
-    EventQuery, VenueQuery
+from ticketpy.query import (
+    AttractionQuery,
+    ClassificationQuery,
+    EventQuery,
+    VenueQuery
+)
 from ticketpy.model import Page
 
 log = logging.getLogger(__name__)
@@ -116,9 +120,10 @@ class ApiClient:
         """HTTP status code 400, or something with 'errors' object"""
         rj = response.json()
         error = namedtuple('error', ['code', 'detail', 'href'])
-        errors = [error(err['code'], err['detail'],
-                        err['_links']['about']['href'])
-                  for err in rj['errors']]
+        errors = [
+            error(err['code'], err['detail'], err['_links']['about']['href'])
+            for err in rj['errors']
+        ]
         log.error('URL: {}\nErrors: {}'.format(response.url, errors))
         raise ApiException(response.status_code, errors, response.url)
 
@@ -129,8 +134,12 @@ class ApiClient:
         fault_str = rj['fault']['faultstring']
         detail = rj['fault']['detail']
         log.error('URL: {}, Faultstr: {}'.format(response.url, fault_str))
-        raise ApiException(response.status_code, fault_str, detail,
-                           response.url)
+        raise ApiException(
+            response.status_code,
+            fault_str,
+            detail,
+            response.url
+        )
 
     def __unknown_error(self, response):
         """Unexpected HTTP status code (not 200, 400, or 401)"""
