@@ -175,7 +175,12 @@ class Event:
         price_ranges = []
         if 'priceRanges' in json_event:
             for pr in json_event['priceRanges']:
-                price_ranges.append({'min': pr['min'], 'max': pr['max']})
+                pr_dict = {}
+                if 'min' in pr:
+                    pr_dict['min'] = pr['min']
+                if 'max' in pr:
+                    pr_dict['max'] = pr['max']
+                price_ranges.append(pr_dict)
         e.price_ranges = price_ranges
 
         venues = []
