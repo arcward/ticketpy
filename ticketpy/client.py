@@ -238,16 +238,24 @@ class PagedResponse:
         """Get items from first page result"""
         return [i for i in self.page]
 
-    def all(self):
-        """Retrieves **all** pages in a result, returning a flat list.
+    def maximum(self):
+        """Retrieves **maximum** pages in a result, returning a flat list.
+        API limits paging depth to (page * size) <= 1000
 
         Use ``limit()`` to restrict the number of page requests being made.
         **WARNING**: Generic searches may involve *a lot* of pages...
         
         :return: Flat list of results
         """
-        # TODO Rename this since all() is a built-in function...
-        return [i for item_list in self for i in item_list]
+        max_pages = 49 # do not exceed allowed paging depth
+        all_items = []
+        counter = 0
+        for pg in self:
+            if counter >= max_pages:
+                break
+            counter += 1
+            all_items += pg
+        return all_items
 
     def __iter__(self):
         yield self.page
