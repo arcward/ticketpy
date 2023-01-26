@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=62.0"]
+build-backend = "setuptoold.build_meta"
+
+[project]
+name = "ticketpy"
+description = "Python wrapper/SDK for the Ticketmaster Discovery API"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    {name = "Edward Wells", email = "git@edward.sh"}
+]
+license = {file = "LICENSE"}
+dependencies = [
+    "pydantic",
+    "requests",
+]
+
+[project.urls]
+repository = "https://github.com/arcward/ticketpy"
+
+[project.optional-dependencies]
+test = [
+    "pytest"
+]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+log_cli = true
+log_level = "DEBUG"
+
+[tool.setuptools.packages.find]
+include = ["ticketpy*", "tests*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "ticketpy.__version__"}
