@@ -1,11 +1,12 @@
 """Classes to handle API queries/searches"""
-from typing import TYPE_CHECKING, Optional, Literal, Union
+from typing import TYPE_CHECKING, Optional, Literal, Union, Generator
 import requests
 from ticketpy.model import Venue, Event, Attraction, Classification
 
 
 if TYPE_CHECKING:
     from ticketpy.client import ApiClient, SearchType
+    from ticketpy.model import PageResponse
 
 
 class BaseQuery:
@@ -69,6 +70,7 @@ class BaseQuery:
         page: Optional[str] = None,
         size: Optional[str] = None,
         locale: Optional[str] = None,
+        limit: Optional[int] = None,
         **kwargs,
     ):
         """Basic API search request, with only the parameters common to all
@@ -82,6 +84,7 @@ class BaseQuery:
         :param page: Page to return (default: 0)
         :param size: Page size (default: 20)
         :param locale: Locale (default: *en*)
+        :param limit: Limit the number of pages returned
         :param kwargs: Additional search parameters
         :return:
         """
@@ -101,7 +104,7 @@ class BaseQuery:
             }
         )
         params = self._search_params(**search_args)
-        return self.__get(**params)
+        return self.__get(limit=limit, **params)
 
     def by_id(self, entity_id):
         """Get a specific object by its ID"""
@@ -132,6 +135,8 @@ class BaseQuery:
 
         return {k: v for (k, v) in kw_map.items() if v is not None}
 
+    def find(self, limit: Optional[int] = None, **kwargs) -> Generator["PageResponse", None, None]:
+        raise NotImplementedError
 
 class AttractionQuery(BaseQuery):
     """Query class for Attractions"""
@@ -150,6 +155,7 @@ class AttractionQuery(BaseQuery):
         page: Optional[Union[str, int]] = None,
         size: Optional[Union[str, int]] = None,
         locale: Optional[str] = None,
+        limit: Optional[int] = None,
         **kwargs,
     ):
         """
@@ -161,6 +167,7 @@ class AttractionQuery(BaseQuery):
         :param page:
         :param size:
         :param locale: API default: *en*
+        :param limit: Limit the number of pages returned
         :param kwargs:
         :return:
         """
@@ -173,6 +180,7 @@ class AttractionQuery(BaseQuery):
             size=size,
             locale=locale,
             source=source,
+            limit=limit,
             **kwargs,
         )
 
@@ -193,6 +201,7 @@ class ClassificationQuery(BaseQuery):
         page: Optional[str] = None,
         size: Optional[str] = None,
         locale: Optional[str] = None,
+        limit: Optional[int] = None,
         **kwargs,
     ):
         """Search classifications
@@ -206,6 +215,7 @@ class ClassificationQuery(BaseQuery):
         :param page:
         :param size:
         :param locale: API default: *en*
+        :param limit: Limit the number of pages returned
         :param kwargs:
         :return:
         """
@@ -218,6 +228,7 @@ class ClassificationQuery(BaseQuery):
             size=size,
             locale=locale,
             source=source,
+            limit=limit,
             **kwargs,
         )
 
@@ -409,6 +420,7 @@ class VenueQuery(BaseQuery):
         page: Optional[str] = None,
         size: Optional[str] = None,
         locale: Optional[str] = None,
+        limit: Optional[int] = None,
         **kwargs,
     ):
         """Search for venues matching provided parameters
@@ -425,6 +437,7 @@ class VenueQuery(BaseQuery):
         :param page: Page number (default: 0)
         :param size: Page size of the response (default: 20)
         :param locale: Locale (default: 'en')
+        :param limit: Limit the number of results returned
         :return: Venues found matching criteria
         :rtype: ``ticketpy.PagedResponse``
         """
@@ -439,6 +452,7 @@ class VenueQuery(BaseQuery):
             state_code=state_code,
             country_code=country_code,
             source=source,
+            limit=limit,
             **kwargs,
         )
 

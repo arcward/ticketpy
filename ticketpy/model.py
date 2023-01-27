@@ -96,6 +96,19 @@ class Page(BaseModel):
     total_pages: Optional[int] = Field(alias="totalPages")
     number: Optional[int]
 
+    @property
+    def max_depth_reached(self) -> bool:
+        """
+        Returns *True* if the max page depth has been
+        reached, *False* otherwise.
+
+        As of this time, the API only supports retrieving
+        the 1000th item (size * page < 1000)
+        """
+        if self.size * self.number < 1000:
+            return False
+        return True
+
 
 class PageResponse(BaseModel):
     class Config:

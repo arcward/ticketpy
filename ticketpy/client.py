@@ -75,10 +75,16 @@ class ApiClient:
 
         log.debug("URL: %s / API key: %s", self.url, self.api_key)
 
-    def search(self, method: SearchType, **kwargs) -> PageResponse:
+    def search(
+            self,
+            method: SearchType,
+            limit: Optional[int] = None,
+            **kwargs
+    ) -> Generator[PageResponse, None, None]:
         """Generic API request
 
         :param method: Search type (*events*, *venues*...)
+        :param limit: Maximum number of pages to return
         :param kwargs: Search parameters (*venueId*, *eventId*,
             *latlong*, etc...)
         :return: ``PagedResponse``
@@ -104,7 +110,10 @@ class ApiClient:
         log.debug(kwargs)
         resp = requests.get(self.urls[method], params=kwargs)
         data = self._handle_response(resp)
-        return PageResponse.parse_obj(data)
+        page = PageResponse.parse_obj(data)
+        for val in self.iter_pages(page, limit=limit):
+            for v in getattr(val, method):
+                yield v
 
     def _follow_link(self, link: Link) -> str:
         if self.root_url in link.href:
@@ -144,7 +153,7 @@ class ApiClient:
     def iter_pages(
             self,
             page: PageResponse,
-            limit: Optional[int] = None
+            limit: Optional[int] = 10
     ) -> Generator[PageResponse, None, None]:
         ct = 0
         while True:
