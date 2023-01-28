@@ -27,7 +27,8 @@ Example searches
 Events
 ^^^^^^
 To pull Hip-Hop events in Georgia between May 19th, 2017 and
-May 21st, 2017:
+May 21st, 2017 (note: change these dates around to the current
+date range):
 
 .. code-block:: python
 
@@ -47,44 +48,15 @@ May 21st, 2017:
         for event in page:
             print(event)
 
-Output::
-
-    Event:        Atlanta Funk Fest 2017 3 Day Ticket
-    Venue(s):     'Wolf Creek Amphitheater' at 3025 Merk Road in Atlanta GA
-    Start date:   2017-05-19
-    Start time:   19:00:00
-    Price ranges: 128.01-424.0
-    Status:       onsale
-    Genres:       R&B
-
-    Event:        Atlanta Funk Fest 2017
-    Venue(s):     'Wolf Creek Amphitheater' at 3025 Merk Road in Atlanta GA
-    Start date:   2017-05-19
-    Start time:   19:00:00
-    Price ranges: 63.0-158.0
-    Status:       onsale
-    Genres:       R&B
-
-    Event:        Atlanta Funk Fest 2017
-    Venue(s):     'Wolf Creek Amphitheater' at 3025 Merk Road in Atlanta GA
-    Start date:   2017-05-20
-    Start time:   17:00:00
-    Price ranges: 63.0-158.0
-    Status:       onsale
-    Genres:       Hip-Hop/Rap
-
-    Event:        NF
-    Venue(s):     'Center Stage Theater' at 1374 W Peachtree St. NW in Atlanta GA
-    Start date:   2017-05-20
-    Start time:   20:00:00
-    Price ranges: 22.0-83.0
-    Status:       onsale
-    Genres:       Hip-Hop/Rap
 
 Calling ``ticketpy.query.BaseQuery.find()`` returns an iterator over
-``ticketpy.model.PageResponse` objects.
+``BaseQuery.model`` objects.
 
-You can limit the number of result pages via `find(limit=n)`
+You can limit the number of result pages via `find(limit=n)`. **Note**: Be
+aware of the ``size`` parameter, which limits the number of results per page.
+If you set ``limit`` to 10 and ``size`` to 1, then *ten* individual requests
+may be made to the API. If you get ``size`` to 10 and ``limit`` to 1, then
+*one* request will be made.
 
 For example, the previous example could also be written as:
 
@@ -94,15 +66,14 @@ For example, the previous example could also be written as:
 
     tm_client = ticketpy.ApiClient(api_key="your_api_key")
 
-    pages = tm_client.events.find(
+    for event in tm_client.events.find(
         classification_name="Hip-Hop",
         state_code="GA",
         start_date_time="2017-05-19T20:00:00Z",
         end_date_time="2017-05-21T20:00:00Z",
         limit=5,
-    )
-
-    for event in pages:
+        size=20,
+    ):
         print(event)
 
 Venues
@@ -114,9 +85,8 @@ To search for venues based on the string "*Tabernacle*":
     import ticketpy
 
     tm_client = ticketpy.ApiClient("your_api_key")
-    venues = tm_client.venues.find(keyword="Tabernacle")
-    for v in venues:
-        print(f"Name: {v.name} / City: {v.city}")
+    for venue in tm_client.venues.find(keyword="Tabernacle"):
+        print(f"Name: {venue.name} / City: {venue.city}")
 
 Output::
 
@@ -144,9 +114,10 @@ Searching for attractions works similarly to the above:
     import ticketpy
 
     tm_client = ticketpy.ApiClient("your_api_key")
-    attractions = tm_client.attractions.find(keyword="Yankees").one()
-    for attr in attractions:
-        print(attr.name)
+    for attraction in tm_client.attractions.find(
+        keyword="Yankees"
+    ):
+        print(attraction.name)
 
 Output::
 
@@ -178,12 +149,15 @@ Searching for classifications works similarly to the above:
     import ticketpy
 
     tm_client = ticketpy.ApiClient("your_api_key")
-    classifications = tm_client.classifications.find(keyword="Drama").one()
 
-    for cl in classifications:
-        print("Segment: {}".format(cl.segment.name))
+    for cl in tm_client.classifications.find(
+        keyword="Drama",
+        limit=1,
+        size=2
+    ):
+        print(f"Segment: {cl.segment.name}")
         for genre in cl.segment.genres:
-            print("--Genre: {}".format(genre.name))
+            print(f"--Genre: {genre.name}")
 
 Output::
 

@@ -1,7 +1,7 @@
 """Models for API objects"""
 import re
 from decimal import Decimal
-from typing import Optional, List, Union, TypedDict, Any
+from typing import Optional, List, Union, Any
 from pydantic import root_validator, validator
 from pydantic import BaseModel, Field
 
